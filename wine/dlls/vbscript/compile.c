@@ -402,7 +402,14 @@ static HRESULT compile_error(script_ctx_t *ctx, compile_ctx_t *compiler, HRESULT
     ctx->ei.scode = error;
     ctx->ei.bstrSource = get_vbscript_string(VBS_COMPILE_ERROR);
     map_vbs_exception(&ctx->ei);
-    return report_script_error(ctx, compiler->code, compiler->loc);
+
+    if(!ctx->error_loc_code) {
+        grab_vbscode(compiler->code);
+        ctx->error_loc_code = compiler->code;
+        ctx->error_loc_offset = compiler->loc;
+    }
+
+    return SCRIPT_E_RECORDED;
 }
 
 static expression_t *lookup_const_decls(compile_ctx_t *ctx, const WCHAR *name, BOOL lookup_global)
@@ -864,7 +871,7 @@ static HRESULT compile_foreach_statement(compile_ctx_t *ctx, foreach_statement_t
 static HRESULT compile_forto_statement(compile_ctx_t *ctx, forto_statement_t *stat)
 {
     statement_ctx_t loop_ctx = {2};
-    unsigned step_instr, instr;
+    unsigned step_instr, loop_start, instr;
     BSTR identifier;
     HRESULT hres;
 
@@ -918,27 +925,30 @@ static HRESULT compile_forto_statement(compile_ctx_t *ctx, forto_statement_t *st
     if(!emit_catch(ctx, 2))
         return E_OUTOFMEMORY;
 
+    loop_start = ctx->instr_cnt;
     hres = compile_statement(ctx, &loop_ctx, stat->body);
     if(FAILED(hres))
         return hres;
 
-    /* FIXME: Error handling can't be done compatible with native using OP_incc here. */
+    /* We need a separated OP_step here so that errors jump to the end-of-loop catch. */
+    ctx->loc = stat->stat.loc;
     instr = push_instr(ctx, OP_incc);
     if(!instr)
         return E_OUTOFMEMORY;
     instr_ptr(ctx, instr)->arg1.bstr = identifier;
 
-    hres = push_instr_addr(ctx, OP_jmp, step_instr);
-    if(FAILED(hres))
-        return hres;
+    instr = push_instr(ctx, OP_step);
+    if(!instr)
+        return E_OUTOFMEMORY;
+    instr_ptr(ctx, instr)->arg2.bstr = identifier;
+    instr_ptr(ctx, instr)->arg1.uint = loop_ctx.for_end_label;
 
-    hres = push_instr_uint(ctx, OP_pop, 2);
+    hres = push_instr_addr(ctx, OP_jmp, loop_start);
     if(FAILED(hres))
         return hres;
 
     label_set_addr(ctx, loop_ctx.for_end_label);
 
-    /* FIXME: reconsider after OP_incc fixup. */
     if(!emit_catch(ctx, 0))
         return E_OUTOFMEMORY;
 
@@ -953,6 +963,9 @@ static HRESULT compile_with_statement(compile_ctx_t *ctx, with_statement_t *stat
     hres = compile_expression(ctx, stat->expr);
     if(FAILED(hres))
         return hres;
+
+    if(!push_instr(ctx, OP_with))
+        return E_OUTOFMEMORY;
 
     if(!emit_catch(ctx, 1))
         return E_OUTOFMEMORY;
@@ -1140,8 +1153,7 @@ static HRESULT compile_dim_statement(compile_ctx_t *ctx, dim_statement_t *stat)
     while(1) {
         if(lookup_dim_decls(ctx, dim_decl->name) || lookup_args_name(ctx, dim_decl->name)
            || lookup_const_decls(ctx, dim_decl->name, FALSE)) {
-            FIXME("dim %s name redefined\n", debugstr_w(dim_decl->name));
-            return E_FAIL;
+            return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
         }
 
         ctx->func->var_cnt++;
@@ -1194,6 +1206,21 @@ static HRESULT compile_redim_statement(compile_ctx_t *ctx, redim_statement_t *st
     return S_OK;
 }
 
+static HRESULT compile_erase_statement(compile_ctx_t *ctx, erase_statement_t *stat)
+{
+    HRESULT hres;
+
+    hres = push_instr_bstr(ctx, OP_erase, stat->identifier);
+    if(FAILED(hres))
+        return hres;
+
+    if(!emit_catch(ctx, 0))
+        return E_OUTOFMEMORY;
+
+
+    return S_OK;
+}
+
 static HRESULT compile_const_statement(compile_ctx_t *ctx, const_statement_t *stat)
 {
     const_decl_t *decl, *next_decl = stat->decls;
@@ -1203,8 +1230,7 @@ static HRESULT compile_const_statement(compile_ctx_t *ctx, const_statement_t *st
 
         if(!lookup_const_decls(ctx, decl->name, FALSE)) {
             if(lookup_args_name(ctx, decl->name) || lookup_dim_decls(ctx, decl->name)) {
-                FIXME("%s redefined\n", debugstr_w(decl->name));
-                return E_FAIL;
+                return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
             }
         }
 
@@ -1256,8 +1282,7 @@ static HRESULT compile_exitdo_statement(compile_ctx_t *ctx)
             break;
     }
     if(!iter) {
-        FIXME("Exit Do outside Do Loop\n");
-        return E_FAIL;
+        return MAKE_VBSERROR(VBSE_INVALID_EXIT);
     }
 
     if(pop_cnt) {
@@ -1282,8 +1307,7 @@ static HRESULT compile_exitfor_statement(compile_ctx_t *ctx)
             break;
     }
     if(!iter) {
-        FIXME("Exit For outside For loop\n");
-        return E_FAIL;
+        return MAKE_VBSERROR(VBSE_INVALID_EXIT);
     }
 
     if(pop_cnt) {
@@ -1315,8 +1339,7 @@ static HRESULT exit_label(compile_ctx_t *ctx, unsigned jmp_label)
 static HRESULT compile_exitsub_statement(compile_ctx_t *ctx)
 {
     if(!ctx->sub_end_label) {
-        FIXME("Exit Sub outside Sub?\n");
-        return E_FAIL;
+        return MAKE_VBSERROR(VBSE_INVALID_EXIT);
     }
 
     return exit_label(ctx, ctx->sub_end_label);
@@ -1325,8 +1348,7 @@ static HRESULT compile_exitsub_statement(compile_ctx_t *ctx)
 static HRESULT compile_exitfunc_statement(compile_ctx_t *ctx)
 {
     if(!ctx->func_end_label) {
-        FIXME("Exit Function outside Function?\n");
-        return E_FAIL;
+        return MAKE_VBSERROR(VBSE_INVALID_EXIT);
     }
 
     return exit_label(ctx, ctx->func_end_label);
@@ -1335,8 +1357,7 @@ static HRESULT compile_exitfunc_statement(compile_ctx_t *ctx)
 static HRESULT compile_exitprop_statement(compile_ctx_t *ctx)
 {
     if(!ctx->prop_end_label) {
-        FIXME("Exit Property outside Property?\n");
-        return E_FAIL;
+        return MAKE_VBSERROR(VBSE_INVALID_EXIT);
     }
 
     return exit_label(ctx, ctx->prop_end_label);
@@ -1379,8 +1400,7 @@ static HRESULT collect_const_decls(compile_ctx_t *ctx, statement_t *stat)
                     break; /* already collected */
 
                 if(lookup_args_name(ctx, decl->name) || lookup_dim_decls(ctx, decl->name)) {
-                    FIXME("%s redefined\n", debugstr_w(decl->name));
-                    return E_FAIL;
+                    return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
                 }
 
                 new_decl = compiler_alloc(ctx->code, sizeof(*new_decl));
@@ -1521,6 +1541,9 @@ static HRESULT compile_statement(compile_ctx_t *ctx, statement_ctx_t *stat_ctx, 
             break;
         case STAT_ONERROR:
             hres = compile_onerror_statement(ctx, (onerror_statement_t*)stat);
+            break;
+        case STAT_ERASE:
+            hres = compile_erase_statement(ctx, (erase_statement_t*)stat);
             break;
         case STAT_REDIM:
             hres = compile_redim_statement(ctx, (redim_statement_t*)stat);
@@ -1714,8 +1737,7 @@ static HRESULT create_function(compile_ctx_t *ctx, function_decl_t *decl, functi
     HRESULT hres;
 
     if(lookup_dim_decls(ctx, decl->name) || lookup_const_decls(ctx, decl->name, FALSE)) {
-        FIXME("%s: redefinition\n", debugstr_w(decl->name));
-        return E_FAIL;
+        return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
     }
 
     func = compiler_alloc(ctx->code, sizeof(*func));
@@ -1837,8 +1859,7 @@ static HRESULT compile_class(compile_ctx_t *ctx, class_decl_t *class_decl)
 
     if(lookup_dim_decls(ctx, class_decl->name) || lookup_funcs_name(ctx, class_decl->name)
             || lookup_const_decls(ctx, class_decl->name, FALSE) || lookup_class_name(ctx, class_decl->name)) {
-        FIXME("%s: redefinition\n", debugstr_w(class_decl->name));
-        return E_FAIL;
+        return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
     }
 
     class_desc = compiler_alloc_zero(ctx->code, sizeof(*class_desc));
@@ -1910,8 +1931,7 @@ static HRESULT compile_class(compile_ctx_t *ctx, class_decl_t *class_decl)
 
     for(prop_decl = class_decl->props, i=0; prop_decl; prop_decl = prop_decl->next, i++) {
         if(lookup_class_funcs(class_desc, prop_decl->name)) {
-            FIXME("Property %s redefined\n", debugstr_w(prop_decl->name));
-            return E_FAIL;
+            return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
         }
 
         class_desc->props[i].name = compiler_alloc_string(ctx->code, prop_decl->name);
@@ -2009,10 +2029,9 @@ static HRESULT check_script_collisions(compile_ctx_t *ctx, script_ctx_t *script)
     for(i = 0; i < var_cnt; i++) {
         if(lookup_script_identifier(ctx, script, vars[i].name)) {
 #ifndef __LIBWINEVBS__
-            FIXME("%s: redefined\n", debugstr_w(vars[i].name));
-            return E_FAIL;
+            return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
 #else
-            external_log_info("%s redefined", debugstr_w(vars[i].name));
+            external_log_info("%s redefined (var)", debugstr_w(vars[i].name));
 #endif
         }
     }
@@ -2020,10 +2039,9 @@ static HRESULT check_script_collisions(compile_ctx_t *ctx, script_ctx_t *script)
     for(class = ctx->code->classes; class; class = class->next) {
         if(lookup_script_identifier(ctx, script, class->name)) {
 #ifndef __LIBWINEVBS__
-            FIXME("%s: redefined\n", debugstr_w(class->name));
-            return E_FAIL;
+            return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
 #else
-            external_log_info("%s redefined", debugstr_w(class->name));
+            external_log_info("%s redefined (class)", debugstr_w(class->name));
 #endif
         }
     }
@@ -2103,7 +2121,7 @@ static void release_compiler(compile_ctx_t *ctx)
 }
 
 HRESULT compile_script(script_ctx_t *script, const WCHAR *src, const WCHAR *item_name, const WCHAR *delimiter,
-                       DWORD_PTR cookie, unsigned start_line, DWORD flags, vbscode_t **ret)
+                       DWORD_PTR cookie, unsigned start_line, DWORD flags, BOOL skip_collisions, vbscode_t **ret)
 {
     function_decl_t *func_decl;
     named_item_t *item = NULL;
@@ -2175,7 +2193,7 @@ HRESULT compile_script(script_ctx_t *script, const WCHAR *src, const WCHAR *item
     }
 
     hres = check_script_collisions(&ctx, script);
-    if(FAILED(hres)) {
+    if(FAILED(hres) && !skip_collisions) {
         hres = compile_error(script, &ctx, hres);
         release_compiler(&ctx);
         return hres;
@@ -2202,7 +2220,7 @@ HRESULT compile_procedure(script_ctx_t *script, const WCHAR *src, const WCHAR *i
     HRESULT hres;
 
     hres = compile_script(script, src, item_name, delimiter, cookie, start_line,
-                          flags & ~SCRIPTTEXT_ISPERSISTENT, &code);
+                          flags & ~SCRIPTTEXT_ISPERSISTENT, FALSE, &code);
     if(FAILED(hres))
         return hres;
 

@@ -52,6 +52,7 @@ static statement_t *new_assign_statement(parser_ctx_t*,unsigned,expression_t*,ex
 static statement_t *new_set_statement(parser_ctx_t*,unsigned,expression_t*,expression_t*);
 static statement_t *new_dim_statement(parser_ctx_t*,unsigned,dim_decl_t*);
 static statement_t *new_redim_statement(parser_ctx_t*,unsigned,BOOL,redim_decl_t*);
+static statement_t *new_erase_statement(parser_ctx_t*,unsigned,const WCHAR*);
 static statement_t *new_while_statement(parser_ctx_t*,unsigned,statement_type_t,expression_t*,statement_t*);
 static statement_t *new_forto_statement(parser_ctx_t*,unsigned,const WCHAR*,expression_t*,expression_t*,expression_t*,statement_t*);
 static statement_t *new_foreach_statement(parser_ctx_t*,unsigned,const WCHAR*,expression_t*,statement_t*);
@@ -121,7 +122,7 @@ static statement_t *link_statements(statement_t*,statement_t*);
 %token <string> tNOT tAND tOR tXOR tEQV tIMP
 %token <string> tIS tMOD
 %token <string> tCALL tSUB tFUNCTION tGET tLET tCONST
-%token <string> tDIM tREDIM tPRESERVE
+%token <string> tDIM tREDIM tPRESERVE tERASE
 %token <string> tIF tELSE tELSEIF tEND tTHEN tEXIT
 %token <string> tWHILE tWEND tDO tLOOP tUNTIL tFOR tTO tEACH tIN
 %token <string> tSELECT tCASE tWITH
@@ -136,11 +137,14 @@ static statement_t *link_statements(statement_t*,statement_t*);
 %token <dbl> tDouble
 %token <date> tDate
 
+%right tNOT
+%left '=' tNEQ '>' '<' tGTEQ tLTEQ tIS
+
 %type <statement> Statement SimpleStatement StatementNl StatementsNl StatementsNl_opt BodyStatements IfStatement Else_opt
 %type <statement> GlobalDimDeclaration StatementsBody StatementsBody_opt
 %type <expression> Expression LiteralExpression PrimaryExpression EqualityExpression CallExpression ExpressionNl_opt
 %type <expression> ConcatExpression AdditiveExpression ModExpression IntdivExpression MultiplicativeExpression ExpExpression
-%type <expression> NotExpression UnaryExpression AndExpression OrExpression XorExpression EqvExpression SignExpression
+%type <expression> UnaryExpression AndExpression OrExpression XorExpression EqvExpression SignExpression
 %type <expression> ConstExpression NumericLiteralExpression
 %type <member> MemberExpression
 %type <expression> Arguments ArgumentList ArgumentList_opt Step_opt ExpressionList
@@ -217,6 +221,7 @@ SimpleStatement
                                             { $$ = new_assign_statement(ctx, @$, $1, $3); CHECK_ERROR; }
     | tDIM DimDeclList                      { $$ = new_dim_statement(ctx, @$, $2); CHECK_ERROR; }
     | tREDIM Preserve_opt ReDimDeclList     { $$ = new_redim_statement(ctx, @$, $2, $3); CHECK_ERROR; }
+    | tERASE Identifier                     { $$ = new_erase_statement(ctx, @$, $2); CHECK_ERROR; }
     | IfStatement                           { $$ = $1; }
     | tWHILE Expression StSep StatementsNl_opt tWEND
                                             { $$ = new_while_statement(ctx, @$, STAT_WHILE, $2, $4); CHECK_ERROR; }
@@ -272,6 +277,7 @@ ReDimDecl
 ReDimDeclList
     : ReDimDecl                             { $$ = $1; }
     | ReDimDecl ',' ReDimDeclList           { $1->next = $3; $$ = $1; }
+
 
 DimDeclList
     : DimDecl                               { $$ = $1; }
@@ -391,22 +397,19 @@ OrExpression
     | OrExpression tOR AndExpression            { $$ = new_binary_expression(ctx, EXPR_OR, $1, $3); CHECK_ERROR; }
 
 AndExpression
-    : NotExpression                             { $$ = $1; }
-    | AndExpression tAND NotExpression          { $$ = new_binary_expression(ctx, EXPR_AND, $1, $3); CHECK_ERROR; }
-
-NotExpression
     : EqualityExpression            { $$ = $1; }
-    | tNOT NotExpression            { $$ = new_unary_expression(ctx, EXPR_NOT, $2); CHECK_ERROR; }
+    | AndExpression tAND EqualityExpression         { $$ = new_binary_expression(ctx, EXPR_AND, $1, $3); CHECK_ERROR; }
 
 EqualityExpression
     : ConcatExpression                          { $$ = $1; }
-    | EqualityExpression '=' ConcatExpression   { $$ = new_binary_expression(ctx, EXPR_EQUAL, $1, $3); CHECK_ERROR; }
-    | EqualityExpression tNEQ ConcatExpression  { $$ = new_binary_expression(ctx, EXPR_NEQUAL, $1, $3); CHECK_ERROR; }
-    | EqualityExpression '>' ConcatExpression   { $$ = new_binary_expression(ctx, EXPR_GT, $1, $3); CHECK_ERROR; }
-    | EqualityExpression '<' ConcatExpression   { $$ = new_binary_expression(ctx, EXPR_LT, $1, $3); CHECK_ERROR; }
-    | EqualityExpression tGTEQ ConcatExpression { $$ = new_binary_expression(ctx, EXPR_GTEQ, $1, $3); CHECK_ERROR; }
-    | EqualityExpression tLTEQ ConcatExpression { $$ = new_binary_expression(ctx, EXPR_LTEQ, $1, $3); CHECK_ERROR; }
-    | EqualityExpression tIS ConcatExpression   { $$ = new_binary_expression(ctx, EXPR_IS, $1, $3); CHECK_ERROR; }
+    | tNOT EqualityExpression                       { $$ = new_unary_expression(ctx, EXPR_NOT, $2); CHECK_ERROR; }
+    | EqualityExpression '=' EqualityExpression     { $$ = new_binary_expression(ctx, EXPR_EQUAL, $1, $3); CHECK_ERROR; }
+    | EqualityExpression tNEQ EqualityExpression    { $$ = new_binary_expression(ctx, EXPR_NEQUAL, $1, $3); CHECK_ERROR; }
+    | EqualityExpression '>' EqualityExpression     { $$ = new_binary_expression(ctx, EXPR_GT, $1, $3); CHECK_ERROR; }
+    | EqualityExpression '<' EqualityExpression     { $$ = new_binary_expression(ctx, EXPR_LT, $1, $3); CHECK_ERROR; }
+    | EqualityExpression tGTEQ EqualityExpression   { $$ = new_binary_expression(ctx, EXPR_GTEQ, $1, $3); CHECK_ERROR; }
+    | EqualityExpression tLTEQ EqualityExpression   { $$ = new_binary_expression(ctx, EXPR_LTEQ, $1, $3); CHECK_ERROR; }
+    | EqualityExpression tIS EqualityExpression     { $$ = new_binary_expression(ctx, EXPR_IS, $1, $3); CHECK_ERROR; }
 
 ConcatExpression
     : AdditiveExpression                        { $$ = $1; }
@@ -514,6 +517,7 @@ Storage_opt
 
 Storage
     : tPUBLIC tDEFAULT              { $$ = STORAGE_IS_DEFAULT; }
+    | tDEFAULT tPRIVATE             { ctx->error_loc = @1; ctx->hres = MAKE_VBSERROR(VBSE_DEFAULT_MUST_BE_PUBLIC); CHECK_ERROR; }
     | tPUBLIC                       { $$ = 0; }
     | tPRIVATE                      { $$ = STORAGE_IS_PRIVATE; }
 
@@ -571,8 +575,8 @@ static int parser_error(unsigned *loc, parser_ctx_t *ctx, const char *str)
     if(ctx->error_loc == -1)
         ctx->error_loc = *loc;
     if(ctx->hres == S_OK) {
-        FIXME("%s: %s\n", debugstr_w(ctx->code + *loc), debugstr_a(str));
-        ctx->hres = E_FAIL;
+        WARN("%s: %s\n", debugstr_w(ctx->code + *loc), debugstr_a(str));
+        ctx->hres = MAKE_VBSERROR(VBSE_SYNTAX_ERROR);
     }else {
         WARN("%s: %08lx\n", debugstr_w(ctx->code + *loc), ctx->hres);
     }
@@ -760,8 +764,7 @@ static call_expression_t *make_call_expression(parser_ctx_t *ctx, expression_t *
     }
 
     if(call_expr->args->next) {
-        FIXME("Invalid syntax: invalid use of parentheses for arguments\n");
-        ctx->hres = E_FAIL;
+        ctx->hres = MAKE_VBSERROR(VBSE_CANNOT_USE_PARENS_CALLING_SUB);
         ctx->error_loc = ctx->ptr - ctx->code;
         return NULL;
     }
@@ -937,6 +940,18 @@ static statement_t *new_redim_statement(parser_ctx_t *ctx, unsigned loc, BOOL pr
 
     stat->preserve = preserve;
     stat->redim_decls = decls;
+    return &stat->stat;
+}
+
+static statement_t *new_erase_statement(parser_ctx_t *ctx, unsigned loc, const WCHAR *identifier)
+{
+    erase_statement_t *stat;
+
+    stat = new_statement(ctx, STAT_ERASE, sizeof(*stat), loc);
+    if(!stat)
+        return NULL;
+
+    stat->identifier = identifier;
     return &stat->stat;
 }
 
@@ -1146,15 +1161,13 @@ static class_decl_t *add_class_function(parser_ctx_t *ctx, class_decl_t *class_d
     for(iter = class_decl->funcs; iter; iter = iter->next) {
         if(!wcsicmp(iter->name, decl->name)) {
             if(decl->type == FUNC_SUB || decl->type == FUNC_FUNCTION) {
-                FIXME("Redefinition of %s::%s\n", debugstr_w(class_decl->name), debugstr_w(decl->name));
-                ctx->hres = E_FAIL;
+                ctx->hres = MAKE_VBSERROR(VBSE_NAME_REDEFINED);
                 return NULL;
             }
 
             while(1) {
                 if(iter->type == decl->type) {
-                    FIXME("Redefinition of %s::%s\n", debugstr_w(class_decl->name), debugstr_w(decl->name));
-                    ctx->hres = E_FAIL;
+                    ctx->hres = MAKE_VBSERROR(VBSE_NAME_REDEFINED);
                     return NULL;
                 }
                 if(!iter->next_prop_func)
@@ -1252,8 +1265,10 @@ HRESULT parse_script(parser_ctx_t *ctx, const WCHAR *code, const WCHAR *delimite
     ctx->hres = S_OK;
     ctx->error_loc = -1;
     ctx->last_token = tNL;
+#ifdef __LIBWINEVBS__
     ctx->is_statement_ctx = TRUE;
     ctx->paren_depth = 0;
+#endif
     ctx->last_nl = 0;
     ctx->stats = ctx->stats_tail = NULL;
     ctx->class_decls = NULL;

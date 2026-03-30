@@ -145,8 +145,107 @@ BSTR get_vbscript_string(int id)
         case VBSE_SERVER_NOT_FOUND:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_SERVER_NOT_FOUND");
             break;
+        case VBSE_VARIABLE_UNDEFINED:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_VARIABLE_UNDEFINED");
+            break;
         case VBSE_UNQUALIFIED_REFERENCE:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNQUALIFIED_REFERENCE");
+            break;
+        case VBSE_SYNTAX_ERROR:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_SYNTAX_ERROR");
+            break;
+        case VBSE_EXPECTED_LPAREN:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LPAREN");
+            break;
+        case VBSE_EXPECTED_IDENTIFIER:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_IDENTIFIER");
+            break;
+        case VBSE_EXPECTED_ASSIGN:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_ASSIGN");
+            break;
+        case VBSE_EXPECTED_TO:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_TO");
+            break;
+        case VBSE_EXPECTED_END:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_END");
+            break;
+        case VBSE_EXPECTED_THEN:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_THEN");
+            break;
+        case VBSE_EXPECTED_WEND:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_WEND");
+            break;
+        case VBSE_EXPECTED_LOOP:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LOOP");
+            break;
+        case VBSE_EXPECTED_NEXT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_NEXT");
+            break;
+        case VBSE_EXPECTED_CASE:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_CASE");
+            break;
+        case VBSE_EXPECTED_STATEMENT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_STATEMENT");
+            break;
+        case VBSE_EXPECTED_END_OF_STATEMENT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_END_OF_STATEMENT");
+            break;
+        case VBSE_EXPECTED_INTEGER_CONSTANT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_INTEGER_CONSTANT");
+            break;
+        case VBSE_EXPECTED_WHILE_UNTIL_EOS:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_WHILE_UNTIL_EOS");
+            break;
+        case VBSE_INVALID_NUMBER:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_NUMBER");
+            break;
+        case VBSE_INVALID_CHAR:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_CHAR");
+            break;
+        case VBSE_UNTERMINATED_STRING:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNTERMINATED_STRING");
+            break;
+        case VBSE_LOOP_WITHOUT_DO:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_LOOP_WITHOUT_DO");
+            break;
+        case VBSE_INVALID_EXIT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_EXIT");
+            break;
+        case VBSE_NAME_REDEFINED:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_NAME_REDEFINED");
+            break;
+        case VBSE_MUST_BE_FIRST_STATEMENT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_MUST_BE_FIRST_STATEMENT");
+            break;
+        case VBSE_CANNOT_USE_PARENS_CALLING_SUB:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CANNOT_USE_PARENS_CALLING_SUB");
+            break;
+        case VBSE_EXPECTED_LITERAL_CONSTANT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LITERAL_CONSTANT");
+            break;
+        case VBSE_EXPECTED_IN:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_IN");
+            break;
+        case VBSE_EXPECTED_CLASS:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_CLASS");
+            break;
+        case VBSE_MUST_BE_INSIDE_CLASS:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_MUST_BE_INSIDE_CLASS");
+            break;
+        case VBSE_EXPECTED_LET_SET_GET:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LET_SET_GET");
+            break;
+        case VBSE_CLASS_INIT_NO_ARGS:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CLASS_INIT_NO_ARGS");
+            break;
+        case VBSE_PROPERTY_LET_SET_NEEDS_ARG:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PROPERTY_LET_SET_NEEDS_ARG");
+            break;
+        case VBSE_UNEXPECTED_NEXT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNEXPECTED_NEXT");
+            break;
+        case VBSE_DEFAULT_MUST_BE_PUBLIC:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DEFAULT_MUST_BE_PUBLIC");
             break;
         case VBS_UNKNOWN_RUNTIME_ERROR:
             swprintf(buf, ARRAY_SIZE(buf), L"VBS_UNKNOWN_RUNTIME_ERROR");

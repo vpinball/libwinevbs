@@ -33,9 +33,11 @@
 
 #include "wine/list.h"
 
+#ifdef __LIBWINEVBS__
 HRESULT external_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown* obj);
 void external_log_info(const char* format, ...);
 void external_log_debug(const char* format, ...);
+#endif
 
 typedef struct {
     void **blocks;
@@ -56,6 +58,7 @@ heap_pool_t *heap_pool_mark(heap_pool_t*);
 typedef struct _function_t function_t;
 typedef struct _vbscode_t vbscode_t;
 typedef struct _script_ctx_t script_ctx_t;
+typedef struct _exec_ctx_t exec_ctx_t;
 typedef struct _vbdisp_t vbdisp_t;
 
 typedef enum {
@@ -171,6 +174,7 @@ HRESULT disp_propput(script_ctx_t*,IDispatch*,DISPID,WORD,DISPPARAMS*);
 HRESULT get_disp_value(script_ctx_t*,IDispatch*,VARIANT*);
 void collect_objects(script_ctx_t*);
 HRESULT create_script_disp(script_ctx_t*,ScriptDisp**);
+HRESULT create_func_ref(script_ctx_t*,function_t*,IDispatch**);
 
 HRESULT to_int(VARIANT*,int*);
 
@@ -206,8 +210,13 @@ struct _script_ctx_t {
 
     ScriptDisp *script_obj;
 
+    named_item_t *current_named_item;
+
     BuiltinDisp *global_obj;
     BuiltinDisp *err_obj;
+
+    exec_ctx_t *current_exec;
+    exec_ctx_t *caller_exec;
 
     EXCEPINFO ei;
     vbscode_t *error_loc_code;
@@ -255,6 +264,7 @@ typedef enum {
     X(hres,           1, ARG_UINT,    0)          \
     X(errmode,        1, ARG_INT,     0)          \
     X(eqv,            1, 0,           0)          \
+    X(erase,          1, ARG_BSTR,    0)          \
     X(exp,            1, 0,           0)          \
     X(gt,             1, 0,           0)          \
     X(gteq,           1, 0,           0)          \
@@ -300,6 +310,7 @@ typedef enum {
     X(val,            1, 0,           0)          \
     X(vcall,          1, ARG_UINT,    0)          \
     X(vcallv,         1, ARG_UINT,    0)          \
+    X(with,           1, 0,           0)          \
     X(xor,            1, 0,           0)
 
 typedef enum {
@@ -391,20 +402,23 @@ static inline void grab_vbscode(vbscode_t *code)
 }
 
 void release_vbscode(vbscode_t*);
-HRESULT compile_script(script_ctx_t*,const WCHAR*,const WCHAR*,const WCHAR*,DWORD_PTR,unsigned,DWORD,vbscode_t**);
+HRESULT compile_script(script_ctx_t*,const WCHAR*,const WCHAR*,const WCHAR*,DWORD_PTR,unsigned,DWORD,BOOL,vbscode_t**);
 HRESULT compile_procedure(script_ctx_t*,const WCHAR*,const WCHAR*,const WCHAR*,DWORD_PTR,unsigned,DWORD,class_desc_t**);
 HRESULT exec_script(script_ctx_t*,BOOL,function_t*,vbdisp_t*,DISPPARAMS*,VARIANT*);
+HRESULT exec_global_code(script_ctx_t*,vbscode_t*,VARIANT*,BOOL);
+BOOL is_exec_local_scope(exec_ctx_t*);
+HRESULT exec_add_caller_dynamic_var(script_ctx_t*,exec_ctx_t*,const WCHAR*);
 
 #ifdef __LIBWINEVBS__
-HRESULT exec_global_code(script_ctx_t *ctx, vbscode_t *code, VARIANT *res);
 HRESULT assign_value_script_ctx(script_ctx_t *ctx, VARIANT *dst, VARIANT *src, WORD flags);
 #endif
 
 void release_dynamic_var(dynamic_var_t*);
 named_item_t *lookup_named_item(script_ctx_t*,const WCHAR*,unsigned);
 void release_named_item(named_item_t*);
+void clear_error_loc(script_ctx_t*);
 void clear_ei(EXCEPINFO*);
-HRESULT report_script_error(script_ctx_t*,const vbscode_t*,unsigned);
+HRESULT report_script_error(script_ctx_t*,vbscode_t*,unsigned,BOOL);
 void detach_global_objects(script_ctx_t*);
 HRESULT get_builtin_id(BuiltinDisp*,const WCHAR*,DISPID*);
 HRESULT array_access(SAFEARRAY *array, DISPPARAMS *dp, VARIANT **ret);

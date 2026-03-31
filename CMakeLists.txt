@@ -175,8 +175,10 @@ if(BUILD_SHARED)
    install(TARGETS winevbs_shared
       LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
    )
-   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atl)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atlmfc/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atlmfc)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/wine)
 
    if(PLATFORM STREQUAL "win-mingw" OR PLATFORM STREQUAL "macos" OR PLATFORM STREQUAL "linux")
       add_executable(winevbs_test src/winevbs_test.c)
@@ -203,7 +205,8 @@ if(BUILD_STATIC)
    install(TARGETS winevbs_static
       LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
    )
-   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-
+   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atl)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atlmfc/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atlmfc)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/wine)
 endif()

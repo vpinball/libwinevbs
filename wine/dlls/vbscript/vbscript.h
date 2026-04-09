@@ -32,6 +32,7 @@
 #include "vbscript_defs.h"
 
 #include "wine/list.h"
+#include "wine/rbtree.h"
 
 #ifdef __LIBWINEVBS__
 HRESULT external_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown* obj);
@@ -124,6 +125,8 @@ typedef struct _dynamic_var_t {
     const WCHAR *name;
     BOOL is_const;
     SAFEARRAY *array;
+    struct rb_entry entry;
+    size_t index;
 } dynamic_var_t;
 
 typedef struct {
@@ -133,10 +136,12 @@ typedef struct {
     dynamic_var_t **global_vars;
     size_t global_vars_cnt;
     size_t global_vars_size;
+    struct rb_tree var_tree;
 
     function_t **global_funcs;
     size_t global_funcs_cnt;
     size_t global_funcs_size;
+    struct rb_tree func_tree;
 
     class_desc_t *classes;
 
@@ -145,6 +150,8 @@ typedef struct {
 
     unsigned int rnd;
 } ScriptDisp;
+
+dynamic_var_t *script_disp_find_var(ScriptDisp *disp, const WCHAR *name);
 
 typedef struct _builtin_prop_t builtin_prop_t;
 
@@ -175,6 +182,7 @@ HRESULT get_disp_value(script_ctx_t*,IDispatch*,VARIANT*);
 void collect_objects(script_ctx_t*);
 HRESULT create_script_disp(script_ctx_t*,ScriptDisp**);
 HRESULT create_func_ref(script_ctx_t*,function_t*,IDispatch**);
+function_t *script_disp_find_func(ScriptDisp*,const WCHAR*);
 
 HRESULT to_int(VARIANT*,int*);
 
@@ -217,6 +225,7 @@ struct _script_ctx_t {
 
     exec_ctx_t *current_exec;
     exec_ctx_t *caller_exec;
+    unsigned call_depth;
 
     EXCEPINFO ei;
     vbscode_t *error_loc_code;
@@ -367,6 +376,8 @@ struct _function_t {
     unsigned code_off;
     vbscode_t *code_ctx;
     function_t *next;
+    struct rb_entry entry;
+    size_t index;
 };
 
 struct _vbscode_t {
@@ -409,10 +420,6 @@ HRESULT exec_global_code(script_ctx_t*,vbscode_t*,VARIANT*,BOOL);
 BOOL is_exec_local_scope(exec_ctx_t*);
 HRESULT exec_add_caller_dynamic_var(script_ctx_t*,exec_ctx_t*,const WCHAR*);
 
-#ifdef __LIBWINEVBS__
-HRESULT assign_value_script_ctx(script_ctx_t *ctx, VARIANT *dst, VARIANT *src, WORD flags);
-#endif
-
 void release_dynamic_var(dynamic_var_t*);
 named_item_t *lookup_named_item(script_ctx_t*,const WCHAR*,unsigned);
 void release_named_item(named_item_t*);
@@ -434,6 +441,21 @@ static inline BOOL is_int32(double d)
 static inline BOOL is_digit(WCHAR c)
 {
     return '0' <= c && c <= '9';
+}
+
+/* ASCII-only case-insensitive compare for VBScript identifiers.
+ * VBScript identifiers are ASCII-only (Windows rejects all non-ASCII
+ * characters), so this avoids the expensive locale-aware wcsicmp. */
+static inline int vbs_wcsicmp(const WCHAR *s1, const WCHAR *s2)
+{
+    WCHAR c1, c2;
+    do {
+        c1 = *s1++;
+        c2 = *s2++;
+        if (c1 >= 'A' && c1 <= 'Z') c1 += 'a' - 'A';
+        if (c2 >= 'A' && c2 <= 'Z') c2 += 'a' - 'A';
+    } while (c1 && c1 == c2);
+    return c1 - c2;
 }
 
 HRESULT create_regexp(IDispatch**);

@@ -131,7 +131,7 @@ HRESULT get_builtin_id(BuiltinDisp *disp, const WCHAR *name, DISPID *id)
 
     while(min <= max) {
         i = (min + max) / 2;
-        r = wcsicmp(disp->members[i].name, name);
+        r = vbs_wcsicmp(disp->members[i].name, name);
         if(!r) {
             *id = i;
             return S_OK;
@@ -550,10 +550,10 @@ static IUnknown *create_object(script_ctx_t *ctx, const WCHAR *progid)
 
     hres = IClassFactory_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
 #else
-    if (!wcsicmp(progid, L"Scripting.FileSystemObject")) {
+    if (!vbs_wcsicmp(progid, L"Scripting.FileSystemObject")) {
         hres = FileSystem_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
     }
-    else if (!wcsicmp(progid, L"Scripting.Dictionary")) {
+    else if (!vbs_wcsicmp(progid, L"Scripting.Dictionary")) {
         hres = Dictionary_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
     }
     else {
@@ -2502,25 +2502,25 @@ static HRESULT Global_DateAdd(BuiltinDisp *This, VARIANT *args, unsigned args_cn
         hres = to_system_time(args + 2, &ud.st);
     if (SUCCEEDED(hres))
     {
-        if (!wcsicmp(interval, L"yyyy"))
+        if (!vbs_wcsicmp(interval, L"yyyy"))
             ud.st.wYear += count;
-        else if (!wcsicmp(interval, L"q"))
+        else if (!vbs_wcsicmp(interval, L"q"))
             ud.st.wMonth += 3 * count;
-        else if (!wcsicmp(interval, L"m"))
+        else if (!vbs_wcsicmp(interval, L"m"))
             ud.st.wMonth += count;
-        else if (!wcsicmp(interval, L"y")
-                || !wcsicmp(interval, L"d")
-                || !wcsicmp(interval, L"w"))
+        else if (!vbs_wcsicmp(interval, L"y")
+                || !vbs_wcsicmp(interval, L"d")
+                || !vbs_wcsicmp(interval, L"w"))
         {
             ud.st.wDay += count;
         }
-        else if (!wcsicmp(interval, L"ww"))
+        else if (!vbs_wcsicmp(interval, L"ww"))
             ud.st.wDay += 7 * count;
-        else if (!wcsicmp(interval, L"h"))
+        else if (!vbs_wcsicmp(interval, L"h"))
             ud.st.wHour += count;
-        else if (!wcsicmp(interval, L"n"))
+        else if (!vbs_wcsicmp(interval, L"n"))
             ud.st.wMinute += count;
-        else if (!wcsicmp(interval, L"s"))
+        else if (!vbs_wcsicmp(interval, L"s"))
             ud.st.wSecond += count;
         else
         {
@@ -2570,35 +2570,35 @@ static HRESULT Global_DateDiff(BuiltinDisp *This, VARIANT *arg, unsigned args_cn
 
     LONGLONG diff = 0;
 
-    if (!wcsicmp(interval, L"yyyy"))
+    if (!vbs_wcsicmp(interval, L"yyyy"))
         diff = st2.wYear - st1.wYear;
-    else if (!wcsicmp(interval, L"q"))
+    else if (!vbs_wcsicmp(interval, L"q"))
         diff = ((st2.wYear - st1.wYear) * 4) + (st2.wMonth - 1) / 3 - (st1.wMonth - 1) / 3;
-    else if (!wcsicmp(interval, L"m"))
+    else if (!vbs_wcsicmp(interval, L"m"))
         diff = (st2.wYear - st1.wYear) * 12 + (st2.wMonth - st1.wMonth);
-    else if (!wcsicmp(interval, L"y"))
+    else if (!vbs_wcsicmp(interval, L"y"))
         return E_NOTIMPL;
-    else if (!wcsicmp(interval, L"d"))
+    else if (!vbs_wcsicmp(interval, L"d"))
         return E_NOTIMPL;
-    else if (!wcsicmp(interval, L"w"))
+    else if (!vbs_wcsicmp(interval, L"w"))
         return E_NOTIMPL;
-    else if (!wcsicmp(interval, L"ww"))
+    else if (!vbs_wcsicmp(interval, L"ww"))
         return E_NOTIMPL;
-    else if (!wcsicmp(interval, L"h")) {
+    else if (!vbs_wcsicmp(interval, L"h")) {
         ui1.LowPart = ft1.dwLowDateTime;
         ui1.HighPart = ft1.dwHighDateTime;
         ui2.LowPart = ft2.dwLowDateTime;
         ui2.HighPart = ft2.dwHighDateTime;
         diff = (ui2.QuadPart - ui1.QuadPart) / (10000LL * 1000 * 60 * 60);
     }
-    else if (!wcsicmp(interval, L"n")) {
+    else if (!vbs_wcsicmp(interval, L"n")) {
         ui1.LowPart = ft1.dwLowDateTime;
         ui1.HighPart = ft1.dwHighDateTime;
         ui2.LowPart = ft2.dwLowDateTime;
         ui2.HighPart = ft2.dwHighDateTime;
         diff = (ui2.QuadPart - ui1.QuadPart) / (10000LL * 1000 * 60);
     }
-    else if (!wcsicmp(interval, L"s")) {
+    else if (!vbs_wcsicmp(interval, L"s")) {
         ui1.LowPart = ft1.dwLowDateTime;
         ui1.HighPart = ft1.dwHighDateTime;
         ui2.LowPart = ft2.dwLowDateTime;
@@ -2637,25 +2637,25 @@ static HRESULT Global_DatePart(BuiltinDisp *This, VARIANT *arg, unsigned args_cn
     VariantTimeToSystemTime(date, &st);
 
     int result;
-    if (!wcsicmp(interval, L"yyyy"))
+    if (!vbs_wcsicmp(interval, L"yyyy"))
         result = st.wYear;
-    else if (!wcsicmp(interval, L"q"))
+    else if (!vbs_wcsicmp(interval, L"q"))
         result = (st.wMonth - 1) / 3 + 1;
-    else if (!wcsicmp(interval, L"m"))
+    else if (!vbs_wcsicmp(interval, L"m"))
         result = st.wMonth;
-    else if (!wcsicmp(interval, L"y"))
+    else if (!vbs_wcsicmp(interval, L"y"))
         return E_NOTIMPL;
-    else if (!wcsicmp(interval, L"d"))
+    else if (!vbs_wcsicmp(interval, L"d"))
         result = st.wDay;
-    else if (!wcsicmp(interval, L"w"))
+    else if (!vbs_wcsicmp(interval, L"w"))
         return E_NOTIMPL;
-    else if (!wcsicmp(interval, L"ww"))
+    else if (!vbs_wcsicmp(interval, L"ww"))
         return E_NOTIMPL;
-    else if (!wcsicmp(interval, L"h"))
+    else if (!vbs_wcsicmp(interval, L"h"))
         result = st.wHour;
-    else if (!wcsicmp(interval, L"n"))
+    else if (!vbs_wcsicmp(interval, L"n"))
         result = st.wMinute;
-    else if (!wcsicmp(interval, L"s"))
+    else if (!vbs_wcsicmp(interval, L"s"))
         result = st.wSecond;
     else
         return E_INVALIDARG;
@@ -2773,10 +2773,169 @@ static HRESULT Global_Erase(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, 
     return E_NOTIMPL;
 }
 
-static HRESULT Global_Filter(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, VARIANT *res)
+static HRESULT Global_Filter(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
 {
-    FIXME("\n");
-    return E_NOTIMPL;
+    VARIANT *data;
+    SAFEARRAY *sa, *out_sa;
+    SAFEARRAYBOUND bounds;
+    LONG lbound, ubound, i, count, match_count;
+    BSTR search, conv_search = NULL, str, conv_str;
+    BSTR *matches = NULL;
+    int include = 1, mode = 0, found;
+    HRESULT hres;
+
+    TRACE("%s %u...\n", debugstr_variant(args), args_cnt);
+
+    assert(2 <= args_cnt && args_cnt <= 4);
+
+    if(V_VT(args) == VT_NULL || V_VT(args+1) == VT_NULL
+            || (args_cnt > 2 && V_VT(args+2) == VT_NULL)
+            || (args_cnt > 3 && V_VT(args+3) == VT_NULL))
+        return MAKE_VBSERROR(VBSE_ILLEGAL_NULL_USE);
+
+    switch(V_VT(args)) {
+    case VT_VARIANT|VT_ARRAY:
+        sa = V_ARRAY(args);
+        break;
+    case VT_VARIANT|VT_ARRAY|VT_BYREF:
+        sa = *V_ARRAYREF(args);
+        break;
+    default:
+        return MAKE_VBSERROR(VBSE_TYPE_MISMATCH);
+    }
+
+    if(V_VT(args+1) == VT_BSTR) {
+        search = V_BSTR(args+1);
+    }else {
+        hres = to_string(args+1, &conv_search);
+        if(FAILED(hres))
+            return hres;
+        search = conv_search;
+    }
+
+    if(args_cnt > 2) {
+        hres = to_int(args+2, &include);
+        if(FAILED(hres))
+            goto done;
+    }
+
+    if(args_cnt > 3) {
+        hres = to_int(args+3, &mode);
+        if(FAILED(hres))
+            goto done;
+        if(mode != 0 && mode != 1) {
+            hres = MAKE_VBSERROR(VBSE_ILLEGAL_FUNC_CALL);
+            goto done;
+        }
+    }
+
+    if(SafeArrayGetDim(sa) != 1) {
+        hres = MAKE_VBSERROR(VBSE_TYPE_MISMATCH);
+        goto done;
+    }
+
+    hres = SafeArrayGetLBound(sa, 1, &lbound);
+    if(FAILED(hres))
+        goto done;
+    hres = SafeArrayGetUBound(sa, 1, &ubound);
+    if(FAILED(hres))
+        goto done;
+
+    hres = SafeArrayAccessData(sa, (void**)&data);
+    if(FAILED(hres))
+        goto done;
+
+    /* Single pass: convert, match, and collect results into a temporary array */
+    count = ubound - lbound + 1;
+    if(count > 0) {
+        matches = calloc(count, sizeof(BSTR));
+        if(!matches) {
+            SafeArrayUnaccessData(sa);
+            hres = E_OUTOFMEMORY;
+            goto done;
+        }
+    }
+
+    match_count = 0;
+    for(i = 0; i < count; i++) {
+        conv_str = NULL;
+        if(V_VT(&data[i]) == VT_BSTR) {
+            str = V_BSTR(&data[i]);
+        }else {
+            hres = to_string(&data[i], &conv_str);
+            if(FAILED(hres)) {
+                SafeArrayUnaccessData(sa);
+                goto done;
+            }
+            str = conv_str;
+        }
+
+        if(!SysStringLen(search))
+            found = 1;
+        else
+            found = FindStringOrdinal(FIND_FROMSTART, str, SysStringLen(str),
+                                      search, SysStringLen(search), mode) >= 0;
+
+        if(include ? found : !found) {
+            matches[match_count] = SysAllocString(str);
+            if(!matches[match_count]) {
+                SysFreeString(conv_str);
+                SafeArrayUnaccessData(sa);
+                hres = E_OUTOFMEMORY;
+                goto done;
+            }
+            match_count++;
+        }
+
+        SysFreeString(conv_str);
+    }
+
+    SafeArrayUnaccessData(sa);
+
+    /* Create result array from collected matches */
+    bounds.lLbound = 0;
+    bounds.cElements = match_count;
+    out_sa = SafeArrayCreate(VT_VARIANT, 1, &bounds);
+    if(!out_sa) {
+        hres = E_OUTOFMEMORY;
+        goto done;
+    }
+
+    if(match_count) {
+        VARIANT *out_data;
+
+        hres = SafeArrayAccessData(out_sa, (void**)&out_data);
+        if(FAILED(hres)) {
+            SafeArrayDestroy(out_sa);
+            goto done;
+        }
+
+        for(i = 0; i < match_count; i++) {
+            V_VT(&out_data[i]) = VT_BSTR;
+            V_BSTR(&out_data[i]) = matches[i];
+            matches[i] = NULL;
+        }
+
+        SafeArrayUnaccessData(out_sa);
+    }
+
+    if(res) {
+        V_VT(res) = VT_ARRAY|VT_VARIANT;
+        V_ARRAY(res) = out_sa;
+    }else {
+        SafeArrayDestroy(out_sa);
+    }
+
+    hres = S_OK;
+
+done:
+    if(matches) {
+        for(i = 0; i < match_count; i++)
+            SysFreeString(matches[i]);
+        free(matches);
+    }
+    SysFreeString(conv_search);
+    return hres;
 }
 
 static HRESULT Global_Join(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
@@ -3986,10 +4145,9 @@ static HRESULT Global_ExecuteGlobal(BuiltinDisp *This, VARIANT *arg, unsigned ar
 static HRESULT Global_GetRef(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, VARIANT *res)
 {
     named_item_t *item;
-    function_t **funcs;
+    function_t *func;
     IDispatch *disp;
     const WCHAR *name;
-    size_t i, cnt;
     HRESULT hres;
 
     TRACE("%s\n", debugstr_variant(arg));
@@ -4004,32 +4162,30 @@ static HRESULT Global_GetRef(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt,
     /* Search the current named item's script object first */
     item = This->ctx->current_named_item;
     if(item && item->script_obj) {
-        funcs = item->script_obj->global_funcs;
-        cnt = item->script_obj->global_funcs_cnt;
-        for(i = 0; i < cnt; i++) {
-            if(!wcsicmp(funcs[i]->name, name)) {
-                hres = create_func_ref(This->ctx, funcs[i], &disp);
-                if(FAILED(hres))
-                    return hres;
-                V_VT(res) = VT_DISPATCH;
-                V_DISPATCH(res) = disp;
+        func = script_disp_find_func(item->script_obj, name);
+        if(func) {
+            if(!res)
                 return S_OK;
-            }
-        }
-    }
-
-    /* Search global script object */
-    funcs = This->ctx->script_obj->global_funcs;
-    cnt = This->ctx->script_obj->global_funcs_cnt;
-    for(i = 0; i < cnt; i++) {
-        if(!wcsicmp(funcs[i]->name, name)) {
-            hres = create_func_ref(This->ctx, funcs[i], &disp);
+            hres = create_func_ref(This->ctx, func, &disp);
             if(FAILED(hres))
                 return hres;
             V_VT(res) = VT_DISPATCH;
             V_DISPATCH(res) = disp;
             return S_OK;
         }
+    }
+
+    /* Search global script object */
+    func = script_disp_find_func(This->ctx->script_obj, name);
+    if(func) {
+        if(!res)
+            return S_OK;
+        hres = create_func_ref(This->ctx, func, &disp);
+        if(FAILED(hres))
+            return hres;
+        V_VT(res) = VT_DISPATCH;
+        V_DISPATCH(res) = disp;
+        return S_OK;
     }
 
     return MAKE_VBSERROR(VBSE_ILLEGAL_FUNC_CALL);

@@ -259,11 +259,13 @@ cd /path/to/libwinevbs
 ./scripts/winediff.sh /path/to/wine
 ```
 
-## Wine Bug Fixes
+## Wine Issues
 
-The following Wine bugs have been fixed in upstream Wine:
+Using the Wine VBScript engine source for Visual Pinball has surfaced a large number of defects. Many of these have since been fixed in upstream Wine as a direct result of this project.
 
-- [Bug 49908](https://bugs.winehq.org/show_bug.cgi?id=49908) — vbscript: ExecuteGlobal is not implemented [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10368) [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10600)
+### Resolved Defects
+
+- [Bug 49908](https://bugs.winehq.org/show_bug.cgi?id=49908) — vbscript: ExecuteGlobal is not implemented [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10368)
 - [Bug 53644](https://bugs.winehq.org/show_bug.cgi?id=53644) — vbscript can not compile classes with lists of private / public / dim declarations [10.1](https://gitlab.winehq.org/wine/wine/-/merge_requests/7068)
 - [Bug 53670](https://bugs.winehq.org/show_bug.cgi?id=53670) — vbscript can not compile if expressions with reversed gte, lte, (=>, =<) [7.22](https://gitlab.winehq.org/wine/wine/-/merge_requests/1534)
 - [Bug 53676](https://bugs.winehq.org/show_bug.cgi?id=53676) — vbscript can not exec_script - invalid number of arguments for Randomize [7.21](https://gitlab.winehq.org/wine/wine/-/merge_requests/1246)
@@ -280,9 +282,10 @@ The following Wine bugs have been fixed in upstream Wine:
 - [Bug 53873](https://bugs.winehq.org/show_bug.cgi?id=53873) — vbscript fails to compile Else If when If is on same line [7.22](https://gitlab.winehq.org/wine/wine/-/merge_requests/1385)
 - [Bug 53888](https://bugs.winehq.org/show_bug.cgi?id=53888) — vbscript does not allow Mid on non VT_BSTR [7.21](https://gitlab.winehq.org/wine/wine/-/merge_requests/1288)
 - [Bug 53889](https://bugs.winehq.org/show_bug.cgi?id=53889) — does not support Get_Item call on IDispatch objects [11.5](https://gitlab.winehq.org/wine/wine/-/merge_requests/10367)
-- [Bug 53962](https://bugs.winehq.org/show_bug.cgi?id=53962) — vbscript does not Eval implemented [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10368) [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10600)
+- [Bug 53962](https://bugs.winehq.org/show_bug.cgi?id=53962) — vbscript does not Eval implemented [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10368)
 - [Bug 54221](https://bugs.winehq.org/show_bug.cgi?id=54221) — vbscript: missing support for GetRef [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10444)
 - [Bug 54234](https://bugs.winehq.org/show_bug.cgi?id=54234) — vbscript fails to compile when colon follows Else in If...Else [8.2](https://gitlab.winehq.org/wine/wine/-/merge_requests/2142)
+- [Bug 54291](https://bugs.winehq.org/show_bug.cgi?id=54291) — stuck in endless for loop when UBound on Empty and On Error Resume Next [11.7](https://gitlab.winehq.org/wine/wine/-/merge_requests/10366)
 - [Bug 54456](https://bugs.winehq.org/show_bug.cgi?id=54456) — vbscript memory leak in For Each with SafeArray as group [8.2](https://gitlab.winehq.org/wine/wine/-/merge_requests/2141)
 - [Bug 54457](https://bugs.winehq.org/show_bug.cgi?id=54457) — vbscript memory leaks in interp_redim_preserve [8.2](https://gitlab.winehq.org/wine/wine/-/merge_requests/2132)
 - [Bug 54458](https://bugs.winehq.org/show_bug.cgi?id=54458) — vbscript memory leaks in Global_Split [8.2](https://gitlab.winehq.org/wine/wine/-/merge_requests/2131)
@@ -304,22 +307,28 @@ The following Wine bugs have been fixed in upstream Wine:
 - [Bug 56480](https://bugs.winehq.org/show_bug.cgi?id=56480) — underscore line continue issues [11.5](https://gitlab.winehq.org/wine/wine/-/merge_requests/10312)
 - [Bug 56781](https://bugs.winehq.org/show_bug.cgi?id=56781) — scrrun: Dictionary setting item to object fails [9.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/5795)
 - [Bug 56931](https://bugs.winehq.org/show_bug.cgi?id=56931) — Const used before declaration fails (explicit) [11.5](https://gitlab.winehq.org/wine/wine/-/merge_requests/10302)
+- [Bug 57511](https://bugs.winehq.org/show_bug.cgi?id=57511) — For loop where loop var is not defined throws error without context [11.7](https://gitlab.winehq.org/wine/wine/-/merge_requests/10374)
 - [Bug 57563](https://bugs.winehq.org/show_bug.cgi?id=57563) — vbscript: mid() throws when passed VT_EMPTY instead of returning empty string [10.1](https://gitlab.winehq.org/wine/wine/-/merge_requests/7049)
 - [Bug 58248](https://bugs.winehq.org/show_bug.cgi?id=58248) — Me(Idx) fails to compile [11.5](https://gitlab.winehq.org/wine/wine/-/merge_requests/10371)
 - [Bug 58026](https://bugs.winehq.org/show_bug.cgi?id=58026) — vbscript: Script running error when Dictionary contains array [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10308)
+- [Bug 58051](https://bugs.winehq.org/show_bug.cgi?id=58051) — Dictionary direct Keys/Items access causes parse error [11.7](https://gitlab.winehq.org/wine/wine/-/merge_requests/10362)
 - [Bug 58056](https://bugs.winehq.org/show_bug.cgi?id=58056) — directly indexing a Split returns Empty [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10308)
 
-## Known Open Issues
-
-The following Wine bugs are still open and may require workarounds:
+### Open Defects
 
 - [Bug 53877](https://bugs.winehq.org/show_bug.cgi?id=53877) — compile_assignment assertion when assigning multidimensional array by indices [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10363)
-- [Bug 54177](https://bugs.winehq.org/show_bug.cgi?id=54177) — fails to compile sub call when argument expression contains multiplication [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10244)
-- [Bug 54291](https://bugs.winehq.org/show_bug.cgi?id=54291) — stuck in endless for loop when UBound on Empty and On Error Resume Next [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10366)
+- [Bug 54177](https://bugs.winehq.org/show_bug.cgi?id=54177) — vbscript: Fix Sub first argument parentheses handling. [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10244) [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10692)
 - [Bug 56280](https://bugs.winehq.org/show_bug.cgi?id=56280) — string coerced to Integer instead of Long [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/8635)
 - [Bug 56281](https://bugs.winehq.org/show_bug.cgi?id=56281) — string number converted to ascii value instead of parsed value [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10314)
-- [Bug 57511](https://bugs.winehq.org/show_bug.cgi?id=57511) — For loop where loop var is not defined throws error without context [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10374)
-- [Bug 58051](https://bugs.winehq.org/show_bug.cgi?id=58051) — Dictionary direct Keys/Items access causes parse error [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10362)
+
+### Implemented MRs (without bug reports)
+
+- vbscript: Support element access on public array properties of class instances. [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10383)
+- vbscript: Convert VT_DISPATCH arguments to string in Eval/Execute/ExecuteGlobal. [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10600)
+
+### Enhancements
+
+- vbscript: Use indexed lookup for global functions and variables. [11.7](https://gitlab.winehq.org/wine/wine/-/merge_requests/10546)
 
 ## VBScript Quirks and Workarounds
 

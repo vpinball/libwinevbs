@@ -27,7 +27,8 @@ find "$WINE_LOCAL" -type f | while read i; do
 
    FILE="$WINE_SRC/$RELATIVE_PATH"
    if [ -f "$FILE" ]; then
-      PATCH=$(diff -u --label "wine/$RELATIVE_PATH" --label "libwinevbs/$RELATIVE_PATH" -w --strip-trailing-cr "$FILE" "$i")
+      #PATCH=$(diff -u --label "wine/$RELATIVE_PATH" --label "libwinevbs/$RELATIVE_PATH" -w --strip-trailing-cr "$FILE" "$i")
+      PATCH=$(diff -u --label "wine/$RELATIVE_PATH" --label "libwinevbs/$RELATIVE_PATH" --strip-trailing-cr "$FILE" "$i")
       if [ -n "$PATCH" ]; then
          echo "$PATCH"
       fi

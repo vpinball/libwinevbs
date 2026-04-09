@@ -64,6 +64,9 @@ BSTR get_vbscript_string(int id)
         case VBSE_TYPE_MISMATCH:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_TYPE_MISMATCH");
             break;
+        case VBSE_OUT_OF_STACK:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OUT_OF_STACK");
+            break;
         case VBSE_FILE_NOT_FOUND:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_FILE_NOT_FOUND");
             break;
@@ -136,6 +139,9 @@ BSTR get_vbscript_string(int id)
         case VBSE_NOT_ENUM:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_NOT_ENUM");
             break;
+        case VBSE_DUPLICATE_KEY:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DUPLICATE_KEY");
+            break;
         case VBSE_INVALID_DLL_FUNCTION_NAME:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_DLL_FUNCTION_NAME");
             break;
@@ -148,8 +154,14 @@ BSTR get_vbscript_string(int id)
         case VBSE_VARIABLE_UNDEFINED:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_VARIABLE_UNDEFINED");
             break;
+        case VBSE_ILLEGAL_ASSIGNMENT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_ILLEGAL_ASSIGNMENT");
+            break;
         case VBSE_UNQUALIFIED_REFERENCE:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNQUALIFIED_REFERENCE");
+            break;
+        case VBSE_CLASS_NOT_DEFINED:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CLASS_NOT_DEFINED");
             break;
         case VBSE_SYNTAX_ERROR:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_SYNTAX_ERROR");
@@ -157,17 +169,32 @@ BSTR get_vbscript_string(int id)
         case VBSE_EXPECTED_LPAREN:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LPAREN");
             break;
+        case VBSE_EXPECTED_RPAREN:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_RPAREN");
+            break;
+        case VBSE_EXPECTED_RBRACKET:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_RBRACKET");
+            break;
         case VBSE_EXPECTED_IDENTIFIER:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_IDENTIFIER");
             break;
         case VBSE_EXPECTED_ASSIGN:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_ASSIGN");
             break;
+        case VBSE_EXPECTED_IF:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_IF");
+            break;
         case VBSE_EXPECTED_TO:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_TO");
             break;
         case VBSE_EXPECTED_END:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_END");
+            break;
+        case VBSE_EXPECTED_FUNCTION:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_FUNCTION");
+            break;
+        case VBSE_EXPECTED_SUB:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_SUB");
             break;
         case VBSE_EXPECTED_THEN:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_THEN");
@@ -184,6 +211,9 @@ BSTR get_vbscript_string(int id)
         case VBSE_EXPECTED_CASE:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_CASE");
             break;
+        case VBSE_EXPECTED_SELECT:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_SELECT");
+            break;
         case VBSE_EXPECTED_STATEMENT:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_STATEMENT");
             break;
@@ -196,6 +226,12 @@ BSTR get_vbscript_string(int id)
         case VBSE_EXPECTED_WHILE_UNTIL_EOS:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_WHILE_UNTIL_EOS");
             break;
+        case VBSE_EXPECTED_WITH:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_WITH");
+            break;
+        case VBSE_IDENTIFIER_TOO_LONG:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_IDENTIFIER_TOO_LONG");
+            break;
         case VBSE_INVALID_NUMBER:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_NUMBER");
             break;
@@ -204,6 +240,9 @@ BSTR get_vbscript_string(int id)
             break;
         case VBSE_UNTERMINATED_STRING:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNTERMINATED_STRING");
+            break;
+        case VBSE_INVALID_USE_OF_ME:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_USE_OF_ME");
             break;
         case VBSE_LOOP_WITHOUT_DO:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_LOOP_WITHOUT_DO");
@@ -235,6 +274,15 @@ BSTR get_vbscript_string(int id)
         case VBSE_EXPECTED_LET_SET_GET:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LET_SET_GET");
             break;
+        case VBSE_EXPECTED_PROPERTY:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_PROPERTY");
+            break;
+        case VBSE_PROPERTY_ARG_COUNT_MISMATCH:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PROPERTY_ARG_COUNT_MISMATCH");
+            break;
+        case VBSE_MULTIPLE_DEFAULT_MEMBERS:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_MULTIPLE_DEFAULT_MEMBERS");
+            break;
         case VBSE_CLASS_INIT_NO_ARGS:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CLASS_INIT_NO_ARGS");
             break;
@@ -246,6 +294,9 @@ BSTR get_vbscript_string(int id)
             break;
         case VBSE_DEFAULT_MUST_BE_PUBLIC:
             swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DEFAULT_MUST_BE_PUBLIC");
+            break;
+        case VBSE_DEFAULT_ONLY_ON_PROPERTY_GET:
+            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DEFAULT_ONLY_ON_PROPERTY_GET");
             break;
         case VBS_UNKNOWN_RUNTIME_ERROR:
             swprintf(buf, ARRAY_SIZE(buf), L"VBS_UNKNOWN_RUNTIME_ERROR");

@@ -20,7 +20,7 @@ static HRESULT WINAPI RegExp_GetIDsOfNames(IRegExp *iface, REFIID riid, LPOLESTR
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -178,7 +178,7 @@ static HRESULT WINAPI RegExp2_GetIDsOfNames(IRegExp2 *iface, REFIID riid, LPOLES
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -348,7 +348,7 @@ static HRESULT WINAPI Match_GetIDsOfNames(IMatch *iface, REFIID riid, LPOLESTR *
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -436,7 +436,7 @@ static HRESULT WINAPI Match2_GetIDsOfNames(IMatch2 *iface, REFIID riid, LPOLESTR
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -530,7 +530,7 @@ static HRESULT WINAPI MatchCollection_GetIDsOfNames(IMatchCollection *iface, REF
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -620,7 +620,7 @@ static HRESULT WINAPI MatchCollection2_GetIDsOfNames(IMatchCollection2 *iface, R
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -710,7 +710,7 @@ static HRESULT WINAPI SubMatches_GetIDsOfNames(ISubMatches *iface, REFIID riid, 
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;

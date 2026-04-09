@@ -915,25 +915,33 @@ COLORREF WINAPI GetSysColor(INT index)
 
 __forceinline int wcsnicmp(LPCWSTR str1, LPCWSTR str2, size_t n)
 {
-   int ret = 0;
-   for (; n > 0; n--, str1++, str2++)
+   while (n--)
    {
-      WCHAR ch1 = (*str1 >= 'A' && *str1 <= 'Z') ? *str1 + 32 : *str1;
-      WCHAR ch2 = (*str2 >= 'A' && *str2 <= 'Z') ? *str2 + 32 : *str2;
-      if ((ret = ch1 - ch2) ||  !*str1) break;
+      WCHAR c1 = *str1++;
+      WCHAR c2 = *str2++;
+
+      if ((unsigned)(c1 - 'A') <= ('Z' - 'A')) c1 |= 0x20;
+      if ((unsigned)(c2 - 'A') <= ('Z' - 'A')) c2 |= 0x20;
+
+      int diff = (int)c1 - (int)c2;
+      if (diff || !c1) return diff;
    }
-   return ret;
+
+   return 0;
 }
 
 __forceinline int wcsicmp(LPCWSTR str1, LPCWSTR str2)
 {
    for (;;)
    {
-      WCHAR ch1 = (*str1 >= 'A' && *str1 <= 'Z') ? *str1 + 32 : *str1;
-      WCHAR ch2 = (*str2 >= 'A' && *str2 <= 'Z') ? *str2 + 32 : *str2;
-      if (ch1 != ch2 || !*str1) return ch1 - ch2;
-      str1++;
-      str2++;
+      WCHAR c1 = *str1++;
+      WCHAR c2 = *str2++;
+
+      if ((unsigned)(c1 - 'A') <= ('Z' - 'A')) c1 |= 0x20;
+      if ((unsigned)(c2 - 'A') <= ('Z' - 'A')) c2 |= 0x20;
+
+      int diff = (int)c1 - (int)c2;
+      if (diff || !c1) return diff;
    }
 }
 

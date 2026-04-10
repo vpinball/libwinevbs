@@ -2541,6 +2541,22 @@ HRESULT WINAPI VarMonthName(INT iMonth, INT fAbbrev, ULONG dwFlags, BSTR *pbstrO
   if (dwFlags)
     FIXME("Does not support flags %#lx, ignoring.\n", dwFlags);
 
+#ifdef __LIBWINEVBS__
+  {
+    static const WCHAR *month_names[] = {
+      L"January", L"February", L"March", L"April", L"May", L"June",
+      L"July", L"August", L"September", L"October", L"November", L"December"
+    };
+    static const WCHAR *abbrev_names[] = {
+      L"Jan", L"Feb", L"Mar", L"Apr", L"May", L"Jun",
+      L"Jul", L"Aug", L"Sep", L"Oct", L"Nov", L"Dec"
+    };
+    const WCHAR *name = fAbbrev ? abbrev_names[iMonth - 1] : month_names[iMonth - 1];
+    *pbstrOut = SysAllocString(name);
+    return *pbstrOut ? S_OK : E_OUTOFMEMORY;
+  }
+#endif
+
   if (fAbbrev)
 	localeValue = LOCALE_SABBREVMONTHNAME1 + iMonth - 1;
   else
@@ -2597,6 +2613,22 @@ HRESULT WINAPI VarWeekdayName(INT iWeekday, INT fAbbrev, INT iFirstDay,
 
   if (dwFlags)
     FIXME("Does not support flags %#lx, ignoring.\n", dwFlags);
+
+#ifdef __LIBWINEVBS__
+  {
+    static const WCHAR *day_names[] = {
+      L"Monday", L"Tuesday", L"Wednesday", L"Thursday", L"Friday", L"Saturday", L"Sunday"
+    };
+    static const WCHAR *abbrev_day_names[] = {
+      L"Mon", L"Tue", L"Wed", L"Thu", L"Fri", L"Sat", L"Sun"
+    };
+    if (iFirstDay == 0) iFirstDay = 1;
+    int idx = (7 + iWeekday - 1 + iFirstDay - 2) % 7;
+    const WCHAR *name = fAbbrev ? abbrev_day_names[idx] : day_names[idx];
+    *pbstrOut = SysAllocString(name);
+    return *pbstrOut ? S_OK : E_OUTOFMEMORY;
+  }
+#endif
 
   /* If we have to use the default firstDay, find which one it is */
   if (iFirstDay == 0) {

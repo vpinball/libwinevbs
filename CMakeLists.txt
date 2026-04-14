@@ -5,6 +5,7 @@ set(ARCH "x64" CACHE STRING "Arch")
 
 option(BUILD_SHARED "Option to build shared library" ON)
 option(BUILD_STATIC "Option to build static library" ON)
+option(ENABLE_SANITIZERS "Enable AddressSanitizer and UBSan for Debug builds" OFF)
 
 message(STATUS "PLATFORM: ${PLATFORM}")
 message(STATUS "ARCH: ${ARCH}")
@@ -12,9 +13,7 @@ message(STATUS "ARCH: ${ARCH}")
 message(STATUS "BUILD_SHARED: ${BUILD_SHARED}")
 message(STATUS "BUILD_STATIC: ${BUILD_STATIC}")
 
-if(PLATFORM STREQUAL "macos")
-   set(CMAKE_OSX_DEPLOYMENT_TARGET 14.0)
-elseif(PLATFORM STREQUAL "ios" OR PLATFORM STREQUAL "ios-simulator")
+if(PLATFORM STREQUAL "ios" OR PLATFORM STREQUAL "ios-simulator")
    set(CMAKE_SYSTEM_NAME iOS)
    if (PLATFORM STREQUAL "ios-simulator")
       set(CMAKE_OSX_SYSROOT iphonesimulator)
@@ -61,6 +60,14 @@ endif()
 set(CMAKE_C_STANDARD 99)
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+   if(ENABLE_SANITIZERS AND (PLATFORM STREQUAL "macos" OR PLATFORM STREQUAL "linux"))
+      set(SANITIZER_FLAGS -fsanitize=address,undefined)
+      add_compile_options(${SANITIZER_FLAGS} -fno-omit-frame-pointer -g)
+      add_link_options(${SANITIZER_FLAGS})
+   endif()
+endif()
 
 if(MINGW)
    find_program(GENDEF gendef)

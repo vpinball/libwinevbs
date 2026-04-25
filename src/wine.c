@@ -1425,15 +1425,8 @@ HRESULT WINAPI PathAllocCombine(const WCHAR *path1, const WCHAR *path2, DWORD fl
 
 BOOL WINAPI ReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped)
 {
-   char* pBuffer = (char*)lpBuffer;
-   *lpNumberOfBytesRead = 0;
-   while (*lpNumberOfBytesRead < nNumberOfBytesToRead)
-   {
-      if(feof(hFile)) break;
-      *pBuffer++ = fgetc(hFile);
-      (*lpNumberOfBytesRead)++;
-   }
-   return TRUE;
+   *lpNumberOfBytesRead = (DWORD)fread(lpBuffer, 1, nNumberOfBytesToRead, hFile);
+   return ferror(hFile) ? FALSE : TRUE;
 }
 
 BOOL WINAPI RemoveDirectoryW(LPCWSTR lpPathName)

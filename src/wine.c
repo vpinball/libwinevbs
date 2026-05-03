@@ -1120,6 +1120,65 @@ BOOL WINAPI CreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurit
 #endif
 }
 
+#ifndef _WIN32
+/* Native Linux/macOS filesystems are case-sensitive; Win32 callers
+ * (and VBScript/COM code that mirrors Win32 path semantics) expect
+ * case-insensitive lookup. Resolve `path` in place by walking the
+ * parent components case-insensitively via opendir/strcasecmp.
+ * Returns 1 on success, 0 on miss. */
+static int resolve_path_ci(char *path)
+{
+   struct stat st;
+   if (stat(path, &st) == 0)
+      return 1;
+
+   char *slash = strrchr(path, '/');
+   const char *child;
+   const char *parent;
+   if (!slash) {
+      child = path;
+      parent = ".";
+   } else if (slash == path) {
+      /* root */
+      return 0;
+   } else {
+      *slash = '\0';
+      if (!resolve_path_ci(path)) {
+         *slash = '/';
+         return 0;
+      }
+      child = slash + 1;
+      parent = path;
+   }
+
+   DIR *dir = opendir(parent);
+   if (!dir) {
+      if (slash) *slash = '/';
+      return 0;
+   }
+   struct dirent *ent;
+   int found = 0;
+   while ((ent = readdir(dir)) != NULL) {
+      if (strcasecmp(ent->d_name, child) == 0) {
+         /* Replace child component with actual on-disk casing. */
+         if (slash) {
+            *slash = '/';
+            strcpy(slash + 1, ent->d_name);
+         } else {
+            strcpy(path, ent->d_name);
+         }
+         found = 1;
+         break;
+      }
+   }
+   closedir(dir);
+   if (!found && slash) *slash = '/';
+   return found;
+}
+#else
+static int resolve_path_ci(char *path) { (void)path; return 0; }
+#endif
+
 HANDLE WINAPI CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
    CHAR szFileName[MAX_PATH];
@@ -1131,6 +1190,13 @@ HANDLE WINAPI CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwSha
       if (szFileName[i] == '\\')
          szFileName[i] = '/';
    }
+
+   /* Allow case-insensitive lookup of an existing file (mirrors the
+    * NTFS-emulation lookups wineprefix does for tables). Only useful
+    * for OPEN_EXISTING-style opens; for CREATE we leave the path as
+    * given so the new file gets the requested casing. */
+   if (dwCreationDisposition == OPEN_EXISTING || dwCreationDisposition == OPEN_ALWAYS)
+      resolve_path_ci(szFileName);
 
    FILE* fp = NULL;
    char mode[3] = { 0 };
@@ -1256,6 +1322,8 @@ HANDLE WINAPI FindFirstFileW(LPCWSTR lpFileName, LPWIN32_FIND_DATAW lpFindFileDa
       if (path[i] == '\\') path[i] = '/';
 
    DIR *dir = opendir(path);
+   if (!dir && resolve_path_ci(path))
+      dir = opendir(path);
    if (!dir)
       return INVALID_HANDLE_VALUE;
 
@@ -1328,6 +1396,8 @@ DWORD WINAPI GetFileAttributesW(LPCWSTR lpFileName)
       szFileName[len-1] = '\0';
 
    struct stat statbuf;
+   if (stat(szFileName, &statbuf) != 0 && resolve_path_ci(szFileName))
+      stat(szFileName, &statbuf);
    if (!stat(szFileName, &statbuf)) {
       status = 0;
       if (S_ISDIR(statbuf.st_mode))

@@ -39,6 +39,16 @@ void external_log_info(const char* format, ...);
 void external_log_debug(const char* format, ...);
 HRESULT WINAPI VBScriptFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 
+/* Codepage used to convert WCHAR paths down to bytes for the POSIX
+ * stat/fopen/opendir backing calls in this file. On Linux/macOS the
+ * filesystem expects UTF-8; on Windows MinGW the C runtime's POSIX
+ * wrappers expect CP_ACP-encoded bytes. Pick accordingly. */
+#ifdef _WIN32
+# define LIBWINEVBS_PATH_CP CP_ACP
+#else
+# define LIBWINEVBS_PATH_CP CP_UTF8
+#endif
+
 #undef wcsncpy
 
 HINSTANCE hProxyDll = 0;
@@ -1104,11 +1114,19 @@ BOOL WINAPI CopyFileW(LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, BOOL bF
 BOOL WINAPI CreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 {
    CHAR szPathName[MAX_PATH];
-   int len = wcslen(lpPathName);
-   WideCharToMultiByte(CP_ACP, 0, lpPathName, len, szPathName, len, NULL, NULL);
-   szPathName[len] = '\0';
+   int wlen = wcslen(lpPathName);
+   /* Linux/macOS filesystems use UTF-8 paths; CP_ACP can't represent
+    * non-ASCII (e.g. U+2013 EN DASH appears in Unicode-named files
+    * users have on disk). Use CP_UTF8 so the Win32 wide path round-trips
+    * to the underlying POSIX call faithfully. FindFirstFileW already
+    * does this -- the other shims should too. The byte count differs
+    * from the WCHAR count for non-ASCII, so use the returned length to
+    * NUL-terminate and to drive the '\\' -> '/' rewrite. */
+   int blen = WideCharToMultiByte(LIBWINEVBS_PATH_CP, 0, lpPathName, wlen, szPathName, sizeof(szPathName) - 1, NULL, NULL);
+   if (blen < 0) blen = 0;
+   szPathName[blen] = '\0';
 
-   for (int i = 0; i < len; ++i) {
+   for (int i = 0; i < blen; ++i) {
       if (szPathName[i] == '\\')
          szPathName[i] = '/';
    }
@@ -1123,11 +1141,12 @@ BOOL WINAPI CreateDirectoryW(LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurit
 HANDLE WINAPI CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
    CHAR szFileName[MAX_PATH];
-   int len = wcslen(lpFileName);
-   WideCharToMultiByte(CP_ACP, 0, lpFileName, len, szFileName, len, NULL, NULL);
-   szFileName[len] = '\0';
+   int wlen = wcslen(lpFileName);
+   int blen = WideCharToMultiByte(LIBWINEVBS_PATH_CP, 0, lpFileName, wlen, szFileName, sizeof(szFileName) - 1, NULL, NULL);
+   if (blen < 0) blen = 0;
+   szFileName[blen] = '\0';
 
-   for (int i = 0; i < len; ++i) {
+   for (int i = 0; i < blen; ++i) {
       if (szFileName[i] == '\\')
          szFileName[i] = '/';
    }
@@ -1249,8 +1268,8 @@ HANDLE WINAPI FindFirstFileW(LPCWSTR lpFileName, LPWIN32_FIND_DATAW lpFindFileDa
 
    char path[MAX_PATH];
    char pattern[MAX_PATH];
-   WideCharToMultiByte(CP_UTF8, 0, pathW, -1, path, sizeof(path), NULL, NULL);
-   WideCharToMultiByte(CP_UTF8, 0, patternW, -1, pattern, sizeof(pattern), NULL, NULL);
+   WideCharToMultiByte(LIBWINEVBS_PATH_CP, 0, pathW, -1, path, sizeof(path), NULL, NULL);
+   WideCharToMultiByte(LIBWINEVBS_PATH_CP, 0, patternW, -1, pattern, sizeof(pattern), NULL, NULL);
 
    for (int i = 0; path[i]; ++i)
       if (path[i] == '\\') path[i] = '/';
@@ -1315,17 +1334,18 @@ DWORD WINAPI GetFileAttributesW(LPCWSTR lpFileName)
 {
    DWORD status = INVALID_FILE_ATTRIBUTES;
    CHAR szFileName[MAX_PATH];
-   int len = wcslen(lpFileName);
-   WideCharToMultiByte(CP_ACP, 0, lpFileName, len, szFileName, len, NULL, NULL);
-   szFileName[len] = '\0';
+   int wlen = wcslen(lpFileName);
+   int blen = WideCharToMultiByte(LIBWINEVBS_PATH_CP, 0, lpFileName, wlen, szFileName, sizeof(szFileName) - 1, NULL, NULL);
+   if (blen < 0) blen = 0;
+   szFileName[blen] = '\0';
 
-   for (int i = 0; i < len; ++i) {
+   for (int i = 0; i < blen; ++i) {
       if (szFileName[i] == '\\')
          szFileName[i] = '/';
    }
 
-   if (szFileName[len-1] == '/')
-      szFileName[len-1] = '\0';
+   if (blen > 0 && szFileName[blen-1] == '/')
+      szFileName[blen-1] = '\0';
 
    struct stat statbuf;
    if (!stat(szFileName, &statbuf)) {

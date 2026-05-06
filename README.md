@@ -296,6 +296,7 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - [Bug 53867](https://bugs.winehq.org/show_bug.cgi?id=53867) — vbscript fails to retrieve property array by index [7.22](https://gitlab.winehq.org/wine/wine/-/merge_requests/1409)
 - [Bug 53868](https://bugs.winehq.org/show_bug.cgi?id=53868) — vbscript fails to return TypeName for VT_DISPATCH [7.22](https://gitlab.winehq.org/wine/wine/-/merge_requests/1347)
 - [Bug 53873](https://bugs.winehq.org/show_bug.cgi?id=53873) — vbscript fails to compile Else If when If is on same line [7.22](https://gitlab.winehq.org/wine/wine/-/merge_requests/1385)
+- [Bug 53877](https://bugs.winehq.org/show_bug.cgi?id=53877) — compile_assignment assertion when assigning multidimensional array by indices [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10363)
 - [Bug 53888](https://bugs.winehq.org/show_bug.cgi?id=53888) — vbscript does not allow Mid on non VT_BSTR [7.21](https://gitlab.winehq.org/wine/wine/-/merge_requests/1288)
 - [Bug 53889](https://bugs.winehq.org/show_bug.cgi?id=53889) — does not support Get_Item call on IDispatch objects [11.5](https://gitlab.winehq.org/wine/wine/-/merge_requests/10367)
 - [Bug 53962](https://bugs.winehq.org/show_bug.cgi?id=53962) — vbscript does not Eval implemented [11.6](https://gitlab.winehq.org/wine/wine/-/merge_requests/10368)
@@ -320,7 +321,7 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - [Bug 55931](https://bugs.winehq.org/show_bug.cgi?id=55931) — vbscript: empty MOD 100000 returns garbage instead of 0 [9.0-rc1](https://gitlab.winehq.org/wine/wine/-/merge_requests/4515)
 - [Bug 55969](https://bugs.winehq.org/show_bug.cgi?id=55969) — vbscript fails to return TypeName for Nothing [9.0-rc1](https://gitlab.winehq.org/wine/wine/-/merge_requests/4564)
 - [Bug 56139](https://bugs.winehq.org/show_bug.cgi?id=56139) — scrrun: Dictionary does not allow storing at key Undefined [9.3](https://gitlab.winehq.org/wine/wine/-/merge_requests/4778)
-- [Bug 56281](https://bugs.winehq.org/show_bug.cgi?id=56281) — string number converted to ascii value instead of parsed value [11.8](https://gitlab.winehq.org/wine/wine/-/merge_requests/10314)
+- [Bug 56281](https://bugs.winehq.org/show_bug.cgi?id=56281) — string number converted to ascii value instead of parsed value [11.8](https://gitlab.winehq.org/wine/wine/-/merge_requests/10314) [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10775)
 - [Bug 56464](https://bugs.winehq.org/show_bug.cgi?id=56464) — vbscript: Join on array with "empty" items fails [10.2](https://gitlab.winehq.org/wine/wine/-/merge_requests/7304)
 - [Bug 56480](https://bugs.winehq.org/show_bug.cgi?id=56480) — underscore line continue issues [11.5](https://gitlab.winehq.org/wine/wine/-/merge_requests/10312)
 - [Bug 56781](https://bugs.winehq.org/show_bug.cgi?id=56781) — scrrun: Dictionary setting item to object fails [9.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/5795)
@@ -334,49 +335,19 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 
 ### Open Defects
 
-- [Bug 53877](https://bugs.winehq.org/show_bug.cgi?id=53877) — compile_assignment assertion when assigning multidimensional array by indices [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10363)
 - [Bug 56280](https://bugs.winehq.org/show_bug.cgi?id=56280) — string coerced to Integer instead of Long [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/8635)
 
 ### Implemented MRs (without bug reports)
 
 - vbscript: Support element access on public array properties of class instances. [11.8](https://gitlab.winehq.org/wine/wine/-/merge_requests/10383)
 - vbscript: Convert VT_DISPATCH arguments to string in Eval/Execute/ExecuteGlobal. [11.8](https://gitlab.winehq.org/wine/wine/-/merge_requests/10600)
-- vbscript: Coerce VT_EMPTY operands before Var* calls. [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10674)
-- oleaut32: Fix Null handling in three-valued logical ops. [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10673)
+- vbscript: Coerce VT_EMPTY operands before Var* calls. [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10674)
+- vbscript: Match native cross-parse name redefinition rules. [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10852)
+- oleaut32: Fix Null handling in three-valued logical ops. [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10673)
 
 ### Enhancements
 
 - vbscript: Use indexed lookup for global functions and variables. [11.7](https://gitlab.winehq.org/wine/wine/-/merge_requests/10546)
-- oleaut32: Add fast paths for VarAdd and VarCmp with integer operands. [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10528)
-
-## VBScript Quirks and Workarounds
-
-These issues stem from differences in how VBScript is interpreted in the Wine engine compared to native Windows.
-
-### Setting values in a 2D array
-
-This is one of the most common issues. It can be automatically patched by [vpxtool](https://github.com/francisdb/vpxtool).
-
-```vbscript
-' does not work
-DTArray(i)(4) = DTCheckBrick(Activeball, DTArray(i)(2))
-
-' workaround — use a class with named properties instead
-DTArray(i).animate = DTCheckBrick(Activeball, DTArray(i).prim)
-```
-
-See: [Bug 53877](https://bugs.winehq.org/show_bug.cgi?id=53877)
-
-### Evals fail when setting a 2D array
-
-```vbscript
-' does not work
-dy = -1*(EVAL("roachxy" & xx)(1)(roachstep) - EVAL("roachxy" & xx)(1)(roachstep-1))
-
-' workaround
-dim roachxy : roachxy = EVAL("roachxy" & xx)
-dy = -1*(roachxy(1)(roachstep) - roachxy(1)(roachstep-1))
-```
 
 ## Acknowledgments
 

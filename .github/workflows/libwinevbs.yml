@@ -37,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-2025, platform: win-mingw, arch: x64 }
+          - { os: windows-2025-vs2026, platform: win-mingw, arch: x64 }
           - { os: macos-15, platform: macos, arch: arm64 }
           - { os: macos-15, platform: macos, arch: x64 }
           - { os: ubuntu-24.04, platform: linux, arch: x64 }

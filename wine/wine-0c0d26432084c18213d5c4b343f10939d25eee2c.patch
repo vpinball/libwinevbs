@@ -1,4 +1,4 @@
-# libwinevbs-only: wine-71e7a2e81eec9155d5d0745b491e1cbfab3bf742.patch
+# libwinevbs-only: wine-0c0d26432084c18213d5c4b343f10939d25eee2c.patch
 --- wine/include/winternl.h
 +++ libwinevbs/include/winternl.h
 @@ -21,7 +21,22 @@
@@ -126,7 +126,7 @@
  #define _BLOB_DEFINED
 --- wine/include/windef.h
 +++ libwinevbs/include/windef.h
-@@ -178,6 +178,15 @@
+@@ -178,6 +178,16 @@
  #define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT)-4)
  #define DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED    ((DPI_AWARENESS_CONTEXT)-5)
  
@@ -137,6 +137,7 @@
 + #ifndef _WIN32
 +  int wcsicmp( LPCWSTR str1, LPCWSTR str2 );
 +  int wcsnicmp( LPCWSTR str1, LPCWSTR str2, size_t n );
++  WCHAR *wcslwr( WCHAR *str );
 + #endif
 +#endif
  #ifdef __cplusplus
@@ -299,7 +300,7 @@
      return NULL;
  }
  
-@@ -660,6 +662,7 @@
+@@ -675,6 +677,7 @@
  
  static const struct sortguid *get_language_sort( const WCHAR *name )
  {
@@ -307,7 +308,7 @@
      const NLS_LOCALE_LCNAME_INDEX *entry;
      const NLS_LOCALE_DATA *locale;
      WCHAR guidstr[39];
-@@ -711,6 +714,9 @@
+@@ -726,6 +729,9 @@
      if (!ret) ret = &sort.guids[0];
      locale_sorts[entry - lcnames_index] = ret;
      return ret;
@@ -317,7 +318,7 @@
  }
  
  
-@@ -1627,7 +1633,11 @@
+@@ -1642,7 +1648,11 @@
  
      if (id != CAL_GREGORIAN && type != CAL_ITWODIGITYEARMAX)
      {
@@ -329,7 +330,7 @@
          for (i = 0; i < ids[0]; i++) if (ids[1 + i] == id) break;
          if (i == ids[0]) goto invalid;
      }
-@@ -2119,7 +2129,11 @@
+@@ -2157,7 +2167,11 @@
      if (pos >> 13)
      {
          if (get_char_props( norm_info, ch ) != 0xbf) return NULL;
@@ -341,7 +342,7 @@
          len = pos >> 13;
      }
      else
-@@ -2134,7 +2148,11 @@
+@@ -2172,7 +2186,11 @@
          for ( ; pos < end; pos++)
          {
              if (pairs[pos].src != (WCHAR)ch) continue;
@@ -353,7 +354,7 @@
              len = pairs[pos].dst >> 13;
              break;
          }
-@@ -2151,7 +2169,11 @@
+@@ -2189,7 +2207,11 @@
  static WCHAR compose_chars( WCHAR ch1, WCHAR ch2 )
  {
      const USHORT *table = (const USHORT *)norm_info + norm_info->comp_hash;
@@ -365,7 +366,7 @@
      unsigned int hash, start, end, i;
      WCHAR ch[3];
  
-@@ -2196,6 +2218,11 @@
+@@ -2234,6 +2256,11 @@
  {
      static const CPTABLEINFO utf7_cpinfo = { CP_UTF7, 5, '?', 0xfffd, '?', '?' };
      static const CPTABLEINFO utf8_cpinfo = { CP_UTF8, 4, '?', 0xfffd, '?', '?' };
@@ -377,7 +378,7 @@
      unsigned int i;
      USHORT *ptr;
      SIZE_T size;
-@@ -3829,6 +3856,7 @@
+@@ -3867,6 +3894,7 @@
  static int compare_string( const struct sortguid *sortid, DWORD flags,
                             const WCHAR *src1, int srclen1, const WCHAR *src2, int srclen2 )
  {
@@ -385,7 +386,7 @@
      struct sortkey_state s1;
      struct sortkey_state s2;
      BYTE primary1[32];
-@@ -3889,6 +3917,12 @@
+@@ -3927,6 +3955,12 @@
      free_sortkey_state( &s1 );
      free_sortkey_state( &s2 );
      return ret;
@@ -398,7 +399,7 @@
  }
  
  
-@@ -4331,7 +4365,11 @@
+@@ -4369,7 +4403,11 @@
      if (id == ENUM_ALL_CALENDARS)
      {
          count = locale_strings[locale->scalendartype];
@@ -410,7 +411,7 @@
      }
      else if (id <= CAL_UMALQURA)
      {
-@@ -4409,7 +4447,11 @@
+@@ -4447,7 +4485,11 @@
          return FALSE;
      }
  
@@ -422,7 +423,7 @@
  
      switch (flags & ~LOCALE_USE_CP_ACP)
      {
-@@ -4746,7 +4788,9 @@
+@@ -4784,7 +4826,9 @@
          return 0;
      }
  
@@ -432,7 +433,7 @@
  
      if (!str1 || !str2)
      {
-@@ -4864,6 +4908,7 @@
+@@ -4902,6 +4946,7 @@
      case LOCALE_CUSTOM_UI_DEFAULT:
          break;
      default:
@@ -440,7 +441,7 @@
          if (lcid == user_lcid || lcid == system_lcid) break;
          if (!(entry = find_lcid_entry( lcid )))
          {
-@@ -4872,6 +4917,7 @@
+@@ -4910,6 +4955,7 @@
              return 0;
          }
          locale = locale_strings + entry->name + 1;
@@ -448,7 +449,7 @@
          break;
      }
  
-@@ -5791,6 +5837,7 @@
+@@ -5829,6 +5875,7 @@
  BOOL WINAPI DECLSPEC_HOTPATCH GetFileMUIInfo( DWORD flags, const WCHAR *path,
                                                FILEMUIINFO *info, DWORD *size )
  {
@@ -456,7 +457,7 @@
      DWORD off, mui_size, type = MUI_FILETYPE_NOT_LANGUAGE_NEUTRAL;
      struct mui_resource *mui = NULL;
      HMODULE hmod;
-@@ -5945,6 +5992,9 @@
+@@ -5983,6 +6030,9 @@
  
      FreeLibrary( hmod );
      return TRUE;
@@ -466,7 +467,7 @@
  }
  
  
-@@ -6716,6 +6766,7 @@
+@@ -6754,6 +6804,7 @@
   */
  BOOL WINAPI DECLSPEC_HOTPATCH IsValidLocale( LCID lcid, DWORD flags )
  {
@@ -474,7 +475,7 @@
      switch (lcid)
      {
      case LOCALE_NEUTRAL:
-@@ -6725,6 +6776,9 @@
+@@ -6763,6 +6814,9 @@
      default:
          return !!NlsValidateLocale( &lcid, LOCALE_ALLOW_NEUTRAL_NAMES );
      }
@@ -885,47 +886,1071 @@
  
  /***********************************************************************
   *      DllGetClassObject (scrrun.@)
---- wine/dlls/vbscript/compile.c
-+++ libwinevbs/dlls/vbscript/compile.c
-@@ -1164,7 +1164,9 @@
-         break;
-     case EXPR_CALL:
-         call_expr = (call_expression_t*)left;
-+#ifndef __LIBWINEVBS__
-         assert(call_expr->call_expr->type == EXPR_MEMBER);
-+#endif
-         member_expr = (member_expression_t*)call_expr->call_expr;
-         break;
-     default:
-@@ -2146,13 +2148,21 @@
+--- wine/dlls/wshom.ocx/wshom_main.c
++++ libwinevbs/dlls/wshom.ocx/wshom_main.c
+@@ -19,7 +19,25 @@
+ #include "wshom_private.h"
  
-     for(i = 0; i < var_cnt; i++) {
-         if(lookup_script_identifier(ctx, script, vars[i].name)) {
-+#ifndef __LIBWINEVBS__
-             return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
-+#else
-+            external_log_info("%s redefined (var)", debugstr_w(vars[i].name));
+ #include "initguid.h"
++#ifdef __LIBWINEVBS__
++/* These IID_* are also emitted by scrrun's typelib header; rename ours
++ * so the linker sees distinct symbols within the unified library. */
++#define IID_IDrive            wshom_unused_IID_IDrive
++#define IID_IFile             wshom_unused_IID_IFile
++#define IID_IFileCollection   wshom_unused_IID_IFileCollection
++#define IID_IFolder           wshom_unused_IID_IFolder
++#define IID_IFolderCollection wshom_unused_IID_IFolderCollection
++#define IID_ITextStream       wshom_unused_IID_ITextStream
 +#endif
-         }
-     }
- 
-     for(class = ctx->code->classes; class; class = class->next) {
-         if(lookup_script_identifier(ctx, script, class->name)) {
-+#ifndef __LIBWINEVBS__
-             return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
-+#else
-+            external_log_info("%s redefined (class)", debugstr_w(class->name));
+ #include "wshom.h"
++#ifdef __LIBWINEVBS__
++#undef IID_IDrive
++#undef IID_IFile
++#undef IID_IFileCollection
++#undef IID_IFolder
++#undef IID_IFolderCollection
++#undef IID_ITextStream
 +#endif
-         }
-     }
+ #include "rpcproxy.h"
  
---- wine/dlls/vbscript/vbdisp.c
-+++ libwinevbs/dlls/vbscript/vbdisp.c
-@@ -418,12 +418,220 @@
-     return S_OK;
+ #include "wine/debug.h"
+@@ -210,6 +228,7 @@
+     ClassFactory_LockServer
+ };
+ 
++#ifndef __LIBWINEVBS__
+ static const IClassFactoryVtbl WshNetworkFactoryVtbl = {
+     ClassFactory_QueryInterface,
+     ClassFactory_AddRef,
+@@ -217,10 +236,14 @@
+     WshNetworkFactory_CreateInstance,
+     ClassFactory_LockServer
+ };
++#endif
+ 
+ static IClassFactory WshShellFactory = { &WshShellFactoryVtbl };
++#ifndef __LIBWINEVBS__
+ static IClassFactory WshNetworkFactory = { &WshNetworkFactoryVtbl };
++#endif
+ 
++#ifndef __LIBWINEVBS__
+ /******************************************************************
+  *              DllMain (wshom.ocx.@)
+  */
+@@ -241,7 +264,9 @@
+ 
+     return TRUE;
+ }
++#endif
+ 
++#ifndef __LIBWINEVBS__
+ /***********************************************************************
+  *		DllGetClassObject	(wshom.ocx.@)
+  */
+@@ -259,3 +284,4 @@
+     FIXME("%s %s %p\n", debugstr_guid(rclsid), debugstr_guid(riid), ppv);
+     return CLASS_E_CLASSNOTAVAILABLE;
+ }
++#endif
+--- wine/dlls/wshom.ocx/network.c
++++ libwinevbs/dlls/wshom.ocx/network.c
+@@ -74,7 +74,11 @@
+     return get_typeinfo(IWshNetwork2_tid, ppTInfo);
  }
  
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshNetwork2_GetIDsOfNames(IWshNetwork2 *iface, REFIID riid, LPOLESTR *rgszNames,
++        UINT cNames, LCID lcid, DISPID *rgDispId);
++#else
++static HRESULT WINAPI WshNetwork2_GetIDsOfNames(IWshNetwork2 *iface, REFIID riid, LPOLESTR *rgszNames,
+         UINT cNames, LCID lcid, DISPID *rgDispId)
+ {
+     ITypeInfo *typeinfo;
+@@ -91,8 +95,13 @@
+ 
+     return hr;
+ }
++#endif
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshNetwork2_Invoke(IWshNetwork2 *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
++        WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
++#else
++static HRESULT WINAPI WshNetwork2_Invoke(IWshNetwork2 *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
+         WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+ {
+     ITypeInfo *typeinfo;
+@@ -111,6 +120,7 @@
+ 
+     return hr;
+ }
++#endif
+ 
+ static HRESULT WINAPI WshNetwork2_get_UserDomain(IWshNetwork2 *iface, BSTR *user_domain)
+ {
+@@ -290,3 +300,7 @@
+ 
+     return IWshNetwork2_QueryInterface(&WshNetwork2, riid, ppv);
+ }
 +
++#ifdef __LIBWINEVBS__
++#include "network_proxy.c"
++#endif
+--- wine/dlls/wshom.ocx/wshom_private.h
++++ libwinevbs/dlls/wshom.ocx/wshom_private.h
+@@ -25,6 +25,14 @@
+ #include "ole2.h"
+ #include "olectl.h"
+ 
++#ifdef __LIBWINEVBS__
++/* libwinevbs links scrrun and wshom.ocx into the same library; rename the
++ * file-scope helpers so they don't collide with their scrrun counterparts. */
++#define get_typeinfo     wshom_get_typeinfo
++#define init_classinfo   wshom_init_classinfo
++#define release_typelib  wshom_release_typelib
++#endif
++
+ /* typelibs */
+ typedef enum tid_t {
+     NULL_tid,
+# libwinevbs-only: dlls/wshom.ocx/shell_proxy.c
+--- wine/dlls/wshom.ocx/shell.c
++++ libwinevbs/dlls/wshom.ocx/shell.c
+@@ -27,6 +27,10 @@
+ 
+ extern HRESULT WINAPI DoOpenPipeStream(HANDLE pipe, IOMode mode, ITextStream **stream);
+ 
++#ifdef __LIBWINEVBS__
++#include "libwinevbs.h"
++#endif
++
+ WINE_DEFAULT_DEBUG_CHANNEL(wshom);
+ 
+ typedef struct
+@@ -163,7 +167,11 @@
+     return get_typeinfo(IWshExec_tid, ppTInfo);
+ }
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshExec_GetIDsOfNames(IWshExec *iface, REFIID riid, LPOLESTR *rgszNames,
++        UINT cNames, LCID lcid, DISPID *rgDispId);
++#else
++static HRESULT WINAPI WshExec_GetIDsOfNames(IWshExec *iface, REFIID riid, LPOLESTR *rgszNames,
+         UINT cNames, LCID lcid, DISPID *rgDispId)
+ {
+     ITypeInfo *typeinfo;
+@@ -180,8 +188,13 @@
+ 
+     return hr;
+ }
++#endif
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshExec_Invoke(IWshExec *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
++        WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
++#else
++static HRESULT WINAPI WshExec_Invoke(IWshExec *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
+         WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+ {
+     ITypeInfo *typeinfo;
+@@ -199,9 +212,11 @@
+ 
+     return hr;
+ }
++#endif
+ 
+ static HRESULT WINAPI WshExec_get_Status(IWshExec *iface, WshExecStatus *status)
+ {
++#ifndef __LIBWINEVBS__
+     WshExecImpl *This = impl_from_IWshExec(iface);
+     DWORD code;
+ 
+@@ -226,10 +241,16 @@
+     }
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.Status is not implemented");
++    if (status) *status = WshFinished;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshExec_get_StdIn(IWshExec *iface, ITextStream **stream)
+ {
++#ifndef __LIBWINEVBS__
+     WshExecImpl *exec = impl_from_IWshExec(iface);
+ 
+     TRACE("%p, %p.\n", iface, stream);
+@@ -238,10 +259,16 @@
+     ITextStream_AddRef(*stream);
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdIn is not implemented");
++    if (stream) *stream = NULL;
++    return E_NOTIMPL;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshExec_get_StdOut(IWshExec *iface, ITextStream **stream)
+ {
++#ifndef __LIBWINEVBS__
+     WshExecImpl *exec = impl_from_IWshExec(iface);
+ 
+     TRACE("%p, %p.\n", iface, stream);
+@@ -250,10 +277,16 @@
+     ITextStream_AddRef(*stream);
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdOut is not implemented");
++    if (stream) *stream = NULL;
++    return E_NOTIMPL;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshExec_get_StdErr(IWshExec *iface, ITextStream **stream)
+ {
++#ifndef __LIBWINEVBS__
+     WshExecImpl *exec = impl_from_IWshExec(iface);
+ 
+     TRACE("%p, %p.\n", iface, stream);
+@@ -262,10 +295,16 @@
+     ITextStream_AddRef(*stream);
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdErr is not implemented");
++    if (stream) *stream = NULL;
++    return E_NOTIMPL;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshExec_get_ProcessID(IWshExec *iface, int *pid)
+ {
++#ifndef __LIBWINEVBS__
+     WshExecImpl *This = impl_from_IWshExec(iface);
+ 
+     TRACE("(%p)->(%p)\n", This, pid);
+@@ -275,15 +314,26 @@
+ 
+     *pid = This->info.dwProcessId;
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.ProcessID is not implemented");
++    if (pid) *pid = 0;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshExec_get_ExitCode(IWshExec *iface, int *code)
+ {
++#ifndef __LIBWINEVBS__
+     WshExecImpl *This = impl_from_IWshExec(iface);
+ 
+     FIXME("(%p)->(%p): stub\n", This, code);
+ 
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.ExitCode is not implemented");
++    if (code) *code = 0;
++    return S_OK;
++#endif
+ }
+ 
+ static BOOL CALLBACK enum_thread_wnd_proc(HWND hwnd, LPARAM lParam)
+@@ -298,6 +348,7 @@
+ 
+ static HRESULT WINAPI WshExec_Terminate(IWshExec *iface)
+ {
++#ifndef __LIBWINEVBS__
+     WshExecImpl *This = impl_from_IWshExec(iface);
+     BOOL ret, kill = FALSE;
+     INT count = 0;
+@@ -317,6 +368,10 @@
+         TerminateProcess(This->info.hProcess, 0);
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.Terminate is not implemented");
++    return S_OK;
++#endif
+ }
+ 
+ static const IWshExecVtbl WshExecVtbl = {
+@@ -501,7 +556,11 @@
+     return get_typeinfo(IWshEnvironment_tid, ppTInfo);
+ }
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshEnvironment_GetIDsOfNames(IWshEnvironment *iface, REFIID riid, LPOLESTR *rgszNames,
++        UINT cNames, LCID lcid, DISPID *rgDispId);
++#else
++static HRESULT WINAPI WshEnvironment_GetIDsOfNames(IWshEnvironment *iface, REFIID riid, LPOLESTR *rgszNames,
+         UINT cNames, LCID lcid, DISPID *rgDispId)
+ {
+     ITypeInfo *typeinfo;
+@@ -518,8 +577,13 @@
+ 
+     return hr;
+ }
++#endif
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshEnvironment_Invoke(IWshEnvironment *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
++        WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
++#else
++static HRESULT WINAPI WshEnvironment_Invoke(IWshEnvironment *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
+         WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+ {
+     ITypeInfo *typeinfo;
+@@ -537,6 +601,7 @@
+ 
+     return hr;
+ }
++#endif
+ 
+ HRESULT get_env_var(const WCHAR *name, BSTR *value)
+ {
+@@ -557,6 +622,7 @@
+ 
+ static HRESULT WINAPI WshEnvironment_get_Item(IWshEnvironment *iface, BSTR name, BSTR *value)
+ {
++#ifndef __LIBWINEVBS__
+     WshEnvironment *This = impl_from_IWshEnvironment(iface);
+ 
+     TRACE("(%p)->(%s %p)\n", This, debugstr_w(name), value);
+@@ -565,41 +631,75 @@
+         return E_POINTER;
+ 
+     return get_env_var(name, value);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Item get(%s) is not implemented", debugstr_w(name));
++    if (!value) return E_POINTER;
++    *value = SysAllocString(L"");
++    return *value ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshEnvironment_put_Item(IWshEnvironment *iface, BSTR name, BSTR value)
+ {
++#ifndef __LIBWINEVBS__
+     WshEnvironment *This = impl_from_IWshEnvironment(iface);
+     FIXME("(%p)->(%s %s): stub\n", This, debugstr_w(name), debugstr_w(value));
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Item put(%s, %s) is not implemented", debugstr_w(name), debugstr_w(value));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshEnvironment_Count(IWshEnvironment *iface, LONG *count)
+ {
++#ifndef __LIBWINEVBS__
+     WshEnvironment *This = impl_from_IWshEnvironment(iface);
+     FIXME("(%p)->(%p): stub\n", This, count);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Count is not implemented");
++    if (count) *count = 0;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshEnvironment_get_length(IWshEnvironment *iface, LONG *len)
+ {
++#ifndef __LIBWINEVBS__
+     WshEnvironment *This = impl_from_IWshEnvironment(iface);
+     FIXME("(%p)->(%p): stub\n", This, len);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.length is not implemented");
++    if (len) *len = 0;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshEnvironment__NewEnum(IWshEnvironment *iface, IUnknown **penum)
+ {
++#ifndef __LIBWINEVBS__
+     WshEnvironment *This = impl_from_IWshEnvironment(iface);
+     FIXME("(%p)->(%p): stub\n", This, penum);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment._NewEnum is not implemented");
++    if (penum) *penum = NULL;
++    return E_NOTIMPL;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshEnvironment_Remove(IWshEnvironment *iface, BSTR name)
+ {
++#ifndef __LIBWINEVBS__
+     WshEnvironment *This = impl_from_IWshEnvironment(iface);
+     FIXME("(%p)->(%s): stub\n", This, debugstr_w(name));
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Remove(%s) is not implemented", debugstr_w(name));
++    return S_OK;
++#endif
+ }
+ 
+ static const IWshEnvironmentVtbl WshEnvironmentVtbl = {
+@@ -697,7 +797,11 @@
+     return get_typeinfo(IWshCollection_tid, ppTInfo);
+ }
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshCollection_GetIDsOfNames(IWshCollection *iface, REFIID riid, LPOLESTR *rgszNames,
++        UINT cNames, LCID lcid, DISPID *rgDispId);
++#else
++static HRESULT WINAPI WshCollection_GetIDsOfNames(IWshCollection *iface, REFIID riid, LPOLESTR *rgszNames,
+         UINT cNames, LCID lcid, DISPID *rgDispId)
+ {
+     ITypeInfo *typeinfo;
+@@ -714,8 +818,13 @@
+ 
+     return hr;
+ }
++#endif
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshCollection_Invoke(IWshCollection *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
++        WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
++#else
++static HRESULT WINAPI WshCollection_Invoke(IWshCollection *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
+         WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+ {
+     ITypeInfo *typeinfo;
+@@ -733,9 +842,11 @@
+ 
+     return hr;
+ }
++#endif
+ 
+ static HRESULT WINAPI WshCollection_Item(IWshCollection *iface, VARIANT *index, VARIANT *value)
+ {
++#ifndef __LIBWINEVBS__
+     WshCollection *This = impl_from_IWshCollection(iface);
+     PIDLIST_ABSOLUTE pidl;
+     WCHAR pathW[MAX_PATH];
+@@ -779,27 +890,52 @@
+     CoTaskMemFree(pidl);
+ 
+     return hr;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.Item is not implemented");
++    if (!value) return E_POINTER;
++    V_VT(value) = VT_BSTR;
++    V_BSTR(value) = SysAllocString(L"");
++    return V_BSTR(value) ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshCollection_Count(IWshCollection *iface, LONG *count)
+ {
++#ifndef __LIBWINEVBS__
+     WshCollection *This = impl_from_IWshCollection(iface);
+     FIXME("(%p)->(%p): stub\n", This, count);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.Count is not implemented");
++    if (count) *count = 0;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshCollection_get_length(IWshCollection *iface, LONG *count)
+ {
++#ifndef __LIBWINEVBS__
+     WshCollection *This = impl_from_IWshCollection(iface);
+     FIXME("(%p)->(%p): stub\n", This, count);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.length is not implemented");
++    if (count) *count = 0;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshCollection__NewEnum(IWshCollection *iface, IUnknown **Enum)
+ {
++#ifndef __LIBWINEVBS__
+     WshCollection *This = impl_from_IWshCollection(iface);
+     FIXME("(%p)->(%p): stub\n", This, Enum);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders._NewEnum is not implemented");
++    if (Enum) *Enum = NULL;
++    return E_NOTIMPL;
++#endif
+ }
+ 
+ static const IWshCollectionVtbl WshCollectionVtbl = {
+@@ -898,7 +1034,11 @@
+     return get_typeinfo(IWshShortcut_tid, ppTInfo);
+ }
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshShortcut_GetIDsOfNames(IWshShortcut *iface, REFIID riid, LPOLESTR *rgszNames,
++        UINT cNames, LCID lcid, DISPID *rgDispId);
++#else
++static HRESULT WINAPI WshShortcut_GetIDsOfNames(IWshShortcut *iface, REFIID riid, LPOLESTR *rgszNames,
+         UINT cNames, LCID lcid, DISPID *rgDispId)
+ {
+     ITypeInfo *typeinfo;
+@@ -915,8 +1055,13 @@
+ 
+     return hr;
+ }
++#endif
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshShortcut_Invoke(IWshShortcut *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
++        WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
++#else
++static HRESULT WINAPI WshShortcut_Invoke(IWshShortcut *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
+         WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+ {
+     ITypeInfo *typeinfo;
+@@ -934,16 +1079,25 @@
+ 
+     return hr;
+ }
++#endif
+ 
+ static HRESULT WINAPI WshShortcut_get_FullName(IWshShortcut *iface, BSTR *name)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     FIXME("(%p)->(%p): stub\n", This, name);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.FullName get is not implemented");
++    if (!name) return E_POINTER;
++    *name = SysAllocString(L"");
++    return *name ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_get_Arguments(IWshShortcut *iface, BSTR *Arguments)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     WCHAR buffW[INFOTIPSIZE];
+     HRESULT hr;
+@@ -961,47 +1115,83 @@
+ 
+     *Arguments = SysAllocString(buffW);
+     return *Arguments ? S_OK : E_OUTOFMEMORY;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Arguments get is not implemented");
++    if (!Arguments) return E_POINTER;
++    *Arguments = SysAllocString(L"");
++    return *Arguments ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_Arguments(IWshShortcut *iface, BSTR Arguments)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+ 
+     TRACE("(%p)->(%s)\n", This, debugstr_w(Arguments));
+ 
+     return IShellLinkW_SetArguments(This->link, Arguments);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Arguments put(%s) is not implemented", debugstr_w(Arguments));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_get_Description(IWshShortcut *iface, BSTR *Description)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     FIXME("(%p)->(%p): stub\n", This, Description);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Description get is not implemented");
++    if (!Description) return E_POINTER;
++    *Description = SysAllocString(L"");
++    return *Description ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_Description(IWshShortcut *iface, BSTR Description)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     TRACE("(%p)->(%s)\n", This, debugstr_w(Description));
+     return IShellLinkW_SetDescription(This->link, Description);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Description put(%s) is not implemented", debugstr_w(Description));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_get_Hotkey(IWshShortcut *iface, BSTR *Hotkey)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     FIXME("(%p)->(%p): stub\n", This, Hotkey);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Hotkey get is not implemented");
++    if (!Hotkey) return E_POINTER;
++    *Hotkey = SysAllocString(L"");
++    return *Hotkey ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_Hotkey(IWshShortcut *iface, BSTR Hotkey)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     FIXME("(%p)->(%s): stub\n", This, debugstr_w(Hotkey));
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Hotkey put(%s) is not implemented", debugstr_w(Hotkey));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_get_IconLocation(IWshShortcut *iface, BSTR *IconPath)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     WCHAR buffW[MAX_PATH], pathW[MAX_PATH];
+     INT icon = 0;
+@@ -1020,10 +1210,17 @@
+     if (!*IconPath) return E_OUTOFMEMORY;
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.IconLocation get is not implemented");
++    if (!IconPath) return E_POINTER;
++    *IconPath = SysAllocString(L"");
++    return *IconPath ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_IconLocation(IWshShortcut *iface, BSTR IconPath)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     HRESULT hr;
+     WCHAR *ptr;
+@@ -1052,17 +1249,27 @@
+     SysFreeString(path);
+ 
+     return hr;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.IconLocation put(%s) is not implemented", debugstr_w(IconPath));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_RelativePath(IWshShortcut *iface, BSTR rhs)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     FIXME("(%p)->(%s): stub\n", This, debugstr_w(rhs));
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.RelativePath put(%s) is not implemented", debugstr_w(rhs));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_get_TargetPath(IWshShortcut *iface, BSTR *Path)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     WCHAR fn[MAX_PATH];
+     HRESULT hr;
+@@ -1077,31 +1284,54 @@
+ 
+     *Path = SysAllocString(fn);
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.TargetPath get is not implemented");
++    if (!Path) return E_POINTER;
++    *Path = SysAllocString(L"");
++    return *Path ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_TargetPath(IWshShortcut *iface, BSTR Path)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     TRACE("(%p)->(%s)\n", This, debugstr_w(Path));
+     return IShellLinkW_SetPath(This->link, Path);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.TargetPath put(%s) is not implemented", debugstr_w(Path));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_get_WindowStyle(IWshShortcut *iface, int *ShowCmd)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     TRACE("(%p)->(%p)\n", This, ShowCmd);
+     return IShellLinkW_GetShowCmd(This->link, ShowCmd);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WindowStyle get is not implemented");
++    if (ShowCmd) *ShowCmd = 0;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_WindowStyle(IWshShortcut *iface, int ShowCmd)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     TRACE("(%p)->(%d)\n", This, ShowCmd);
+     return IShellLinkW_SetShowCmd(This->link, ShowCmd);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WindowStyle put(%d) is not implemented", ShowCmd);
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_get_WorkingDirectory(IWshShortcut *iface, BSTR *WorkingDirectory)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     WCHAR buffW[MAX_PATH];
+     HRESULT hr;
+@@ -1117,24 +1347,41 @@
+ 
+     *WorkingDirectory = SysAllocString(buffW);
+     return *WorkingDirectory ? S_OK : E_OUTOFMEMORY;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WorkingDirectory get is not implemented");
++    if (!WorkingDirectory) return E_POINTER;
++    *WorkingDirectory = SysAllocString(L"");
++    return *WorkingDirectory ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_put_WorkingDirectory(IWshShortcut *iface, BSTR WorkingDirectory)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     TRACE("(%p)->(%s)\n", This, debugstr_w(WorkingDirectory));
+     return IShellLinkW_SetWorkingDirectory(This->link, WorkingDirectory);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WorkingDirectory put(%s) is not implemented", debugstr_w(WorkingDirectory));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_Load(IWshShortcut *iface, BSTR PathLink)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     FIXME("(%p)->(%s): stub\n", This, debugstr_w(PathLink));
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Load(%s) is not implemented", debugstr_w(PathLink));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShortcut_Save(IWshShortcut *iface)
+ {
++#ifndef __LIBWINEVBS__
+     WshShortcut *This = impl_from_IWshShortcut(iface);
+     IPersistFile *file;
+     HRESULT hr;
+@@ -1146,6 +1393,10 @@
+     IPersistFile_Release(file);
+ 
+     return hr;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Save is not implemented");
++    return S_OK;
++#endif
+ }
+ 
+ static const IWshShortcutVtbl WshShortcutVtbl = {
+@@ -1275,7 +1526,11 @@
+     return get_typeinfo(IWshShell3_tid, ppTInfo);
+ }
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshShell3_GetIDsOfNames(IWshShell3 *iface, REFIID riid, LPOLESTR *rgszNames,
++        UINT cNames, LCID lcid, DISPID *rgDispId);
++#else
++static HRESULT WINAPI WshShell3_GetIDsOfNames(IWshShell3 *iface, REFIID riid, LPOLESTR *rgszNames,
+         UINT cNames, LCID lcid, DISPID *rgDispId)
+ {
+     ITypeInfo *typeinfo;
+@@ -1292,8 +1547,13 @@
+ 
+     return hr;
+ }
++#endif
+ 
++#ifdef __LIBWINEVBS__
+ static HRESULT WINAPI WshShell3_Invoke(IWshShell3 *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
++        WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr);
++#else
++static HRESULT WINAPI WshShell3_Invoke(IWshShell3 *iface, DISPID dispIdMember, REFIID riid, LCID lcid,
+         WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
+ {
+     ITypeInfo *typeinfo;
+@@ -1312,17 +1572,28 @@
+ 
+     return hr;
+ }
++#endif
+ 
+ static HRESULT WINAPI WshShell3_get_SpecialFolders(IWshShell3 *iface, IWshCollection **folders)
+ {
++#ifndef __LIBWINEVBS__
+     TRACE("(%p)\n", folders);
+     return WshCollection_Create(folders);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders is not implemented");
++    return WshCollection_Create(folders);
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_get_Environment(IWshShell3 *iface, VARIANT *type, IWshEnvironment **env)
+ {
++#ifndef __LIBWINEVBS__
+     FIXME("(%s %p): semi-stub\n", debugstr_variant(type), env);
+     return WshEnvironment_Create(env);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment is not implemented");
++    return WshEnvironment_Create(env);
++#endif
+ }
+ 
+ static inline BOOL is_optional_argument(const VARIANT *arg)
+@@ -1354,6 +1625,7 @@
+ 
+ static HRESULT WINAPI WshShell3_Run(IWshShell3 *iface, BSTR cmd, VARIANT *style, VARIANT *wait, int *exit_code)
+ {
++#ifndef __LIBWINEVBS__
+     SHELLEXECUTEINFOW info;
+     int waitforprocess, show;
+     WCHAR *file, *params;
+@@ -1420,6 +1692,11 @@
+ 
+     }
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Run(%s) is not implemented", debugstr_w(cmd));
++    if (exit_code) *exit_code = 0;
++    return S_OK;
++#endif
+ }
+ 
+ struct popup_thread_param
+@@ -1442,6 +1719,7 @@
+ static HRESULT WINAPI WshShell3_Popup(IWshShell3 *iface, BSTR text, VARIANT *seconds_to_wait, VARIANT *title,
+         VARIANT *type, int *button)
+ {
++#ifndef __LIBWINEVBS__
+     struct popup_thread_param param;
+     DWORD tid, status;
+     VARIANT timeout;
+@@ -1496,16 +1774,27 @@
+     CloseHandle(hthread);
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Popup(%s) is not implemented", debugstr_w(text));
++    if (button) *button = -1;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_CreateShortcut(IWshShell3 *iface, BSTR PathLink, IDispatch** Shortcut)
+ {
++#ifndef __LIBWINEVBS__
+     TRACE("(%s %p)\n", debugstr_w(PathLink), Shortcut);
+     return WshShortcut_Create(PathLink, Shortcut);
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CreateShortcut(%s) is not implemented", debugstr_w(PathLink));
++    return WshShortcut_Create(PathLink, Shortcut);
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_ExpandEnvironmentStrings(IWshShell3 *iface, BSTR Src, BSTR* Dst)
+ {
++#ifndef __LIBWINEVBS__
+     DWORD ret;
+ 
+     TRACE("(%s %p)\n", debugstr_w(Src), Dst);
+@@ -1524,6 +1813,12 @@
+         *Dst = NULL;
+         return HRESULT_FROM_WIN32(GetLastError());
+     }
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: ExpandEnvironmentStrings(%s) is not implemented", debugstr_w(Src));
++    if (!Dst) return E_POINTER;
++    *Dst = SysAllocString(Src ? Src : L"");
++    return *Dst ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HKEY get_root_key(const WCHAR *path)
+@@ -1588,6 +1883,7 @@
+ 
+ static HRESULT WINAPI WshShell3_RegRead(IWshShell3 *iface, BSTR name, VARIANT *value)
+ {
++#ifndef __LIBWINEVBS__
+     DWORD type, datalen, ret;
+     WCHAR *subkey, *val;
+     HRESULT hr;
+@@ -1721,10 +2017,18 @@
+     if (val)
+         free(subkey);
+     return hr;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegRead(%s) is not implemented", debugstr_w(name));
++
++    if (value)
++        VariantInit(value);
++    return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_RegWrite(IWshShell3 *iface, BSTR name, VARIANT *value, VARIANT *type)
+ {
++#ifndef __LIBWINEVBS__
+     DWORD regtype, data_len;
+     WCHAR *subkey, *val;
+     const BYTE *data;
+@@ -1804,34 +2108,61 @@
+     if (val)
+         free(subkey);
+     return hr;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegWrite(%s) is not implemented", debugstr_w(name));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_RegDelete(IWshShell3 *iface, BSTR Name)
+ {
++#ifndef __LIBWINEVBS__
+     FIXME("(%s): stub\n", debugstr_w(Name));
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegDelete(%s) is not implemented", debugstr_w(Name));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_LogEvent(IWshShell3 *iface, VARIANT *Type, BSTR Message, BSTR Target, VARIANT_BOOL *out_Success)
+ {
++#ifndef __LIBWINEVBS__
+     FIXME("(%s %s %s %p): stub\n", debugstr_variant(Type), debugstr_w(Message), debugstr_w(Target), out_Success);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: LogEvent(%s, %s) is not implemented", debugstr_w(Message), debugstr_w(Target));
++    if (out_Success) *out_Success = VARIANT_TRUE;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_AppActivate(IWshShell3 *iface, VARIANT *App, VARIANT *Wait, VARIANT_BOOL *out_Success)
+ {
++#ifndef __LIBWINEVBS__
+     FIXME("(%s %s %p): stub\n", debugstr_variant(App), debugstr_variant(Wait), out_Success);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: AppActivate is not implemented");
++    if (out_Success) *out_Success = VARIANT_FALSE;
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_SendKeys(IWshShell3 *iface, BSTR Keys, VARIANT *Wait)
+ {
++#ifndef __LIBWINEVBS__
+     FIXME("(%s %p): stub\n", debugstr_w(Keys), Wait);
+     return E_NOTIMPL;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SendKeys(%s) is not implemented", debugstr_w(Keys));
++    return S_OK;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_Exec(IWshShell3 *iface, BSTR command, IWshExec **ret)
+ {
++#ifndef __LIBWINEVBS__
+     BSTR expandedcmd;
+     HRESULT hr;
+ 
+@@ -1850,10 +2181,16 @@
+     hr = WshExec_create(expandedcmd, ret);
+     SysFreeString(expandedcmd);
+     return hr;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec(%s) is not implemented", debugstr_w(command));
++    if (ret) *ret = NULL;
++    return E_NOTIMPL;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_get_CurrentDirectory(IWshShell3 *iface, BSTR *dir)
+ {
++#ifndef __LIBWINEVBS__
+     DWORD ret;
+ 
+     TRACE("(%p)\n", dir);
+@@ -1874,10 +2211,17 @@
+     }
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CurrentDirectory get is not implemented");
++    if (!dir) return E_POINTER;
++    *dir = SysAllocString(L"");
++    return *dir ? S_OK : E_OUTOFMEMORY;
++#endif
+ }
+ 
+ static HRESULT WINAPI WshShell3_put_CurrentDirectory(IWshShell3 *iface, BSTR dir)
+ {
++#ifndef __LIBWINEVBS__
+     TRACE("(%s)\n", debugstr_w(dir));
+ 
+     if (!dir)
+@@ -1887,6 +2231,10 @@
+         return HRESULT_FROM_WIN32(GetLastError());
+ 
+     return S_OK;
++#else
++    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CurrentDirectory put(%s) is not implemented", debugstr_w(dir));
++    return S_OK;
++#endif
+ }
+ 
+ static const IWshShell3Vtbl WshShell3Vtbl = {
+@@ -1922,3 +2270,7 @@
+     init_classinfo(&IID_IWshShell3, (IUnknown *)&WshShell3.IWshShell3_iface, &WshShell3.classinfo);
+     return IWshShell3_QueryInterface(&WshShell3.IWshShell3_iface, riid, ppv);
+ }
++
++#ifdef __LIBWINEVBS__
++#include "shell_proxy.c"
++#endif
+--- wine/dlls/vbscript/vbdisp.c
++++ libwinevbs/dlls/vbscript/vbdisp.c
+@@ -553,6 +553,213 @@
+     return hr;
+ }
+ 
 +#ifdef __LIBWINEVBS__
 +typedef struct {
 +    ITypeInfo ITypeInfo_iface;
@@ -971,7 +1996,6 @@
 +{
 +    VBDispTypeInfo *This = VBDispTypeInfo_from_ITypeInfo(iface);
 +    LONG ref = InterlockedDecrement(&This->ref);
-+    UINT i;
 +
 +    TRACE("(%p) ref=%ld\n", This, ref);
 +
@@ -1036,10 +2060,16 @@
 +{
 +    VBDispTypeInfo *This = VBDispTypeInfo_from_ITypeInfo(iface);
 +
++    if (pBstrDocString) *pBstrDocString = NULL;
++    if (pdwHelpContext) *pdwHelpContext = 0;
++    if (pBstrHelpFile)  *pBstrHelpFile  = NULL;
++
 +    if (memid == MEMBERID_NIL) {
-+        *pBstrName = SysAllocString(This->disp->desc->name);
++        if (pBstrName)
++            *pBstrName = This->disp->desc ? SysAllocString(This->disp->desc->name) : NULL;
 +        return S_OK;
 +    }
++    if (pBstrName) *pBstrName = NULL;
 +    return E_NOTIMPL;
 +}
 +
@@ -1110,34 +2140,35 @@
 +    VBDispTypeInfo_ReleaseFuncDesc,
 +    VBDispTypeInfo_ReleaseVarDesc
 +};
++
++static HRESULT alloc_vbdisp_typeinfo(vbdisp_t *disp, ITypeInfo **out)
++{
++    VBDispTypeInfo *type_info;
++
++    if (!(type_info = malloc(sizeof(*type_info))))
++        return E_OUTOFMEMORY;
++
++    type_info->ITypeInfo_iface.lpVtbl = &VBDispTypeInfoVtbl;
++    type_info->ref = 1;
++    type_info->disp = disp;
++    IDispatchEx_AddRef(&disp->IDispatchEx_iface);
++
++    *out = &type_info->ITypeInfo_iface;
++    return S_OK;
++}
 +#endif
 +
  static HRESULT WINAPI DispatchEx_GetTypeInfo(IDispatchEx *iface, UINT iTInfo, LCID lcid,
                                                ITypeInfo **ppTInfo)
  {
-     vbdisp_t *This = impl_from_IDispatchEx(iface);
+@@ -565,7 +772,11 @@
+     if(iTInfo) return DISP_E_BADINDEX;
+     if(!This->desc) return E_UNEXPECTED;
+ 
 +#ifndef __LIBWINEVBS__
-     FIXME("(%p)->(%u %lu %p)\n", This, iTInfo, lcid, ppTInfo);
-     return E_NOTIMPL;
+     return build_class_typeinfo((class_desc_t*)This->desc, ppTInfo);
 +#else
-+    VBDispTypeInfo *type_info;
-+
-+    TRACE("(%p)->(%u %lu %p)\n", This, iTInfo, lcid);
-+
-+    if(iTInfo)
-+        return DISP_E_BADINDEX;
-+
-+    if(!(type_info = malloc(sizeof(*type_info))))
-+        return E_OUTOFMEMORY;
-+
-+    type_info->ITypeInfo_iface.lpVtbl = &VBDispTypeInfoVtbl;
-+    type_info->ref = 1;
-+    type_info->disp = This;
-+
-+    IDispatchEx_AddRef(&This->IDispatchEx_iface);
-+
-+    *ppTInfo = &type_info->ITypeInfo_iface;
-+    return S_OK;
++    return alloc_vbdisp_typeinfo(This, ppTInfo);
 +#endif
  }
  
@@ -1241,17 +2272,7 @@
  
  typedef HRESULT (*instr_func_t)(exec_ctx_t*);
  
-@@ -389,6 +396,9 @@
- static inline HRESULT stack_push_null(exec_ctx_t *ctx)
- {
-     VARIANT v;
-+#ifdef __LIBWINEVBS__
-+    VariantInit(&v);
-+#endif
-     V_VT(&v) = VT_NULL;
-     return stack_push(ctx, &v);
- }
-@@ -1417,11 +1427,13 @@
+@@ -1512,11 +1519,13 @@
          v = V_VARIANTREF(v);
      }
  
@@ -1265,7 +2286,7 @@
  
      hres = array_bounds_from_stack(ctx, dim_cnt, &bounds);
      if(FAILED(hres))
-@@ -1834,6 +1846,20 @@
+@@ -1929,6 +1938,20 @@
      }else {
          named_item_t *item;
          disp = NULL;
@@ -1286,146 +2307,16 @@
          LIST_FOR_EACH_ENTRY(item, &ctx->script->named_items, named_item_t, entry) {
              if(!(item->flags & SCRIPTITEM_GLOBALMEMBERS)) continue;
              disp = item->disp;
-@@ -1975,6 +2001,10 @@
- 
-     TRACE("\n");
- 
-+#ifdef __LIBWINEVBS__
-+    VariantInit(&v);
-+#endif
-+
-     hres = stack_pop_val(ctx, &val);
-     if(FAILED(hres))
-         return hres;
-@@ -1995,6 +2025,10 @@
- 
-     TRACE("\n");
- 
-+#ifdef __LIBWINEVBS__
-+    VariantInit(&v);
-+#endif
-+
-     hres = stack_pop_val(ctx, &r);
-     if(FAILED(hres))
-         return hres;
-@@ -2019,6 +2053,10 @@
- 
-     TRACE("\n");
- 
-+#ifdef __LIBWINEVBS__
-+    VariantInit(&v);
-+#endif
-+
-     hres = stack_pop_val(ctx, &r);
-     if(FAILED(hres))
-         return hres;
-@@ -2043,6 +2081,10 @@
- 
-     TRACE("\n");
- 
-+#ifdef __LIBWINEVBS__
-+    VariantInit(&v);
-+#endif
-+
-     hres = stack_pop_val(ctx, &r);
-     if(FAILED(hres))
-         return hres;
-@@ -2067,6 +2109,10 @@
- 
-     TRACE("\n");
- 
-+#ifdef __LIBWINEVBS__
-+    VariantInit(&v);
-+#endif
-+
-     hres = stack_pop_val(ctx, &r);
-     if(FAILED(hres))
-         return hres;
-@@ -2091,6 +2137,10 @@
- 
-     TRACE("\n");
- 
-+#ifdef __LIBWINEVBS__
-+    VariantInit(&v);
-+#endif
-+
-     hres = stack_pop_val(ctx, &r);
-     if(FAILED(hres))
-         return hres;
-@@ -2109,14 +2159,23 @@
- 
- static inline BOOL is_numeric_vt(VARTYPE vt)
- {
-+#ifndef __LIBWINEVBS__
-     return vt == VT_I2 || vt == VT_I4 || vt == VT_R4 || vt == VT_R8
-         || vt == VT_CY || vt == VT_DATE || vt == VT_UI1;
-+#else
-+    return vt == VT_I2 || vt == VT_I4 || vt == VT_R4 || vt == VT_R8
-+        || vt == VT_CY || vt == VT_DATE || vt == VT_UI1
-+        || vt == VT_BOOL || vt == VT_I1 || vt == VT_I8
-+        || vt == VT_UI2 || vt == VT_UI4 || vt == VT_UI8
-+        || vt == VT_DECIMAL || vt == VT_INT || vt == VT_UINT;
-+#endif
- }
- 
- static HRESULT var_cmp(exec_ctx_t *ctx, VARIANT *l, VARIANT *r)
- {
-     TRACE("%s %s\n", debugstr_variant(l), debugstr_variant(r));
- 
-+#ifndef __LIBWINEVBS__
-     /* VarCmp would use string comparison; VBScript converts the string to a number. */
-     if((V_VT(l) == VT_BSTR && is_numeric_vt(V_VT(r))) ||
-        (V_VT(r) == VT_BSTR && is_numeric_vt(V_VT(l)))) {
-@@ -2135,6 +2194,38 @@
-             return VARCMP_GT;
-         return VARCMP_EQ;
-     }
-+#else
-+    VARTYPE lvt = V_VT(l) & VT_TYPEMASK;
-+    VARTYPE rvt = V_VT(r) & VT_TYPEMASK;
-+
-+    if((lvt == VT_BSTR && is_numeric_vt(rvt)) ||
-+       (rvt == VT_BSTR && is_numeric_vt(lvt))) {
-+        VARIANT left, right;
-+        HRESULT hres;
-+
-+        V_VT(&left) = VT_EMPTY;
-+        hres = VariantCopy(&left, l);
-+        if(FAILED(hres))
-+            return hres;
-+
-+        V_VT(&right) = VT_EMPTY;
-+        hres = VariantCopy(&right, r);
-+        if(FAILED(hres)) {
-+            VariantClear(&left);
-+            return hres;
-+        }
-+
-+        if(lvt == VT_BSTR)
-+            V_VT(&right) |= VT_RESERVED;
-+        else
-+            V_VT(&left) |= VT_RESERVED;
-+
-+        hres = VarCmp(&left, &right, ctx->script->lcid, 0);
-+        VariantClear(&left);
-+        VariantClear(&right);
-+        return hres;
-+    }
-+#endif
- 
-     return VarCmp(l, r, ctx->script->lcid, 0);
- }
 # libwinevbs-only: dlls/vbscript/regexp_proxy.c
 --- wine/dlls/vbscript/vbscript.h
 +++ libwinevbs/dlls/vbscript/vbscript.h
-@@ -34,6 +34,12 @@
+@@ -34,6 +34,11 @@
  #include "wine/list.h"
  #include "wine/rbtree.h"
  
 +#ifdef __LIBWINEVBS__
-+HRESULT external_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown* obj);
-+void external_log_info(const char* format, ...);
-+void external_log_debug(const char* format, ...);
++#include "libwinevbs.h"
++HRESULT external_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 +#endif
 +
  typedef struct {
@@ -1774,7 +2665,7 @@
  
  static HRESULT WINAPI SubMatches_get_Item(ISubMatches *iface,
          LONG index, VARIANT *pSubMatch)
-@@ -303,9 +314,11 @@
+@@ -303,9 +314,13 @@
      DWORD i;
      HRESULT hres;
  
@@ -1782,11 +2673,13 @@
      hres = init_regexp_typeinfo(SubMatches_tid);
      if(FAILED(hres))
          return hres;
++#else
++    hres = S_OK;
 +#endif
  
      ret = calloc(1, sizeof(*ret));
      if(!ret)
-@@ -415,7 +428,11 @@
+@@ -415,7 +430,11 @@
      return E_NOTIMPL;
  }
  
@@ -1798,7 +2691,7 @@
          REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
  {
      Match2 *This = impl_from_IMatch2(iface);
-@@ -425,8 +442,14 @@
+@@ -425,8 +444,14 @@
  
      return ITypeInfo_GetIDsOfNames(typeinfos[Match2_tid], rgszNames, cNames, rgDispId);
  }
@@ -1813,7 +2706,7 @@
          REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
                  VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
-@@ -438,6 +461,7 @@
+@@ -438,6 +463,7 @@
      return ITypeInfo_Invoke(typeinfos[Match2_tid], iface, dispIdMember, wFlags,
              pDispParams, pVarResult, pExcepInfo, puArgErr);
  }
@@ -1821,7 +2714,7 @@
  
  static HRESULT WINAPI Match2_get_Value(IMatch2 *iface, BSTR *pValue)
  {
-@@ -549,14 +573,24 @@
+@@ -549,14 +575,24 @@
      return IMatch2_GetTypeInfo(&This->IMatch2_iface, iTInfo, lcid, ppTInfo);
  }
  
@@ -1846,7 +2739,7 @@
          REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
          VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
-@@ -564,6 +598,7 @@
+@@ -564,6 +600,7 @@
      return IMatch2_Invoke(&This->IMatch2_iface, dispIdMember, riid, lcid,
              wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
  }
@@ -1854,7 +2747,7 @@
  
  static HRESULT WINAPI Match_get_Value(IMatch *iface, BSTR *pValue)
  {
-@@ -601,9 +636,11 @@
+@@ -601,9 +638,11 @@
      Match2 *ret;
      HRESULT hres;
  
@@ -1866,7 +2759,7 @@
  
      ret = calloc(1, sizeof(*ret));
      if(!ret)
-@@ -853,7 +890,11 @@
+@@ -853,7 +892,11 @@
      return E_NOTIMPL;
  }
  
@@ -1878,7 +2771,7 @@
          REFIID riid, LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
  {
      MatchCollection2 *This = impl_from_IMatchCollection2(iface);
-@@ -863,8 +904,14 @@
+@@ -863,8 +906,14 @@
  
      return ITypeInfo_GetIDsOfNames(typeinfos[MatchCollection2_tid], rgszNames, cNames, rgDispId);
  }
@@ -1893,7 +2786,7 @@
          REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
          VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
-@@ -876,6 +923,7 @@
+@@ -876,6 +925,7 @@
      return ITypeInfo_Invoke(typeinfos[MatchCollection2_tid], iface, dispIdMember, wFlags,
              pDispParams, pVarResult, pExcepInfo, puArgErr);
  }
@@ -1901,7 +2794,7 @@
  
  static HRESULT WINAPI MatchCollection2_get_Item(IMatchCollection2 *iface,
          LONG index, IDispatch **ppMatch)
-@@ -969,15 +1017,25 @@
+@@ -969,15 +1019,25 @@
      return IMatchCollection2_GetTypeInfo(&This->IMatchCollection2_iface, iTInfo, lcid, ppTInfo);
  }
  
@@ -1927,7 +2820,7 @@
          REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult,
          EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
-@@ -985,6 +1043,7 @@
+@@ -985,6 +1045,7 @@
      return IMatchCollection2_Invoke(&This->IMatchCollection2_iface, dispIdMember,
              riid, lcid, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
  }
@@ -1935,7 +2828,7 @@
  
  static HRESULT WINAPI MatchCollection_get_Item(IMatchCollection *iface, LONG index, IDispatch **ppMatch)
  {
-@@ -1047,9 +1106,11 @@
+@@ -1047,9 +1108,11 @@
      MatchCollection2 *ret;
      HRESULT hres;
  
@@ -1947,7 +2840,7 @@
  
      ret = calloc(1, sizeof(*ret));
      if(!ret)
-@@ -1148,7 +1209,11 @@
+@@ -1148,7 +1211,11 @@
      return S_OK;
  }
  
@@ -1959,7 +2852,7 @@
          LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
  {
      RegExp2 *This = impl_from_IRegExp2(iface);
-@@ -1158,8 +1223,14 @@
+@@ -1158,8 +1225,14 @@
  
      return ITypeInfo_GetIDsOfNames(typeinfos[RegExp2_tid], rgszNames, cNames, rgDispId);
  }
@@ -1974,7 +2867,7 @@
          REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
          VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
-@@ -1171,6 +1242,7 @@
+@@ -1171,6 +1244,7 @@
      return ITypeInfo_Invoke(typeinfos[RegExp2_tid], iface, dispIdMember, wFlags,
              pDispParams, pVarResult, pExcepInfo, puArgErr);
  }
@@ -1982,7 +2875,7 @@
  
  static HRESULT WINAPI RegExp2_get_Pattern(IRegExp2 *iface, BSTR *pPattern)
  {
-@@ -1713,14 +1785,24 @@
+@@ -1713,14 +1787,24 @@
      return IRegExp2_GetTypeInfo(&This->IRegExp2_iface, iTInfo, lcid, ppTInfo);
  }
  
@@ -2007,7 +2900,7 @@
          REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS *pDispParams,
                  VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
-@@ -1728,6 +1810,7 @@
+@@ -1728,6 +1812,7 @@
      return IRegExp2_Invoke(&This->IRegExp2_iface, dispIdMember, riid, lcid,
              wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
  }
@@ -2015,7 +2908,7 @@
  
  static HRESULT WINAPI RegExp_get_Pattern(IRegExp *iface, BSTR *pPattern)
  {
-@@ -1813,9 +1896,11 @@
+@@ -1813,9 +1898,11 @@
      RegExp2 *regexp;
      HRESULT hres;
  
@@ -2027,7 +2920,7 @@
  
      regexp = calloc(1, sizeof(*regexp));
      if(!regexp)
-@@ -1857,3 +1942,7 @@
+@@ -1857,3 +1944,7 @@
      if(typelib)
          ITypeLib_Release(typelib);
  }
@@ -2037,19 +2930,21 @@
 +#endif
 --- wine/dlls/vbscript/global.c
 +++ libwinevbs/dlls/vbscript/global.c
-@@ -28,6 +28,11 @@
+@@ -28,6 +28,13 @@
  
  #include "wine/debug.h"
  
 +#ifdef __LIBWINEVBS__
 +#include <locale.h>
 +#include "scrrun_private.h"
++
++extern HRESULT WINAPI WshShellFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 +#endif
 +
  WINE_DEFAULT_DEBUG_CHANNEL(vbscript);
  
  #define VB_E_CANNOT_CREATE_OBJ 0x800a01ad
-@@ -536,6 +541,7 @@
+@@ -536,6 +543,7 @@
      if(FAILED(hres))
          return NULL;
  
@@ -2057,7 +2952,7 @@
      hres = IClassFactory_QueryInterface(cf, &IID_IClassFactoryEx, (void**)&cfex);
      if(SUCCEEDED(hres)) {
          FIXME("Use IClassFactoryEx\n");
-@@ -543,6 +549,17 @@
+@@ -543,6 +551,22 @@
      }
  
      hres = IClassFactory_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
@@ -2068,14 +2963,19 @@
 +    else if (!vbs_wcsicmp(progid, L"Scripting.Dictionary")) {
 +        hres = Dictionary_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
 +    }
++    else if (!vbs_wcsicmp(progid, L"WScript.Shell")) {
++        hres = WshShellFactory_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
++    }
 +    else {
-+        hres = external_create_object(progid, cf, (IUnknown*)&obj);
++        hres = external_create_object(progid, cf, &obj);
++        if(FAILED(hres))
++            external_log(LIBWINEVBS_LOG_WARN, "vbscript: could not create object %s", debugstr_w(progid));
 +    }
 +#endif
      if(FAILED(hres))
          return NULL;
  
-@@ -1186,7 +1203,11 @@
+@@ -1186,7 +1210,11 @@
          break;
      case VT_EMPTY:
      case VT_NULL:
@@ -2087,7 +2987,7 @@
      default:
          FIXME("arg %s not supported\n", debugstr_variant(arg));
          return E_NOTIMPL;
-@@ -1227,7 +1248,11 @@
+@@ -1230,7 +1258,11 @@
          break;
      case VT_EMPTY:
      case VT_NULL:
@@ -2099,7 +2999,7 @@
      default:
          FIXME("arg %s not supported\n", debugstr_variant(arg));
          return E_NOTIMPL;
-@@ -2665,8 +2690,16 @@
+@@ -2733,8 +2765,16 @@
          hres = E_NOTIMPL;
      }
  
@@ -2110,91 +3010,21 @@
 +    if(SUCCEEDED(hres)) {
 +        char buf[2048];
 +        WideCharToMultiByte(CP_ACP, 0, prompt, -1, buf, sizeof(buf) - 1, NULL, NULL);
-+        external_log_info("MsgBox: prompt=%s", buf);
++        external_log(LIBWINEVBS_LOG_INFO, "vbscript: MsgBox prompt=%s", buf);
 +    }
 +#endif
  
      SysFreeString(prompt);
      SysFreeString(title);
-@@ -2823,8 +2856,77 @@
- 
- static HRESULT Global_DateDiff(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, VARIANT *res)
- {
-+#ifndef __LIBWINEVBS__
-     FIXME("\n");
-     return E_NOTIMPL;
-+#else
-+    SYSTEMTIME st1, st2;
-+    FILETIME ft1, ft2;
-+    ULARGE_INTEGER ui1, ui2;
-+    BSTR interval;
-+    DATE date1, date2;
-+    HRESULT hr;
-+
-+    assert(3 <= args_cnt && args_cnt <= 5);
-+
-+    if (V_VT(arg) != VT_BSTR || !(V_VT(arg + 1) == VT_DATE || V_VT(arg + 1) == VT_BSTR) || V_VT(arg + 2) != VT_DATE)
-+        return E_INVALIDARG;
-+
-+    interval = V_BSTR(arg);
-+    date1 = V_DATE(arg + 1);
-+    date2 = V_DATE(arg + 2);
-+
-+    VariantTimeToSystemTime(date1, &st1);
-+    SystemTimeToFileTime(&st1, &ft1);
-+
-+    VariantTimeToSystemTime(date2, &st2);
-+    SystemTimeToFileTime(&st2, &ft2);
-+
-+    LONGLONG diff = 0;
-+
-+    if (!vbs_wcsicmp(interval, L"yyyy"))
-+        diff = st2.wYear - st1.wYear;
-+    else if (!vbs_wcsicmp(interval, L"q"))
-+        diff = ((st2.wYear - st1.wYear) * 4) + (st2.wMonth - 1) / 3 - (st1.wMonth - 1) / 3;
-+    else if (!vbs_wcsicmp(interval, L"m"))
-+        diff = (st2.wYear - st1.wYear) * 12 + (st2.wMonth - st1.wMonth);
-+    else if (!vbs_wcsicmp(interval, L"y"))
-+        return E_NOTIMPL;
-+    else if (!vbs_wcsicmp(interval, L"d"))
-+        return E_NOTIMPL;
-+    else if (!vbs_wcsicmp(interval, L"w"))
-+        return E_NOTIMPL;
-+    else if (!vbs_wcsicmp(interval, L"ww"))
-+        return E_NOTIMPL;
-+    else if (!vbs_wcsicmp(interval, L"h")) {
-+        ui1.LowPart = ft1.dwLowDateTime;
-+        ui1.HighPart = ft1.dwHighDateTime;
-+        ui2.LowPart = ft2.dwLowDateTime;
-+        ui2.HighPart = ft2.dwHighDateTime;
-+        diff = (ui2.QuadPart - ui1.QuadPart) / (10000LL * 1000 * 60 * 60);
-+    }
-+    else if (!vbs_wcsicmp(interval, L"n")) {
-+        ui1.LowPart = ft1.dwLowDateTime;
-+        ui1.HighPart = ft1.dwHighDateTime;
-+        ui2.LowPart = ft2.dwLowDateTime;
-+        ui2.HighPart = ft2.dwHighDateTime;
-+        diff = (ui2.QuadPart - ui1.QuadPart) / (10000LL * 1000 * 60);
-+    }
-+    else if (!vbs_wcsicmp(interval, L"s")) {
-+        ui1.LowPart = ft1.dwLowDateTime;
-+        ui1.HighPart = ft1.dwHighDateTime;
-+        ui2.LowPart = ft2.dwLowDateTime;
-+        ui2.HighPart = ft2.dwHighDateTime;
-+        diff = (ui2.QuadPart - ui1.QuadPart) / (10000LL * 1000);
-+    }
-+    else
-+        return E_INVALIDARG;
-+
-+    V_VT(res) = VT_I4;
-+    V_I4(res) = (int)diff;
-+
-+    return S_OK;
-+#endif
+@@ -3037,6 +3077,7 @@
+     return return_int(res, result);
  }
  
++
  static HRESULT Global_DatePart(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
-@@ -3901,6 +4003,7 @@
+ {
+     BSTR interval = NULL;
+@@ -4116,6 +4157,7 @@
  
  static HRESULT Global_FormatNumber(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
  {
@@ -2202,7 +3032,7 @@
      int a[4] = {-1, -2, -2, -2};
      HRESULT hres;
      BSTR str;
-@@ -3913,6 +4016,88 @@
+@@ -4128,6 +4170,88 @@
      hres = format_number_lcid(This->ctx->lcid, args, a[0], a[1], a[2], a[3], &str);
      if(FAILED(hres)) return hres;
      return return_bstr(res, str);
@@ -2336,242 +3166,6 @@
  
  /***********************************************************************
   *		DllRegisterServer (OLEAUT32.@)
---- wine/dlls/oleaut32/variant.c
-+++ libwinevbs/dlls/oleaut32/variant.c
-@@ -28,6 +28,9 @@
- #include <string.h>
- #include <stdlib.h>
- #include <stdarg.h>
-+#ifdef __LIBWINEVBS__
-+#include <limits.h>
-+#endif
- 
- #define COBJMACROS
- #include "windef.h"
-@@ -2784,6 +2787,36 @@
- 
-     TRACE("%s, %s, %#lx, %#lx.\n", debugstr_variant(left), debugstr_variant(right), lcid, flags);
- 
-+#ifdef __LIBWINEVBS__
-+    /* Fast path for common integer comparisons: skip expensive VariantChangeType */
-+    if (V_VT(left) == VT_I2 && V_VT(right) == VT_I2)
-+        return (V_I2(left) == V_I2(right)) ? VARCMP_EQ :
-+               (V_I2(left) < V_I2(right)) ? VARCMP_LT : VARCMP_GT;
-+
-+    if (!(V_VT(left) & ~VT_TYPEMASK) && !(V_VT(right) & ~VT_TYPEMASK))
-+    {
-+        LONGLONG lval, rval;
-+        BOOL left_i = TRUE, right_i = TRUE;
-+
-+        switch (V_VT(left))
-+        {
-+        case VT_I4:    lval = V_I4(left); break;
-+        case VT_I2:    lval = V_I2(left); break;
-+        case VT_EMPTY: lval = 0; break;
-+        default:       left_i = FALSE; break;
-+        }
-+        switch (V_VT(right))
-+        {
-+        case VT_I4:    rval = V_I4(right); break;
-+        case VT_I2:    rval = V_I2(right); break;
-+        case VT_EMPTY: rval = 0; break;
-+        default:       right_i = FALSE; break;
-+        }
-+        if (left_i && right_i)
-+            return (lval == rval) ? VARCMP_EQ : (lval < rval) ? VARCMP_LT : VARCMP_GT;
-+    }
-+#endif
-+
-     lvt = V_VT(left) & VT_TYPEMASK;
-     rvt = V_VT(right) & VT_TYPEMASK;
-     xmask = (1 << lvt) | (1 << rvt);
-@@ -3046,6 +3079,7 @@
-         goto VarAnd_Exit;
-     }
- 
-+#ifndef __LIBWINEVBS__
-     if (leftvt == VT_NULL || rightvt == VT_NULL)
-     {
-         /*
-@@ -3096,7 +3130,99 @@
-         V_VT(result) = resvt;
-         goto VarAnd_Exit;
-     }
-+#else
-+    if (leftvt == VT_NULL || rightvt == VT_NULL)
-+    {
-+        VARIANT *other;
-+        VARTYPE  othervt;
-+        BOOL     other_is_zero = FALSE;
-+        BOOL     other_known = TRUE;
- 
-+        V_VT(result) = VT_NULL;
-+        V_I8(result) = 0;
-+
-+        if (leftvt == VT_NULL && rightvt == VT_NULL)
-+            goto VarAnd_Exit;
-+
-+        if (leftvt == VT_NULL) { other = right; othervt = rightvt; }
-+        else                   { other = left;  othervt = leftvt;  }
-+
-+        switch (othervt)
-+        {
-+        case VT_EMPTY: other_is_zero = TRUE;                             break;
-+        case VT_I1:    other_is_zero = (V_I1(other)   == 0);             break;
-+        case VT_UI1:   other_is_zero = (V_UI1(other)  == 0);             break;
-+        case VT_I2:    other_is_zero = (V_I2(other)   == 0);             break;
-+        case VT_UI2:   other_is_zero = (V_UI2(other)  == 0);             break;
-+        case VT_I4:    other_is_zero = (V_I4(other)   == 0);             break;
-+        case VT_UI4:   other_is_zero = (V_UI4(other)  == 0);             break;
-+        case VT_I8:    other_is_zero = (V_I8(other)   == 0);             break;
-+        case VT_UI8:   other_is_zero = (V_UI8(other)  == 0);             break;
-+        case VT_INT:   other_is_zero = (V_INT(other)  == 0);             break;
-+        case VT_UINT:  other_is_zero = (V_UINT(other) == 0);             break;
-+        case VT_BOOL:  other_is_zero = (V_BOOL(other) == VARIANT_FALSE); break;
-+        case VT_R4:    other_is_zero = (V_R4(other)   == 0.0f);          break;
-+        case VT_R8:    other_is_zero = (V_R8(other)   == 0.0);           break;
-+        case VT_DATE:  other_is_zero = (V_DATE(other) == 0.0);           break;
-+        case VT_CY:    other_is_zero = (V_CY(other).int64 == 0);         break;
-+        case VT_DECIMAL:
-+            other_is_zero = (V_DECIMAL(other).Hi32 == 0 &&
-+                             V_DECIMAL(other).Lo64 == 0);
-+            break;
-+        case VT_BSTR:
-+        {
-+            VARIANT_BOOL b;
-+            hres = VarBoolFromStr(V_BSTR(other), LOCALE_USER_DEFAULT,
-+                                  VAR_LOCALBOOL, &b);
-+            if (FAILED(hres))
-+                goto VarAnd_Exit;
-+            if (b == VARIANT_FALSE)
-+            {
-+                V_VT(result)   = VT_BOOL;
-+                V_BOOL(result) = VARIANT_FALSE;
-+            }
-+            else
-+            {
-+                V_VT(result) = VT_NULL;
-+                V_I8(result) = 0;
-+            }
-+            goto VarAnd_Exit;
-+        }
-+        default:
-+            other_known = FALSE;
-+            break;
-+        }
-+
-+        if (!other_known || !other_is_zero)
-+        {
-+            V_VT(result) = VT_NULL;
-+            V_I8(result) = 0;
-+            goto VarAnd_Exit;
-+        }
-+
-+        V_VT(result) = resvt;
-+        switch (resvt)
-+        {
-+        case VT_BOOL: V_BOOL(result) = VARIANT_FALSE; break;
-+        case VT_I1:   V_I1(result)   = 0;            break;
-+        case VT_UI1:  V_UI1(result)  = 0;            break;
-+        case VT_I2:   V_I2(result)   = 0;            break;
-+        case VT_UI2:  V_UI2(result)  = 0;            break;
-+        case VT_I4:   V_I4(result)   = 0;            break;
-+        case VT_UI4:  V_UI4(result)  = 0;            break;
-+        case VT_I8:   V_I8(result)   = 0;            break;
-+        case VT_UI8:  V_UI8(result)  = 0;            break;
-+        case VT_INT:  V_INT(result)  = 0;            break;
-+        case VT_UINT: V_UINT(result) = 0;            break;
-+        default:
-+            V_VT(result) = VT_NULL;
-+            V_I8(result) = 0;
-+            break;
-+        }
-+        goto VarAnd_Exit;
-+    }
-+#endif
-+
-     hres = VariantCopy(&varLeft, left);
-     if (FAILED(hres)) goto VarAnd_Exit;
- 
-@@ -3223,6 +3349,78 @@
-     };
- 
-     TRACE("(%s,%s,%p)\n", debugstr_variant(left), debugstr_variant(right), result);
-+
-+#ifdef __LIBWINEVBS__
-+    /* Fast path for common integer additions: skip expensive VariantChangeType */
-+    if (V_VT(left) == VT_I2 && V_VT(right) == VT_I2)
-+    {
-+        int sum = (int)V_I2(left) + (int)V_I2(right);
-+        if (sum >= -32768 && sum <= 32767)
-+        {
-+            V_VT(result) = VT_I2;
-+            V_I2(result) = sum;
-+        }
-+        else
-+        {
-+            V_VT(result) = VT_I4;
-+            V_I4(result) = sum;
-+        }
-+        return S_OK;
-+    }
-+    if (!(V_VT(left) & ~VT_TYPEMASK) && !(V_VT(right) & ~VT_TYPEMASK))
-+    {
-+        LONGLONG lval, rval;
-+        BOOL left_i = TRUE, right_i = TRUE;
-+
-+        switch (V_VT(left))
-+        {
-+        case VT_I4:    lval = V_I4(left); break;
-+        case VT_I2:    lval = V_I2(left); break;
-+        case VT_EMPTY: lval = 0; break;
-+        default:       left_i = FALSE; break;
-+        }
-+        switch (V_VT(right))
-+        {
-+        case VT_I4:    rval = V_I4(right); break;
-+        case VT_I2:    rval = V_I2(right); break;
-+        case VT_EMPTY: rval = 0; break;
-+        default:       right_i = FALSE; break;
-+        }
-+        if (left_i && right_i)
-+        {
-+            LONGLONG sum = lval + rval;
-+            if (V_VT(left) == VT_I4 || V_VT(right) == VT_I4)
-+            {
-+                if (sum >= (LONGLONG)INT_MIN && sum <= (LONGLONG)INT_MAX)
-+                {
-+                    V_VT(result) = VT_I4;
-+                    V_I4(result) = sum;
-+                }
-+                else
-+                {
-+                    /* I4 overflow promotes to R8 (not I8) per Windows behavior */
-+                    V_VT(result) = VT_R8;
-+                    V_R8(result) = (double)sum;
-+                }
-+            }
-+            else
-+            {
-+                /* Both are I2 or EMPTY: result is I2, overflow promotes to I4 */
-+                if (sum >= -32768 && sum <= 32767)
-+                {
-+                    V_VT(result) = VT_I2;
-+                    V_I2(result) = sum;
-+                }
-+                else
-+                {
-+                    V_VT(result) = VT_I4;
-+                    V_I4(result) = sum;
-+                }
-+            }
-+            return S_OK;
-+        }
-+    }
-+#endif
- 
-     VariantInit(&lv);
-     VariantInit(&rv);
 --- wine/dlls/oleaut32/vartype.c
 +++ libwinevbs/dlls/oleaut32/vartype.c
 @@ -6198,6 +6198,12 @@

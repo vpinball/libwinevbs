@@ -956,6 +956,16 @@ __forceinline int wcsicmp(LPCWSTR str1, LPCWSTR str2)
    }
 }
 
+__forceinline WCHAR *wcslwr(WCHAR *str)
+{
+   WCHAR *p;
+
+   for (p = str; *p; p++)
+      if ((unsigned)(*p - 'A') <= ('Z' - 'A')) *p |= 0x20;
+
+   return str;
+}
+
 __forceinline INT WINAPI lstrcmpA(LPCSTR str1, LPCSTR str2)
 {
    return strcmp(str1, str2);

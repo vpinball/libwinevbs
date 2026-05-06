@@ -28,6 +28,5 @@ HRESULT external_create_object(const WCHAR* progid, IClassFactory* cf, IUnknown*
    if (g_callbacks.create_object)
       return g_callbacks.create_object(progid, cf, obj);
 
-   external_log(LIBWINEVBS_LOG_ERROR, "Creating an object is not implemented");
    return CLASS_E_CLASSNOTAVAILABLE;
 }

@@ -185,6 +185,7 @@ typedef enum DPI_AWARENESS
  #ifndef _WIN32
   int wcsicmp( LPCWSTR str1, LPCWSTR str2 );
   int wcsnicmp( LPCWSTR str1, LPCWSTR str2, size_t n );
+  WCHAR *wcslwr( WCHAR *str );
  #endif
 #endif
 #ifdef __cplusplus

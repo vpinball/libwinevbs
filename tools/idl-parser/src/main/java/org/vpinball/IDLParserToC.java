@@ -31,7 +31,7 @@ public class IDLParserToC {
 
 		FileOutputStream outputStream = new FileOutputStream(out);
 
-		outputStream.write("void external_log_info(const char* format, ...);\n".getBytes());
+		outputStream.write("#include \"libwinevbs_log.h\"\n".getBytes());
 		outputStream.write("\n".getBytes());
 
 		for (String name : all.keySet()) {
@@ -298,7 +298,7 @@ public class IDLParserToC {
 		fragment.append("\tVariantClear(&res);\n");
 		fragment.append("}\n");
 		fragment.append("else {\n");
-		fragment.append("external_log_info(\"" + idlInterface.getClassName() + "_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d\", dispIdMember, dispIdMember, wFlags, hres);\n");
+		fragment.append("external_log(LIBWINEVBS_LOG_WARN, \"" + idlInterface.getClassName() + "_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d\", dispIdMember, dispIdMember, wFlags, hres);\n");
 		fragment.append("}\n");
 		fragment.append("return hres;\n");
 
@@ -638,5 +638,15 @@ public class IDLParserToC {
 					new IDLInterface("IMatchCollection", "MatchCollection"),
 					new IDLInterface("IMatchCollection2", "MatchCollection2"),
 					new IDLInterface("ISubMatches", "SubMatches")));
+
+		parser.parse(
+				wineDlls + "/wshom.ocx/wshom.idl",
+				wineDlls + "/wshom.ocx/shell_proxy.c",
+				Arrays.asList(
+					new IDLInterface("IWshCollection", "WshCollection"),
+					new IDLInterface("IWshEnvironment", "WshEnvironment"),
+					new IDLInterface("IWshExec", "WshExec"),
+					new IDLInterface("IWshShortcut", "WshShortcut"),
+					new IDLInterface("IWshShell3", "WshShell3")));
 	 }
 }

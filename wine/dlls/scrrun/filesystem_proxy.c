@@ -1,4 +1,4 @@
-void external_log_info(const char* format, ...);
+#include "libwinevbs_log.h"
 
 static HRESULT WINAPI drive_GetIDsOfNames(IDrive *iface, REFIID riid, LPOLESTR *rgszNames,
 		UINT cNames, LCID lcid, DISPID *rgDispId)
@@ -178,7 +178,7 @@ static HRESULT WINAPI drive_Invoke(IDrive *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("drive_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "drive_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }
@@ -272,7 +272,7 @@ static HRESULT WINAPI drivecoll_Invoke(IDriveCollection *iface, DISPID dispIdMem
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("drivecoll_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "drivecoll_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }
@@ -483,7 +483,7 @@ static HRESULT WINAPI textstream_Invoke(ITextStream *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("textstream_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "textstream_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }
@@ -755,7 +755,7 @@ static HRESULT WINAPI file_Invoke(IFile *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("file_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "file_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }
@@ -849,7 +849,7 @@ static HRESULT WINAPI filecoll_Invoke(IFileCollection *iface, DISPID dispIdMembe
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("filecoll_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "filecoll_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }
@@ -960,7 +960,7 @@ static HRESULT WINAPI foldercoll_Invoke(IFolderCollection *iface, DISPID dispIdM
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("foldercoll_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "foldercoll_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }
@@ -1279,7 +1279,7 @@ static HRESULT WINAPI folder_Invoke(IFolder *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("folder_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "folder_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }
@@ -1855,7 +1855,7 @@ static HRESULT WINAPI filesys_Invoke(IFileSystem3 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log_info("filesys_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "filesys_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
 	}
 	return hres;
 }

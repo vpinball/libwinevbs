@@ -31,6 +31,8 @@
 #ifdef __LIBWINEVBS__
 #include <locale.h>
 #include "scrrun_private.h"
+
+extern HRESULT WINAPI WshShellFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 #endif
 
 WINE_DEFAULT_DEBUG_CHANNEL(vbscript);
@@ -555,6 +557,9 @@ static IUnknown *create_object(script_ctx_t *ctx, const WCHAR *progid)
     }
     else if (!vbs_wcsicmp(progid, L"Scripting.Dictionary")) {
         hres = Dictionary_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
+    }
+    else if (!vbs_wcsicmp(progid, L"WScript.Shell")) {
+        hres = WshShellFactory_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
     }
     else {
         hres = external_create_object(progid, cf, &obj);
@@ -2697,7 +2702,7 @@ static HRESULT Global_MsgBox(BuiltinDisp *This, VARIANT *args, unsigned args_cnt
     if(SUCCEEDED(hres)) {
         char buf[2048];
         WideCharToMultiByte(CP_ACP, 0, prompt, -1, buf, sizeof(buf) - 1, NULL, NULL);
-        external_log_info("MsgBox: prompt=%s", buf);
+        external_log(LIBWINEVBS_LOG_INFO, "MsgBox: prompt=%s", buf);
     }
 #endif
 

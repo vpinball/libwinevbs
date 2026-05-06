@@ -107,6 +107,9 @@ set(LIBWINEVBS_SOURCES
    wine/dlls/scrrun/filesystem.c
    wine/dlls/scrrun/scrrun.c
 
+   wine/dlls/wshom.ocx/shell.c
+   wine/dlls/wshom.ocx/wshom_main.c
+
    wine/dlls/atl/atl.c
 
    wine/dlls/kernelbase/locale.c
@@ -124,6 +127,7 @@ set(LIBWINEVBS_PRIVATE_INCLUDE_DIRS
    ${CMAKE_SOURCE_DIR}/wine/dlls/oleaut32
    ${CMAKE_SOURCE_DIR}/wine/dlls/kernelbase
    ${CMAKE_SOURCE_DIR}/wine/dlls/scrrun
+   ${CMAKE_SOURCE_DIR}/wine/dlls/wshom.ocx
    ${CMAKE_SOURCE_DIR}/wine/dlls/atl
 )
 

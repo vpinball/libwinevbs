@@ -15,7 +15,9 @@ DEFINE_GUID(CLSID_VBScript, 0xb54f3741, 0x5b07, 0x11cf, 0xa4, 0xb0, 0x0, 0xaa, 0
 
 static void log_callback(libwinevbs_log_level_t level, const char* format, va_list args)
 {
-   const char *prefix = level == LIBWINEVBS_LOG_ERROR ? "ERROR" : level == LIBWINEVBS_LOG_DEBUG ? "DEBUG" : "INFO";
+   const char *prefix = level == LIBWINEVBS_LOG_ERROR ? "ERROR" :
+                        level == LIBWINEVBS_LOG_WARN  ? "WARN"  :
+                        level == LIBWINEVBS_LOG_DEBUG ? "DEBUG" : "INFO";
    printf("[%s] ", prefix);
    vprintf(format, args);
    printf("\n");
@@ -195,6 +197,25 @@ int main(void)
       0, NULL, &ei);
    if (FAILED(hr))
       printf("Loop test failed: 0x%08X\n", hr);
+
+   printf("\n--- Test 4: WScript.Shell Reg* no-op ---\n");
+   hr = ASP_ParseScriptText(parser,
+      L"Dim sh\n"
+      L"Set sh = CreateObject(\"WScript.Shell\")\n"
+      L"sh.RegWrite \"HKCU\\Software\\Test\\Hi\", \"value\", \"REG_SZ\"\n"
+      L"Print \"RegWrite ok\"\n"
+      L"On Error Resume Next\n"
+      L"Dim v\n"
+      L"v = sh.RegRead(\"HKCU\\Software\\Test\\Missing\")\n"
+      L"If Err.Number <> 0 Then\n"
+      L"   Print \"RegRead failed as expected: \" & Err.Description\n"
+      L"Else\n"
+      L"   Print \"RegRead unexpectedly succeeded\"\n"
+      L"End If\n",
+      NULL, NULL, NULL, 0, 0,
+      0, NULL, &ei);
+   if (FAILED(hr))
+      printf("WScript.Shell test failed: 0x%08X\n", hr);
 
    IActiveScript_Close(engine);
    IActiveScript_Release(engine);

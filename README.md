@@ -103,6 +103,10 @@ DEFINE_GUID(CLSID_VBScript, 0xb54f3741, 0x5b07, 0x11cf,
 
 static void log_callback(libwinevbs_log_level_t level, const char* format, va_list args)
 {
+   const char *prefix = level == LIBWINEVBS_LOG_ERROR ? "ERROR" :
+                        level == LIBWINEVBS_LOG_WARN  ? "WARN"  :
+                        level == LIBWINEVBS_LOG_DEBUG ? "DEBUG" : "INFO";
+   printf("[%s] ", prefix);
    vprintf(format, args);
    printf("\n");
 }

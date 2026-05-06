@@ -1832,7 +1832,7 @@ static int get_geo_info( const struct geo_id *geo, enum SYSGEOTYPE type,
     case GEO_TIMEZONES:
     case GEO_OFFICIALLANGUAGES:
     case GEO_NAME:
-        FIXME( "type %u is not supported\n", type );
+        FIXME( "type %u is not implemented\n", type );
         SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
         return 0;
     default:

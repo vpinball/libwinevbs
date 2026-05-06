@@ -6,6 +6,8 @@
 #include <oleauto.h>
 #include <winternl.h>
 #include <rpcproxy.h>
+#include <shellapi.h>
+#include <shlobj.h>
 #include "wine/debug.h"
 
 #include <sys/time.h>
@@ -35,8 +37,7 @@ static int fnmatch(const char *pattern, const char *string, int flags) {
    return (*p || *s) ? 1 : 0;
 }
 #endif
-void external_log_info(const char* format, ...);
-void external_log_debug(const char* format, ...);
+#include "libwinevbs_log.h"
 HRESULT WINAPI VBScriptFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 
 /* Codepage used to convert WCHAR paths down to bytes for the POSIX
@@ -85,7 +86,7 @@ int WINAPI __wine_dbg_write(const char *str, unsigned int len)
       *end = '\0';
 
 #ifdef _DEBUG
-      external_log_debug("%s", dbg_buffer);
+      external_log(LIBWINEVBS_LOG_DEBUG, "%s", dbg_buffer);
 #endif
 
       *dbg_buffer = '\0';
@@ -1000,14 +1001,14 @@ DWORD WINAPI GetModuleFileNameA(HMODULE module, LPSTR filename, DWORD size)
 
 INT WINAPI MessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type)
 {
-   external_log_info("MessageBoxA(): title=%s, text=%s", title, text);
+   external_log(LIBWINEVBS_LOG_INFO, "MessageBoxA(): title=%s, text=%s", title, text);
 
    return 0;
 }
 
 VOID WINAPI OutputDebugStringA(LPCSTR text)
 {
-   external_log_info("OutputDebugStringA(): text=%s", text);
+   external_log(LIBWINEVBS_LOG_INFO, "OutputDebugStringA(): text=%s", text);
 }
 
 __forceinline DWORD WINAPI CharLowerBuffW(WCHAR *str, DWORD len)
@@ -1767,3 +1768,94 @@ HRESULT WINAPI OLEAUTPS_DllGetClassObject(REFCLSID p1, REFIID p2, LPVOID * p3)
 
 DEFINE_GUID(CLSID_StdComponentCategoriesMgr, 0x0002e005, 0x00, 0x00, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46);
 DEFINE_GUID(IID_ICatRegister, 0x0002e012, 0x0000, 0x0000, 0xc0,0x00, 0x00,0x00,0x00,0x00,0x00,0x46);
+
+DEFINE_GUID(CLSID_ShellLink, 0x00021401, 0x0000, 0x0000, 0xc0,0x00, 0x00,0x00,0x00,0x00,0x00,0x46);
+DEFINE_GUID(IID_IShellLinkW, 0x000214f9, 0x0000, 0x0000, 0xc0,0x00, 0x00,0x00,0x00,0x00,0x00,0x46);
+
+BOOL WINAPI CreatePipe(PHANDLE read, PHANDLE write, LPSECURITY_ATTRIBUTES sa, DWORD size)
+{
+   return FALSE;
+}
+
+BOOL WINAPI CreateProcessW(LPCWSTR app, LPWSTR cmd, LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
+                           BOOL inherit, DWORD flags, LPVOID env, LPCWSTR cwd, LPSTARTUPINFOW si, LPPROCESS_INFORMATION pi)
+{
+   return FALSE;
+}
+
+HANDLE WINAPI CreateThread(LPSECURITY_ATTRIBUTES sa, SIZE_T stack, LPTHREAD_START_ROUTINE start,
+                           LPVOID param, DWORD flags, LPDWORD tid)
+{
+   return NULL;
+}
+
+BOOL WINAPI EnumThreadWindows(DWORD tid, WNDENUMPROC fn, LPARAM lparam)
+{
+   return FALSE;
+}
+
+DWORD WINAPI ExpandEnvironmentStringsW(LPCWSTR src, LPWSTR dst, DWORD count)
+{
+   return 0;
+}
+
+UINT WINAPI GetCurrentDirectoryW(UINT len, LPWSTR buf)
+{
+   return 0;
+}
+
+BOOL WINAPI GetExitCodeProcess(HANDLE process, LPDWORD code)
+{
+   return FALSE;
+}
+
+BOOL WINAPI PostMessageW(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+   return FALSE;
+}
+
+BOOL WINAPI PostThreadMessageW(DWORD tid, UINT msg, WPARAM wp, LPARAM lp)
+{
+   return FALSE;
+}
+
+LSTATUS WINAPI RegGetValueW(HKEY hkey, LPCWSTR subkey, LPCWSTR value, DWORD flags,
+                            LPDWORD type, PVOID data, LPDWORD len)
+{
+   return ERROR_FILE_NOT_FOUND;
+}
+
+BOOL WINAPI SHGetPathFromIDListW(LPCITEMIDLIST pidl, LPWSTR path)
+{
+   return FALSE;
+}
+
+HRESULT WINAPI SHGetSpecialFolderLocation(HWND hwnd, int csidl, LPITEMIDLIST *pidl)
+{
+   return E_FAIL;
+}
+
+BOOL WINAPI SetCurrentDirectoryW(LPCWSTR path)
+{
+   return FALSE;
+}
+
+BOOL WINAPI SetHandleInformation(HANDLE h, DWORD mask, DWORD flags)
+{
+   return FALSE;
+}
+
+BOOL WINAPI ShellExecuteExW(SHELLEXECUTEINFOW *info)
+{
+   return FALSE;
+}
+
+BOOL WINAPI TerminateProcess(HANDLE process, UINT code)
+{
+   return FALSE;
+}
+
+DWORD WINAPI WaitForSingleObject(HANDLE h, DWORD ms)
+{
+   return WAIT_FAILED;
+}

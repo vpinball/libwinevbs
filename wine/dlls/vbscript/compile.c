@@ -2151,7 +2151,7 @@ static HRESULT check_script_collisions(compile_ctx_t *ctx, script_ctx_t *script)
 #ifndef __LIBWINEVBS__
             return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
 #else
-            external_log_info("%s redefined (var)", debugstr_w(vars[i].name));
+            external_log(LIBWINEVBS_LOG_INFO, "%s redefined (var)", debugstr_w(vars[i].name));
 #endif
         }
     }
@@ -2161,7 +2161,7 @@ static HRESULT check_script_collisions(compile_ctx_t *ctx, script_ctx_t *script)
 #ifndef __LIBWINEVBS__
             return MAKE_VBSERROR(VBSE_NAME_REDEFINED);
 #else
-            external_log_info("%s redefined (class)", debugstr_w(class->name));
+            external_log(LIBWINEVBS_LOG_INFO, "%s redefined (class)", debugstr_w(class->name));
 #endif
         }
     }

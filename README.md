@@ -259,6 +259,18 @@ cd /path/to/libwinevbs
 ./scripts/winediff.sh /path/to/wine
 ```
 
+## IDL Parser
+
+`tools/idl-parser` is a development-only Java tool that regenerates the `*_proxy.c` IDispatch dispatchers from the Wine `.idl` files. End users do not need it; it only runs when the Wine IDL definitions change and the proxy stubs need to be regenerated.
+
+Requires Java 11+ and Gradle. To regenerate:
+
+```bash
+./scripts/genproxy.sh
+```
+
+Output is written directly into `wine/dlls/<module>/<module>_proxy.c`. The list of IDLs and interfaces to process is hardcoded in `tools/idl-parser/src/main/java/org/vpinball/IDLParserToC.java`.
+
 ## Wine Issues
 
 Using the Wine VBScript engine source for Visual Pinball has surfaced a large number of defects. Many of these have since been fixed in upstream Wine as a direct result of this project.

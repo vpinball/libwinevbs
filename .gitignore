@@ -1,4 +1,5 @@
 /build/
+/build-release/
 /build-static/
 /out/
 /.vs/
@@ -7,3 +8,5 @@ CMakeSettings.json
 .DS_Store
 wine/dlls/vbscript/parser.tab.c
 wine/dlls/vbscript/parser.tab.h
+/tools/idl-parser/.gradle/
+/tools/idl-parser/build/

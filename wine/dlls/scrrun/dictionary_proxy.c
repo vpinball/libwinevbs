@@ -53,6 +53,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		case DISPID_VALUE: {
 			if (wFlags & DISPATCH_PROPERTYPUTREF) {
 				// line 108: [id(DISPID_VALUE), propputref]HRESULT Item([in] VARIANT* Key, [in] VARIANT* pRetItem);
+				if (pDispParams->cArgs < 2) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);
@@ -65,6 +69,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 111: [id(DISPID_VALUE), propput]HRESULT Item([in] VARIANT* Key, [in] VARIANT* pRetItem);
+				if (pDispParams->cArgs < 2) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);
@@ -77,6 +85,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYGET) {
 				// line 114: [id(DISPID_VALUE), propget]HRESULT Item([in] VARIANT* Key, [out, retval] VARIANT* pRetItem);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);
@@ -94,6 +106,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		case 0x00000001: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 117: [id(0x00000001)]HRESULT Add([in] VARIANT* Key, [in] VARIANT* Item);
+				if (pDispParams->cArgs < 2) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);
@@ -117,6 +133,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		case 0x00000003: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 123: [id(0x00000003)]HRESULT Exists([in] VARIANT* Key, [out, retval] VARIANT_BOOL* pExists);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);
@@ -136,6 +156,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		case 0x00000005: {
 			if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 129: [id(0x00000005), propput]HRESULT Key([in] VARIANT* Key, [in] VARIANT* rhs);
+				if (pDispParams->cArgs < 2) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);
@@ -158,6 +182,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		case 0x00000007: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 135: [id(0x00000007)]HRESULT Remove([in] VARIANT* Key);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);
@@ -176,6 +204,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		case 0x00000009: {
 			if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 141: [id(0x00000009), propput]HRESULT CompareMode([in] CompareMethod pcomp);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_I4);
@@ -200,6 +232,10 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		case 0x0000000a: {
 			if (wFlags & DISPATCH_PROPERTYGET) {
 				// line 150: [id(0x0000000a), propget, hidden]HRESULT HashVal([in] VARIANT* Key, [out, retval] VARIANT* HashVal);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantCopyInd(&var0, &pDispParams->rgvarg[--index]);

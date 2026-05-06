@@ -20,7 +20,7 @@ static HRESULT WINAPI RegExp_GetIDsOfNames(IRegExp *iface, REFIID riid, LPOLESTR
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -62,6 +62,10 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 48: [id(DISPID_REGEXP_PATTERN), propput]HRESULT Pattern([in] BSTR pPattern);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
@@ -78,6 +82,10 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 54: [id(DISPID_REGEXP_IGNORECASE), propput]HRESULT IgnoreCase([in] VARIANT_BOOL pIgnoreCase);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BOOL);
@@ -94,6 +102,10 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 60: [id(DISPID_REGEXP_GLOBAL), propput]HRESULT Global([in] VARIANT_BOOL pGlobal);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BOOL);
@@ -105,6 +117,10 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 		case DISPID_REGEXP_EXECUTE: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 63: [id(DISPID_REGEXP_EXECUTE)]HRESULT Execute([in] BSTR sourceString,[out, retval] IDispatch **ppMatches);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
@@ -117,6 +133,10 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 		case DISPID_REGEXP_TEST: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 68: [id(DISPID_REGEXP_TEST)]HRESULT Test([in] BSTR sourceString,[out, retval] VARIANT_BOOL *pMatch);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
@@ -129,6 +149,10 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 		case DISPID_REGEXP_REPLACE: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 73: [id(DISPID_REGEXP_REPLACE)]HRESULT Replace([in] BSTR sourceString,[in] BSTR replaceString,[out, retval] BSTR *pDestString);
+				if (pDispParams->cArgs < 2) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
@@ -178,7 +202,7 @@ static HRESULT WINAPI RegExp2_GetIDsOfNames(IRegExp2 *iface, REFIID riid, LPOLES
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -220,6 +244,10 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 93: [id(DISPID_REGEXP_PATTERN), propput]HRESULT Pattern([in] BSTR pPattern);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
@@ -236,6 +264,10 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 99: [id(DISPID_REGEXP_IGNORECASE), propput]HRESULT IgnoreCase([in] VARIANT_BOOL pIgnoreCase);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BOOL);
@@ -252,6 +284,10 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 105: [id(DISPID_REGEXP_GLOBAL), propput]HRESULT Global([in] VARIANT_BOOL pGlobal);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BOOL);
@@ -268,6 +304,10 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 			}
 			else if (wFlags & DISPATCH_PROPERTYPUT) {
 				// line 111: [id(DISPID_REGEXP_MULTILINE), propput]HRESULT Multiline([in] VARIANT_BOOL pMultiline);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BOOL);
@@ -279,6 +319,10 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 		case DISPID_REGEXP_EXECUTE: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 114: [id(DISPID_REGEXP_EXECUTE)]HRESULT Execute([in] BSTR sourceString,[out, retval] IDispatch **ppMatches);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
@@ -291,6 +335,10 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 		case DISPID_REGEXP_TEST: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 119: [id(DISPID_REGEXP_TEST)]HRESULT Test([in] BSTR sourceString,[out, retval] VARIANT_BOOL *pMatch);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
@@ -303,12 +351,16 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 		case DISPID_REGEXP_REPLACE: {
 			if (wFlags & DISPATCH_METHOD) {
 				// line 124: [id(DISPID_REGEXP_REPLACE)]HRESULT Replace([in] BSTR sourceString,[in] VARIANT replaceVar,[out, retval] BSTR *pDestString);
+				if (pDispParams->cArgs < 2) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_BSTR);
 				VARIANT var1;
 				V_VT(&var1) = VT_EMPTY;
-				VariantChangeType(&var1, &pDispParams->rgvarg[--index], 0, VT_VARIANT);
+				VariantCopyInd(&var1, &pDispParams->rgvarg[--index]);
 				V_VT(&res) = VT_BSTR;
 				hres = RegExp2_Replace(iface, V_BSTR(&var0), var1, &V_BSTR(&res));
 				VariantClear(&var0);
@@ -348,7 +400,7 @@ static HRESULT WINAPI Match_GetIDsOfNames(IMatch *iface, REFIID riid, LPOLESTR *
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -436,7 +488,7 @@ static HRESULT WINAPI Match2_GetIDsOfNames(IMatch2 *iface, REFIID riid, LPOLESTR
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -496,6 +548,12 @@ static HRESULT WINAPI Match2_Invoke(IMatch2 *iface, DISPID dispIdMember,
 				// line 170: [id(DISPID_MATCH_SUBMATCHES), propget]HRESULT SubMatches([out, retval] IDispatch **ppSubMatches);
 				V_VT(&res) = VT_DISPATCH;
 				hres = Match2_get_SubMatches(iface, (IDispatch**)&V_DISPATCH(&res));
+				if (SUCCEEDED(hres) && pDispParams->cArgs > 0) {
+					IDispatch *_chained = V_DISPATCH(&res);
+					V_VT(&res) = VT_EMPTY;
+					hres = IDispatch_Invoke(_chained, DISPID_VALUE, &IID_NULL, lcid, wFlags, pDispParams, &res, pExcepInfo, puArgErr);
+					IDispatch_Release(_chained);
+				}
 			}
 			break;
 		}
@@ -530,7 +588,7 @@ static HRESULT WINAPI MatchCollection_GetIDsOfNames(IMatchCollection *iface, REF
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -558,6 +616,10 @@ static HRESULT WINAPI MatchCollection_Invoke(IMatchCollection *iface, DISPID dis
 		case DISPID_VALUE: {
 			if (wFlags & DISPATCH_PROPERTYGET) {
 				// line 184: [id(DISPID_VALUE), propget]HRESULT Item([in] LONG index,[out, retval] IDispatch **ppMatch);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_I4);
@@ -620,7 +682,7 @@ static HRESULT WINAPI MatchCollection2_GetIDsOfNames(IMatchCollection2 *iface, R
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -648,6 +710,10 @@ static HRESULT WINAPI MatchCollection2_Invoke(IMatchCollection2 *iface, DISPID d
 		case DISPID_VALUE: {
 			if (wFlags & DISPATCH_PROPERTYGET) {
 				// line 206: [id(DISPID_VALUE), propget]HRESULT Item([in] LONG index,[out, retval] IDispatch **ppMatch);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_I4);
@@ -710,7 +776,7 @@ static HRESULT WINAPI SubMatches_GetIDsOfNames(ISubMatches *iface, REFIID riid, 
 	int r;
 	while(min <= max) {
 		i = (min + max) / 2;
-		r = vbs_wcsicmp(names_ids_list[i].name, *rgszNames);
+		r = wcsicmp(names_ids_list[i].name, *rgszNames);
 		if (!r) {
 			*rgDispId = names_ids_list[i].dispId;
 			return S_OK;
@@ -738,6 +804,10 @@ static HRESULT WINAPI SubMatches_Invoke(ISubMatches *iface, DISPID dispIdMember,
 		case DISPID_VALUE: {
 			if (wFlags & DISPATCH_PROPERTYGET) {
 				// line 228: [id(DISPID_VALUE), propget]HRESULT Item([in] LONG index,[out, retval] VARIANT *pSubMatch);
+				if (pDispParams->cArgs < 1) {
+					hres = DISP_E_BADPARAMCOUNT;
+					break;
+				}
 				VARIANT var0;
 				V_VT(&var0) = VT_EMPTY;
 				VariantChangeType(&var0, &pDispParams->rgvarg[--index], 0, VT_I4);

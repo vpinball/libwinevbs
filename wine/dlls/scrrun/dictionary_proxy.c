@@ -1,4 +1,4 @@
-#include "libwinevbs_log.h"
+#include "libwinevbs.h"
 
 static HRESULT WINAPI dictionary_GetIDsOfNames(IDictionary *iface, REFIID riid, LPOLESTR *rgszNames,
 		UINT cNames, LCID lcid, DISPID *rgDispId)

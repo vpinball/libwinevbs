@@ -35,7 +35,7 @@
 #include "wine/rbtree.h"
 
 #ifdef __LIBWINEVBS__
-#include "libwinevbs_log.h"
+#include "libwinevbs.h"
 HRESULT external_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 #endif
 

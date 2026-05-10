@@ -28,7 +28,7 @@
 extern HRESULT WINAPI DoOpenPipeStream(HANDLE pipe, IOMode mode, ITextStream **stream);
 
 #ifdef __LIBWINEVBS__
-#include "libwinevbs_log.h"
+#include "libwinevbs.h"
 #endif
 
 WINE_DEFAULT_DEBUG_CHANNEL(wshom);

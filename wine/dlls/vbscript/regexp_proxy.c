@@ -1,4 +1,4 @@
-#include "libwinevbs_log.h"
+#include "libwinevbs.h"
 
 static HRESULT WINAPI RegExp_GetIDsOfNames(IRegExp *iface, REFIID riid, LPOLESTR *rgszNames,
 		UINT cNames, LCID lcid, DISPID *rgDispId)

@@ -3,7 +3,7 @@
 
 #define LIBWINEVBS_VERSION_MAJOR 0
 #define LIBWINEVBS_VERSION_MINOR 5
-#define LIBWINEVBS_VERSION_PATCH 0
+#define LIBWINEVBS_VERSION_PATCH 1
 
 #define _LIBWINEVBS_STR(x) #x
 #define LIBWINEVBS_STR(x) _LIBWINEVBS_STR(x)
@@ -17,8 +17,6 @@
 #include "winbase.h"
 #include "ole2.h"
 #include "activscp.h"
-
-#include "libwinevbs_log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +35,15 @@ extern "C" {
       #define LIBWINEVBS_API
    #endif
 #endif
+
+typedef enum {
+   LIBWINEVBS_LOG_INFO,
+   LIBWINEVBS_LOG_DEBUG,
+   LIBWINEVBS_LOG_WARN,
+   LIBWINEVBS_LOG_ERROR
+} libwinevbs_log_level_t;
+
+void external_log(libwinevbs_log_level_t level, const char* format, ...);
 
 typedef struct {
    void (*log)(libwinevbs_log_level_t level, const char* format, va_list args);

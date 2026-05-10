@@ -31,7 +31,7 @@ public class IDLParserToC {
 
 		FileOutputStream outputStream = new FileOutputStream(out);
 
-		outputStream.write("#include \"libwinevbs_log.h\"\n".getBytes());
+		outputStream.write("#include \"libwinevbs.h\"\n".getBytes());
 		outputStream.write("\n".getBytes());
 
 		for (String name : all.keySet()) {

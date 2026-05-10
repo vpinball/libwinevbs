@@ -1,4 +1,4 @@
-#include "libwinevbs_log.h"
+#include "libwinevbs.h"
 
 static HRESULT WINAPI drive_GetIDsOfNames(IDrive *iface, REFIID riid, LPOLESTR *rgszNames,
 		UINT cNames, LCID lcid, DISPID *rgDispId)

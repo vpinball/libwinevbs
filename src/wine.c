@@ -37,7 +37,7 @@ static int fnmatch(const char *pattern, const char *string, int flags) {
    return (*p || *s) ? 1 : 0;
 }
 #endif
-#include "libwinevbs_log.h"
+#include "libwinevbs.h"
 HRESULT WINAPI VBScriptFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 
 /* Codepage used to convert WCHAR paths down to bytes for the POSIX

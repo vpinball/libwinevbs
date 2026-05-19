@@ -388,9 +388,12 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 
 - vbscript: Support element access on public array properties of class instances. [11.8](https://gitlab.winehq.org/wine/wine/-/merge_requests/10383)
 - vbscript: Convert VT_DISPATCH arguments to string in Eval/Execute/ExecuteGlobal. [11.8](https://gitlab.winehq.org/wine/wine/-/merge_requests/10600)
+- oleaut32: Fix Null handling in three-valued logical ops. [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10673)
 - vbscript: Coerce VT_EMPTY operands before Var* calls. [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10674)
 - vbscript: Match native cross-parse name redefinition rules. [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10852)
-- oleaut32: Fix Null handling in three-valued logical ops. [11.9](https://gitlab.winehq.org/wine/wine/-/merge_requests/10673)
+- vbscript: Resolve UBound/LBound default member and match native errors [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10895)
+- vbscript: Mark class member fixed-size arrays as FADF_FIXEDSIZE [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10927)
+- vbscript: Parse double literals via ucrtbase _wcstod_l. [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10937)
 
 ### Enhancements
 

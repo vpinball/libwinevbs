@@ -671,6 +671,17 @@ static HRESULT show_msgbox(script_ctx_t *ctx, BSTR prompt, unsigned type, BSTR o
     return return_short(res, ret);
 }
 
+/* Cxxx() coercion functions raise err 94 (Illegal Null use) on Null and
+ * err 91 (Object variable not set) on Nothing, matching native VBScript. */
+static HRESULT check_coerce_arg(const VARIANT *arg)
+{
+    if(V_VT(arg) == VT_NULL)
+        return MAKE_VBSERROR(VBSE_ILLEGAL_NULL_USE);
+    if(V_VT(arg) == VT_DISPATCH && !V_DISPATCH(arg))
+        return MAKE_VBSERROR(VBSE_OBJECT_VARIABLE_NOT_SET);
+    return S_OK;
+}
+
 static HRESULT Global_CCur(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, VARIANT *res)
 {
     VARIANT v;
@@ -679,6 +690,10 @@ static HRESULT Global_CCur(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, V
     TRACE("%s\n", debugstr_variant(arg));
 
     assert(args_cnt == 1);
+
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
 
     V_VT(&v) = VT_EMPTY;
     hres = VariantChangeType(&v, arg, 0, VT_CY);
@@ -703,6 +718,10 @@ static HRESULT Global_CInt(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, V
 
     assert(args_cnt == 1);
 
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
+
     V_VT(&v) = VT_EMPTY;
     hres = VariantChangeType(&v, arg, 0, VT_I2);
     if(FAILED(hres))
@@ -725,6 +744,10 @@ static HRESULT Global_CLng(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, V
 
     assert(args_cnt == 1);
 
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
+
     hres = to_int(arg, &i);
     if(FAILED(hres))
         return hres;
@@ -742,6 +765,10 @@ static HRESULT Global_CBool(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, 
     TRACE("%s\n", debugstr_variant(arg));
 
     assert(args_cnt == 1);
+
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
 
     V_VT(&v) = VT_EMPTY;
     hres = VariantChangeType(&v, arg, VARIANT_LOCALBOOL, VT_BOOL);
@@ -763,6 +790,10 @@ static HRESULT Global_CByte(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, 
     TRACE("%s\n", debugstr_variant(arg));
 
     assert(args_cnt == 1);
+
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
 
     V_VT(&v) = VT_EMPTY;
     hres = VariantChangeType(&v, arg, VARIANT_LOCALBOOL, VT_UI1);
@@ -787,8 +818,9 @@ static HRESULT Global_CDate(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, 
 
     assert(args_cnt == 1);
 
-    if(V_VT(arg) == VT_NULL)
-        return MAKE_VBSERROR(VBSE_ILLEGAL_NULL_USE);
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
 
     V_VT(&v) = VT_EMPTY;
     hres = VariantChangeType(&v, arg, 0, VT_DATE);
@@ -816,6 +848,10 @@ static HRESULT Global_CDbl(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, V
 
     assert(args_cnt == 1);
 
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
+
     V_VT(&v) = VT_EMPTY;
     hres = VariantChangeType(&v, arg, 0, VT_R8);
     if(FAILED(hres))
@@ -838,6 +874,10 @@ static HRESULT Global_CSng(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, V
 
     assert(args_cnt == 1);
 
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
+
     V_VT(&v) = VT_EMPTY;
     hres = VariantChangeType(&v, arg, 0, VT_R4);
     if(FAILED(hres))
@@ -857,8 +897,9 @@ static HRESULT Global_CStr(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, V
 
     TRACE("%s\n", debugstr_variant(arg));
 
-    if(V_VT(arg) == VT_NULL)
-        return MAKE_VBSERROR(VBSE_ILLEGAL_NULL_USE);
+    hres = check_coerce_arg(arg);
+    if(FAILED(hres))
+        return hres;
 
     hres = to_string(This->ctx->lcid, arg, &str);
     if(FAILED(hres))
@@ -1192,6 +1233,8 @@ static HRESULT Global_Timer(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, 
 
 static HRESULT Global_LBound(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, VARIANT *res)
 {
+    VARIANT default_value;
+    VARIANT *array_arg = arg;
     SAFEARRAY *sa;
     HRESULT hres;
     LONG lbound;
@@ -1201,45 +1244,56 @@ static HRESULT Global_LBound(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt,
 
     TRACE("%s %s\n", debugstr_variant(arg), args_cnt == 2 ? debugstr_variant(arg + 1) : "1");
 
-    switch(V_VT(arg)) {
-    case VT_VARIANT|VT_ARRAY:
-        sa = V_ARRAY(arg);
-        break;
-    case VT_VARIANT|VT_ARRAY|VT_BYREF:
-        sa = *V_ARRAYREF(arg);
-        break;
-    case VT_EMPTY:
-    case VT_NULL:
-#ifndef __LIBWINEVBS__
-        return MAKE_VBSERROR(VBSE_TYPE_MISMATCH);
-#else
-        return return_int(res, 0);
-#endif
-    default:
-        FIXME("arg %s not supported\n", debugstr_variant(arg));
-        return E_NOTIMPL;
+    V_VT(&default_value) = VT_EMPTY;
+
+    if(V_VT(arg) == VT_DISPATCH) {
+        DISPPARAMS dp = {0};
+        if(!V_DISPATCH(arg))
+            return MAKE_VBSERROR(VBSE_OBJECT_VARIABLE_NOT_SET);
+        hres = disp_call(This->ctx, V_DISPATCH(arg), DISPID_VALUE, TRUE, &dp, &default_value);
+        if(FAILED(hres))
+            return hres;
+        array_arg = &default_value;
     }
 
-    if(!sa)
-        return MAKE_VBSERROR(VBSE_OUT_OF_BOUNDS);
+    switch(V_VT(array_arg)) {
+    case VT_VARIANT|VT_ARRAY:
+        sa = V_ARRAY(array_arg);
+        break;
+    case VT_VARIANT|VT_ARRAY|VT_BYREF:
+        sa = *V_ARRAYREF(array_arg);
+        break;
+    default:
+        VariantClear(&default_value);
+        return MAKE_VBSERROR(VBSE_TYPE_MISMATCH);
+    }
+
+    if(!sa) {
+        hres = MAKE_VBSERROR(VBSE_OUT_OF_BOUNDS);
+        goto done;
+    }
 
     if(args_cnt == 2) {
         hres = to_int(arg + 1, &dim);
         if(FAILED(hres))
-            return hres;
+            goto done;
     }else {
         dim = 1;
     }
 
     hres = SafeArrayGetLBound(sa, dim, &lbound);
-    if(FAILED(hres))
-        return hres;
+    if(SUCCEEDED(hres))
+        hres = return_int(res, lbound);
 
-    return return_int(res, lbound);
+done:
+    VariantClear(&default_value);
+    return hres;
 }
 
 static HRESULT Global_UBound(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, VARIANT *res)
 {
+    VARIANT default_value;
+    VARIANT *array_arg = arg;
     SAFEARRAY *sa;
     HRESULT hres;
     LONG ubound;
@@ -1249,41 +1303,50 @@ static HRESULT Global_UBound(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt,
 
     TRACE("%s %s\n", debugstr_variant(arg), args_cnt == 2 ? debugstr_variant(arg + 1) : "1");
 
-    switch(V_VT(arg)) {
-    case VT_VARIANT|VT_ARRAY:
-        sa = V_ARRAY(arg);
-        break;
-    case VT_VARIANT|VT_ARRAY|VT_BYREF:
-        sa = *V_ARRAYREF(arg);
-        break;
-    case VT_EMPTY:
-    case VT_NULL:
-#ifndef __LIBWINEVBS__
-        return MAKE_VBSERROR(VBSE_TYPE_MISMATCH);
-#else
-        return return_int(res, 0);
-#endif
-    default:
-        FIXME("arg %s not supported\n", debugstr_variant(arg));
-        return E_NOTIMPL;
+    V_VT(&default_value) = VT_EMPTY;
+
+    if(V_VT(arg) == VT_DISPATCH) {
+        DISPPARAMS dp = {0};
+        if(!V_DISPATCH(arg))
+            return MAKE_VBSERROR(VBSE_OBJECT_VARIABLE_NOT_SET);
+        hres = disp_call(This->ctx, V_DISPATCH(arg), DISPID_VALUE, TRUE, &dp, &default_value);
+        if(FAILED(hres))
+            return hres;
+        array_arg = &default_value;
     }
 
-    if(!sa)
-        return MAKE_VBSERROR(VBSE_OUT_OF_BOUNDS);
+    switch(V_VT(array_arg)) {
+    case VT_VARIANT|VT_ARRAY:
+        sa = V_ARRAY(array_arg);
+        break;
+    case VT_VARIANT|VT_ARRAY|VT_BYREF:
+        sa = *V_ARRAYREF(array_arg);
+        break;
+    default:
+        VariantClear(&default_value);
+        return MAKE_VBSERROR(VBSE_TYPE_MISMATCH);
+    }
+
+    if(!sa) {
+        hres = MAKE_VBSERROR(VBSE_OUT_OF_BOUNDS);
+        goto done;
+    }
 
     if(args_cnt == 2) {
         hres = to_int(arg + 1, &dim);
         if(FAILED(hres))
-            return hres;
+            goto done;
     }else {
         dim = 1;
     }
 
     hres = SafeArrayGetUBound(sa, dim, &ubound);
-    if(FAILED(hres))
-        return hres;
+    if(SUCCEEDED(hres))
+        hres = return_int(res, ubound);
 
-    return return_int(res, ubound);
+done:
+    VariantClear(&default_value);
+    return hres;
 }
 
 static HRESULT Global_RGB(BuiltinDisp *This, VARIANT *arg, unsigned args_cnt, VARIANT *res)
@@ -3076,7 +3139,6 @@ static HRESULT Global_DateDiff(BuiltinDisp *This, VARIANT *args, unsigned args_c
 
     return return_int(res, result);
 }
-
 
 static HRESULT Global_DatePart(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
 {

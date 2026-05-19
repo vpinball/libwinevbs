@@ -1418,6 +1418,13 @@ static HRESULT interp_dim(exec_ctx_t *ctx)
         assert(var != NULL);
         v = &var->v;
         array_ref = &var->array;
+
+        /* A separate ExecuteGlobal can re-encounter a name that was already
+         * Dim'd as an array in an earlier compile unit. Native rejects this
+         * with err 13 regardless of whether the existing array is fixed or
+         * dynamic. Re-Dim'ing an existing scalar (V_VT_EMPTY) is allowed. */
+        if(V_ISARRAY(v))
+            return MAKE_VBSERROR(VBSE_TYPE_MISMATCH);
     }else {
         ref_t ref;
 
@@ -1519,13 +1526,11 @@ static HRESULT interp_redim(exec_ctx_t *ctx)
         v = V_VARIANTREF(v);
     }
 
-#ifndef __LIBWINEVBS__
     if(V_ISARRAY(v)) {
         SAFEARRAY *sa = V_ISBYREF(v) ? *V_ARRAYREF(v) : V_ARRAY(v);
         if(sa && (sa->fFeatures & FADF_FIXEDSIZE))
             return MAKE_VBSERROR(VBSE_ARRAY_LOCKED);
     }
-#endif
 
     hres = array_bounds_from_stack(ctx, dim_cnt, &bounds);
     if(FAILED(hres))
@@ -2113,6 +2118,31 @@ static inline void coerce_empty_to_i2(variant_val_t *val)
     val->owned = TRUE;
 }
 
+/* Native And/Or/Imp coerce a BSTR operand to a number when it parses as one,
+ * falling back to a Boolean conversion otherwise. VarXor already does this
+ * internally; VarAnd/VarOr/VarImp do not, so VBScript needs to coerce first. */
+static HRESULT coerce_str_to_num_or_bool(variant_val_t *val)
+{
+    DOUBLE d;
+    HRESULT hres;
+    VARTYPE target;
+
+    if(V_VT(val->v) != VT_BSTR)
+        return S_OK;
+
+    target = SUCCEEDED(VarR8FromStr(V_BSTR(val->v), LOCALE_USER_DEFAULT, 0, &d)) ? VT_I4 : VT_BOOL;
+    VariantInit(&val->store);
+    hres = VariantChangeType(&val->store, val->v, VARIANT_LOCALBOOL, target);
+    if(FAILED(hres))
+        return hres;
+
+    if(val->owned)
+        VariantClear(val->v);
+    val->v = &val->store;
+    val->owned = TRUE;
+    return S_OK;
+}
+
 static HRESULT interp_not(exec_ctx_t *ctx)
 {
     variant_val_t val;
@@ -2150,7 +2180,11 @@ static HRESULT interp_and(exec_ctx_t *ctx)
     if(SUCCEEDED(hres)) {
         coerce_empty_to_i4(&l);
         coerce_empty_to_i4(&r);
-        hres = VarAnd(l.v, r.v, &v);
+        hres = coerce_str_to_num_or_bool(&l);
+        if(SUCCEEDED(hres))
+            hres = coerce_str_to_num_or_bool(&r);
+        if(SUCCEEDED(hres))
+            hres = VarAnd(l.v, r.v, &v);
         release_val(&l);
     }
     release_val(&r);
@@ -2176,7 +2210,11 @@ static HRESULT interp_or(exec_ctx_t *ctx)
     if(SUCCEEDED(hres)) {
         coerce_empty_to_i4(&l);
         coerce_empty_to_i4(&r);
-        hres = VarOr(l.v, r.v, &v);
+        hres = coerce_str_to_num_or_bool(&l);
+        if(SUCCEEDED(hres))
+            hres = coerce_str_to_num_or_bool(&r);
+        if(SUCCEEDED(hres))
+            hres = VarOr(l.v, r.v, &v);
         release_val(&l);
     }
     release_val(&r);
@@ -2264,7 +2302,11 @@ static HRESULT interp_imp(exec_ctx_t *ctx)
         } else {
             coerce_empty_to_i4(&l);
             coerce_empty_to_i4(&r);
-            hres = VarImp(l.v, r.v, &v);
+            hres = coerce_str_to_num_or_bool(&l);
+            if(SUCCEEDED(hres))
+                hres = coerce_str_to_num_or_bool(&r);
+            if(SUCCEEDED(hres))
+                hres = VarImp(l.v, r.v, &v);
         }
         release_val(&l);
     }

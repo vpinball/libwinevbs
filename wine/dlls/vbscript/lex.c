@@ -30,24 +30,6 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(vbscript);
 
-#ifdef __LIBWINEVBS__
-#ifndef _WIN32
-typedef locale_t _locale_t;
-#define _free_locale freelocale
-static inline _locale_t _create_locale(int category, const char *locale)
-{
-    return newlocale(LC_ALL_MASK, locale, (locale_t)0);
-}
-static inline double _wcstod_l(const WCHAR *str, WCHAR **endptr, _locale_t locale)
-{
-    locale_t old = uselocale(locale);
-    double r = wcstod(str, endptr);
-    uselocale(old);
-    return r;
-}
-#endif
-#endif
-
 #define MAX_IDENTIFIER_LENGTH 255
 
 static int lex_error(parser_ctx_t *ctx, HRESULT hres)

@@ -36,6 +36,9 @@
 #include "winternl.h"
 #include "kernelbase.h"
 #include "wine/debug.h"
+#ifdef __LIBWINEVBS__
+#include "libwinevbs_nls.h"
+#endif
 
 WINE_DEFAULT_DEBUG_CHANNEL(nls);
 
@@ -579,6 +582,7 @@ static int compare_locale_names( const WCHAR *n1, const WCHAR *n2 )
 
 static const NLS_LOCALE_LCNAME_INDEX *find_lcname_entry( const WCHAR *name )
 {
+#ifndef __LIBWINEVBS__
     int min = 0, max = locale_table->nb_lcnames - 1;
 
     while (min <= max)
@@ -590,6 +594,7 @@ static const NLS_LOCALE_LCNAME_INDEX *find_lcname_entry( const WCHAR *name )
         else if (res > 0) min = pos + 1;
         else return &lcnames_index[pos];
     }
+#endif
     return NULL;
 }
 
@@ -777,6 +782,7 @@ static const struct sortguid *get_language_sort( const WCHAR *name )
  */
 const NLS_LOCALE_DATA * WINAPI NlsValidateLocale( LCID *lcid, ULONG flags )
 {
+#ifndef __LIBWINEVBS__
     const NLS_LOCALE_LCNAME_INDEX *name_entry;
     const NLS_LOCALE_LCID_INDEX *entry;
     const NLS_LOCALE_DATA *locale;
@@ -803,6 +809,10 @@ const NLS_LOCALE_DATA * WINAPI NlsValidateLocale( LCID *lcid, ULONG flags )
             locale = get_locale_data( name_entry->idx );
         return locale;
     }
+#else
+    static const NLS_LOCALE_DATA unmapped_locale;
+    return &unmapped_locale;
+#endif
 }
 
 
@@ -1169,6 +1179,7 @@ static const WCHAR *get_locale_sortname( LCID lcid )
 static int get_locale_info( const NLS_LOCALE_DATA *locale, LCID lcid, LCTYPE type,
                             WCHAR *buffer, int len )
 {
+#ifndef __LIBWINEVBS__
     static const WCHAR spermille[] = { 0x2030, 0 };  /* this one seems hardcoded */
     static const BYTE ipossignposn[]    = { 3, 3, 4, 2, 1, 1, 3, 4, 1, 3, 4, 2, 4, 3, 3, 1 };
     static const BYTE inegsignposn[]    = { 0, 3, 4, 2, 0, 1, 3, 4, 1, 3, 4, 2, 4, 3, 0, 0 };
@@ -1667,6 +1678,9 @@ static int get_locale_info( const NLS_LOCALE_DATA *locale, LCID lcid, LCTYPE typ
     }
     SetLastError( ERROR_INVALID_FLAGS );
     return 0;
+#else
+    return libwinevbs_get_locale_info( lcid, type, buffer, len );
+#endif
 }
 
 
@@ -6541,6 +6555,7 @@ LANGID WINAPI DECLSPEC_HOTPATCH GetUserDefaultUILanguage(void)
     RtlpQueryDefaultUILanguage( &lang, FALSE );
     return lang;
 }
+
 
 /******************************************************************************
  *	GetUserGeoID   (kernelbase.@)

@@ -30,7 +30,6 @@
 
 #ifdef __LIBWINEVBS__
 #include "libwinevbs.h"
-#include <locale.h>
 #include "scrrun_private.h"
 HRESULT libwinevbs_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 extern HRESULT WINAPI WshShellFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
@@ -4220,7 +4219,6 @@ static HRESULT parse_format_args(VARIANT *args, unsigned args_cnt, int *vals)
 
 static HRESULT Global_FormatNumber(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
 {
-#ifndef __LIBWINEVBS__
     int a[4] = {-1, -2, -2, -2};
     HRESULT hres;
     BSTR str;
@@ -4233,88 +4231,6 @@ static HRESULT Global_FormatNumber(BuiltinDisp *This, VARIANT *args, unsigned ar
     hres = format_number_lcid(This->ctx->lcid, args, a[0], a[1], a[2], a[3], &str);
     if(FAILED(hres)) return hres;
     return return_bstr(res, str);
-#else
-    HRESULT hres;
-    float number;
-    int decimal_places = 2;
-    int inc_leading_zero = -1;
-    int use_parenthesis = 0;
-    int group_digits = 0;
-    char* saved_locale;
-
-    hres = to_float(args, &number);
-    if (FAILED(hres))
-        return hres;
-
-    if (args_cnt > 1) {
-        if (V_VT(args+1) != VT_ERROR) {
-           hres = to_int(args+1, &decimal_places);
-           if (FAILED(hres))
-              return hres;
-        }
-    }
-
-    if (args_cnt > 2) {
-        if (V_VT(args+2) != VT_ERROR) {
-           hres = to_int(args+2, &inc_leading_zero);
-           if (FAILED(hres))
-              return hres;
-        }
-    }
-
-    if (args_cnt > 3) {
-        if (V_VT(args+3) != VT_ERROR) {
-           hres = to_int(args+3, &use_parenthesis);
-           if (FAILED(hres))
-              return hres;
-        }
-    }
-
-    if (args_cnt > 4) {
-        if (V_VT(args+4) != VT_ERROR) {
-           hres = to_int(args+4, &group_digits);
-           if (FAILED(hres))
-              return hres;
-        }
-    }
-    WCHAR format[128];
-
-    if (group_digits != -1)
-        swprintf(format, ARRAY_SIZE(format), L"%%.%df", decimal_places);
-    else {
-        saved_locale = strdup(setlocale(LC_NUMERIC, NULL));
-        setlocale(LC_NUMERIC, "");
-
-        swprintf(format, ARRAY_SIZE(format), L"%%'.%df", decimal_places);
-    }
-
-    WCHAR buf[128];
-    swprintf(buf, ARRAY_SIZE(buf), format, number);
-
-    WCHAR tmp_buf[128];
-
-    if (inc_leading_zero != -1) {
-        if (*buf == L'0') {
-            wcscpy(tmp_buf, buf + 1);
-            wcscpy(buf, tmp_buf);
-        }
-        else if (*buf == L'-' && *(buf+1) == L'0') {
-            wcscpy(tmp_buf, buf + 2);
-            swprintf(buf, ARRAY_SIZE(buf), L"-%ls", tmp_buf);
-        }
-    }
-
-    if (use_parenthesis == -1 && number < 0) {
-        wcscpy(tmp_buf, buf);
-        swprintf(buf, ARRAY_SIZE(buf), L"(%ls)", tmp_buf);
-    }
-
-    if (group_digits == -1) {
-        setlocale(LC_NUMERIC, saved_locale);
-        free(saved_locale);
-    }
-    return return_string(res, buf);
-#endif
 }
 
 static HRESULT Global_FormatCurrency(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)

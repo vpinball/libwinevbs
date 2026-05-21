@@ -27,10 +27,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(vbscript);
 static DISPID propput_dispid = DISPID_PROPERTYPUT;
 static const unsigned max_call_depth = 1024;
 
-#ifndef __LIBWINEVBS__
 typedef struct _exec_ctx_t {
-#endif
-struct _exec_ctx_t {
     vbscode_t *code;
     instr_t *instr;
     script_ctx_t *script;
@@ -53,11 +50,7 @@ struct _exec_ctx_t {
     VARIANT ret_val;
 
     exec_ctx_t *caller;
-#ifndef __LIBWINEVBS__
 } exec_ctx_t;
-#else
-};
-#endif
 
 typedef HRESULT (*instr_func_t)(exec_ctx_t*);
 

@@ -80,20 +80,18 @@
  
  #ifdef NONAMELESSUNION
  #define GetCurrentFiber()  (((NT_TIB *)NtCurrentTeb())->u.FiberData)
-@@ -8047,6 +8067,8 @@
+@@ -8047,6 +8067,7 @@
  #endif
  }
  
-+#ifdef __LIBWINVBS__
-+#ifndef __MINGW32__
++#ifndef __LIBWINEVBS__
  static FORCEINLINE DECLSPEC_NORETURN void __fastfail(unsigned int code)
  {
  #if defined(__aarch64__) || defined(__arm64ec__)
-@@ -8059,6 +8081,8 @@
+@@ -8059,6 +8080,7 @@
      for (;;) __asm__ __volatile__( "udf #0xfb" :: "r" (val) : "memory" );
  #endif
  }
-+#endif
 +#endif
  
  #endif  /* __GNUC__ */
@@ -125,19 +123,51 @@
  #define _BLOB_DEFINED
 --- wine/include/windef.h
 +++ libwinevbs/include/windef.h
-@@ -178,6 +178,16 @@
+@@ -178,6 +178,48 @@
  #define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT)-4)
  #define DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED    ((DPI_AWARENESS_CONTEXT)-5)
  
 +#ifdef __LIBWINEVBS__
-+ #undef wcsncpy
 + #include <wctype.h>
 + #include <wchar.h>
++ #include <locale.h>
++ #include <stdarg.h>
 + #ifndef _WIN32
 +  int wcsicmp( LPCWSTR str1, LPCWSTR str2 );
 +  int wcsnicmp( LPCWSTR str1, LPCWSTR str2, size_t n );
 +  WCHAR *wcslwr( WCHAR *str );
++  typedef locale_t _locale_t;
++  #define _free_locale freelocale
++  static inline _locale_t _create_locale( int category, const char *name )
++  {
++      return newlocale( LC_ALL_MASK, name, (locale_t)0 );
++  }
++  static inline double _wcstod_l( const WCHAR *str, WCHAR **endptr, _locale_t loc )
++  {
++      locale_t old = uselocale( loc );
++      double r = wcstod( str, endptr );
++      uselocale( old );
++      return r;
++  }
 + #endif
++ /* mingw ucrt headers do not declare _swprintf_l */
++ static inline int _swprintf_l( WCHAR *buffer, size_t count, const WCHAR *format, _locale_t loc, ... )
++ {
++     va_list args;
++     int ret;
++ #ifndef _WIN32
++     locale_t old = uselocale( loc );
++ #else
++     (void)loc;
++ #endif
++     va_start( args, loc );
++     ret = vswprintf( buffer, count, format, args );
++     va_end( args );
++ #ifndef _WIN32
++     uselocale( old );
++ #endif
++     return ret;
++ }
 +#endif
  #ifdef __cplusplus
  }
@@ -165,7 +195,6 @@
  # elif defined(__GNUC__)
  #  define __WINE_UUID_ATTR __attribute__((visibility("hidden"),weak))
  # endif
-# libwinevbs-only: include/intrin.h
 --- wine/include/minwindef.h
 +++ libwinevbs/include/minwindef.h
 @@ -57,6 +57,7 @@
@@ -283,9 +312,36 @@
      return TRUE;
  }
 +#endif
+# libwinevbs-only: dlls/kernelbase/libwinevbs_nls.c
+# libwinevbs-only: dlls/kernelbase/libwinevbs_nls.h
 --- wine/dlls/kernelbase/locale.c
 +++ libwinevbs/dlls/kernelbase/locale.c
-@@ -596,6 +596,7 @@
+@@ -36,6 +36,9 @@
+ #include "winternl.h"
+ #include "kernelbase.h"
+ #include "wine/debug.h"
++#ifdef __LIBWINEVBS__
++#include "libwinevbs_nls.h"
++#endif
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(nls);
+ 
+@@ -579,6 +582,7 @@
+ 
+ static const NLS_LOCALE_LCNAME_INDEX *find_lcname_entry( const WCHAR *name )
+ {
++#ifndef __LIBWINEVBS__
+     int min = 0, max = locale_table->nb_lcnames - 1;
+ 
+     while (min <= max)
+@@ -590,12 +594,14 @@
+         else if (res > 0) min = pos + 1;
+         else return &lcnames_index[pos];
+     }
++#endif
+     return NULL;
+ }
+ 
  
  static const NLS_LOCALE_LCID_INDEX *find_lcid_entry( LCID lcid )
  {
@@ -293,7 +349,7 @@
      int min = 0, max = locale_table->nb_lcids - 1;
  
      while (min <= max)
-@@ -605,6 +606,7 @@
+@@ -605,6 +611,7 @@
          else if (lcid > lcids_index[pos].id) min = pos + 1;
          else return &lcids_index[pos];
      }
@@ -301,7 +357,7 @@
      return NULL;
  }
  
-@@ -692,6 +694,7 @@
+@@ -692,6 +699,7 @@
          *name = locale_strings + user_ui_locale->sname + 1;
          break;
      default:
@@ -309,7 +365,7 @@
          if (lcid == user_lcid || lcid == system_lcid) break;
          if (!(entry = find_lcid_entry( lcid )))
          {
-@@ -700,6 +703,7 @@
+@@ -700,6 +708,7 @@
              return FALSE;
          }
          *name = locale_strings + entry->name + 1;
@@ -317,7 +373,7 @@
          break;
      }
      return TRUE;
-@@ -708,6 +712,7 @@
+@@ -708,6 +717,7 @@
  
  static const struct sortguid *get_language_sort( const WCHAR *name )
  {
@@ -325,7 +381,7 @@
      const NLS_LOCALE_LCNAME_INDEX *entry;
      const NLS_LOCALE_DATA *locale;
      WCHAR guidstr[39];
-@@ -759,6 +764,9 @@
+@@ -759,6 +769,9 @@
      if (!ret) ret = &sort.guids[0];
      locale_sorts[entry - lcnames_index] = ret;
      return ret;
@@ -335,7 +391,44 @@
  }
  
  
-@@ -1677,7 +1685,11 @@
+@@ -769,6 +782,7 @@
+  */
+ const NLS_LOCALE_DATA * WINAPI NlsValidateLocale( LCID *lcid, ULONG flags )
+ {
++#ifndef __LIBWINEVBS__
+     const NLS_LOCALE_LCNAME_INDEX *name_entry;
+     const NLS_LOCALE_LCID_INDEX *entry;
+     const NLS_LOCALE_DATA *locale;
+@@ -795,6 +809,10 @@
+             locale = get_locale_data( name_entry->idx );
+         return locale;
+     }
++#else
++    static const NLS_LOCALE_DATA unmapped_locale;
++    return &unmapped_locale;
++#endif
+ }
+ 
+ 
+@@ -1161,6 +1179,7 @@
+ static int get_locale_info( const NLS_LOCALE_DATA *locale, LCID lcid, LCTYPE type,
+                             WCHAR *buffer, int len )
+ {
++#ifndef __LIBWINEVBS__
+     static const WCHAR spermille[] = { 0x2030, 0 };  /* this one seems hardcoded */
+     static const BYTE ipossignposn[]    = { 3, 3, 4, 2, 1, 1, 3, 4, 1, 3, 4, 2, 4, 3, 3, 1 };
+     static const BYTE inegsignposn[]    = { 0, 3, 4, 2, 0, 1, 3, 4, 1, 3, 4, 2, 4, 3, 0, 0 };
+@@ -1659,6 +1678,9 @@
+     }
+     SetLastError( ERROR_INVALID_FLAGS );
+     return 0;
++#else
++    return libwinevbs_get_locale_info( lcid, type, buffer, len );
++#endif
+ }
+ 
+ 
+@@ -1677,7 +1699,11 @@
  
      if (id != CAL_GREGORIAN && type != CAL_ITWODIGITYEARMAX)
      {
@@ -347,7 +440,7 @@
          for (i = 0; i < ids[0]; i++) if (ids[1 + i] == id) break;
          if (i == ids[0]) goto invalid;
      }
-@@ -2196,7 +2208,11 @@
+@@ -2196,7 +2222,11 @@
      if (pos >> 13)
      {
          if (get_char_props( norm_info, ch ) != 0xbf) return NULL;
@@ -359,7 +452,7 @@
          len = pos >> 13;
      }
      else
-@@ -2211,7 +2227,11 @@
+@@ -2211,7 +2241,11 @@
          for ( ; pos < end; pos++)
          {
              if (pairs[pos].src != (WCHAR)ch) continue;
@@ -371,7 +464,7 @@
              len = pairs[pos].dst >> 13;
              break;
          }
-@@ -2228,7 +2248,11 @@
+@@ -2228,7 +2262,11 @@
  static WCHAR compose_chars( WCHAR ch1, WCHAR ch2 )
  {
      const USHORT *table = (const USHORT *)norm_info + norm_info->comp_hash;
@@ -383,7 +476,7 @@
      unsigned int hash, start, end, i;
      WCHAR ch[3];
  
-@@ -2273,6 +2297,11 @@
+@@ -2273,6 +2311,11 @@
  {
      static const CPTABLEINFO utf7_cpinfo = { CP_UTF7, 5, '?', 0xfffd, '?', '?' };
      static const CPTABLEINFO utf8_cpinfo = { CP_UTF8, 4, '?', 0xfffd, '?', '?' };
@@ -395,7 +488,7 @@
      unsigned int i;
      USHORT *ptr;
      SIZE_T size;
-@@ -3906,6 +3935,7 @@
+@@ -3906,6 +3949,7 @@
  static int compare_string( const struct sortguid *sortid, DWORD flags,
                             const WCHAR *src1, int srclen1, const WCHAR *src2, int srclen2 )
  {
@@ -403,7 +496,7 @@
      struct sortkey_state s1;
      struct sortkey_state s2;
      BYTE primary1[32];
-@@ -3966,6 +3996,12 @@
+@@ -3966,6 +4010,12 @@
      free_sortkey_state( &s1 );
      free_sortkey_state( &s2 );
      return ret;
@@ -416,7 +509,7 @@
  }
  
  
-@@ -4408,7 +4444,11 @@
+@@ -4408,7 +4458,11 @@
      if (id == ENUM_ALL_CALENDARS)
      {
          count = locale_strings[locale->scalendartype];
@@ -428,7 +521,7 @@
      }
      else if (id <= CAL_UMALQURA)
      {
-@@ -4486,7 +4526,11 @@
+@@ -4486,7 +4540,11 @@
          return FALSE;
      }
  
@@ -440,7 +533,7 @@
  
      switch (flags & ~LOCALE_USE_CP_ACP)
      {
-@@ -4823,7 +4867,9 @@
+@@ -4823,7 +4881,9 @@
          return 0;
      }
  
@@ -450,7 +543,7 @@
  
      if (!str1 || !str2)
      {
-@@ -5826,6 +5872,7 @@
+@@ -5826,6 +5886,7 @@
  BOOL WINAPI DECLSPEC_HOTPATCH GetFileMUIInfo( DWORD flags, const WCHAR *path,
                                                FILEMUIINFO *info, DWORD *size )
  {
@@ -458,7 +551,7 @@
      DWORD off, mui_size, type = MUI_FILETYPE_NOT_LANGUAGE_NEUTRAL;
      struct mui_resource *mui = NULL;
      HMODULE hmod;
-@@ -5980,6 +6027,9 @@
+@@ -5980,6 +6041,9 @@
  
      FreeLibrary( hmod );
      return TRUE;
@@ -468,15 +561,7 @@
  }
  
  
-@@ -6492,7 +6542,6 @@
-     return lang;
- }
- 
--
- /******************************************************************************
-  *	GetUserGeoID   (kernelbase.@)
-  */
-@@ -6796,6 +6845,7 @@
+@@ -6796,6 +6860,7 @@
   */
  BOOL WINAPI DECLSPEC_HOTPATCH IsValidLocale( LCID lcid, DWORD flags )
  {
@@ -484,7 +569,7 @@
      switch (lcid)
      {
      case LOCALE_NEUTRAL:
-@@ -6805,6 +6855,9 @@
+@@ -6805,6 +6870,9 @@
      default:
          return !!NlsValidateLocale( &lcid, LOCALE_ALLOW_NEUTRAL_NAMES );
      }
@@ -2182,59 +2267,9 @@
  }
  
  static HRESULT WINAPI DispatchEx_GetIDsOfNames(IDispatchEx *iface, REFIID riid,
---- wine/dlls/vbscript/lex.c
-+++ libwinevbs/dlls/vbscript/lex.c
-@@ -30,6 +30,24 @@
- 
- WINE_DEFAULT_DEBUG_CHANNEL(vbscript);
- 
-+#ifdef __LIBWINEVBS__
-+#ifndef _WIN32
-+typedef locale_t _locale_t;
-+#define _free_locale freelocale
-+static inline _locale_t _create_locale(int category, const char *locale)
-+{
-+    return newlocale(LC_ALL_MASK, locale, (locale_t)0);
-+}
-+static inline double _wcstod_l(const WCHAR *str, WCHAR **endptr, _locale_t locale)
-+{
-+    locale_t old = uselocale(locale);
-+    double r = wcstod(str, endptr);
-+    uselocale(old);
-+    return r;
-+}
-+#endif
-+#endif
-+
- #define MAX_IDENTIFIER_LENGTH 255
- 
- static int lex_error(parser_ctx_t *ctx, HRESULT hres)
 --- wine/dlls/vbscript/interp.c
 +++ libwinevbs/dlls/vbscript/interp.c
-@@ -27,7 +27,10 @@
- static DISPID propput_dispid = DISPID_PROPERTYPUT;
- static const unsigned max_call_depth = 1024;
- 
-+#ifndef __LIBWINEVBS__
- typedef struct _exec_ctx_t {
-+#endif
-+struct _exec_ctx_t {
-     vbscode_t *code;
-     instr_t *instr;
-     script_ctx_t *script;
-@@ -50,7 +53,11 @@
-     VARIANT ret_val;
- 
-     exec_ctx_t *caller;
-+#ifndef __LIBWINEVBS__
- } exec_ctx_t;
-+#else
-+};
-+#endif
- 
- typedef HRESULT (*instr_func_t)(exec_ctx_t*);
- 
-@@ -2107,6 +2114,20 @@
+@@ -2107,6 +2107,20 @@
      }else {
          named_item_t *item;
          disp = NULL;
@@ -2707,13 +2742,12 @@
 +#endif
 --- wine/dlls/vbscript/global.c
 +++ libwinevbs/dlls/vbscript/global.c
-@@ -28,6 +28,14 @@
+@@ -28,6 +28,13 @@
  
  #include "wine/debug.h"
  
 +#ifdef __LIBWINEVBS__
 +#include "libwinevbs.h"
-+#include <locale.h>
 +#include "scrrun_private.h"
 +HRESULT libwinevbs_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 +extern HRESULT WINAPI WshShellFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
@@ -2722,7 +2756,7 @@
  WINE_DEFAULT_DEBUG_CHANNEL(vbscript);
  
  #define VB_E_CANNOT_CREATE_OBJ 0x800a01ad
-@@ -536,6 +544,7 @@
+@@ -536,6 +543,7 @@
      if(FAILED(hres))
          return NULL;
  
@@ -2730,7 +2764,7 @@
      hres = IClassFactory_QueryInterface(cf, &IID_IClassFactoryEx, (void**)&cfex);
      if(SUCCEEDED(hres)) {
          FIXME("Use IClassFactoryEx\n");
-@@ -543,6 +552,22 @@
+@@ -543,6 +551,22 @@
      }
  
      hres = IClassFactory_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
@@ -2753,7 +2787,7 @@
      if(FAILED(hres))
          return NULL;
  
-@@ -2804,8 +2829,16 @@
+@@ -2804,8 +2828,16 @@
          hres = E_NOTIMPL;
      }
  
@@ -2770,103 +2804,6 @@
  
      SysFreeString(prompt);
      SysFreeString(title);
-@@ -4187,6 +4220,7 @@
- 
- static HRESULT Global_FormatNumber(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
- {
-+#ifndef __LIBWINEVBS__
-     int a[4] = {-1, -2, -2, -2};
-     HRESULT hres;
-     BSTR str;
-@@ -4199,6 +4233,88 @@
-     hres = format_number_lcid(This->ctx->lcid, args, a[0], a[1], a[2], a[3], &str);
-     if(FAILED(hres)) return hres;
-     return return_bstr(res, str);
-+#else
-+    HRESULT hres;
-+    float number;
-+    int decimal_places = 2;
-+    int inc_leading_zero = -1;
-+    int use_parenthesis = 0;
-+    int group_digits = 0;
-+    char* saved_locale;
-+
-+    hres = to_float(args, &number);
-+    if (FAILED(hres))
-+        return hres;
-+
-+    if (args_cnt > 1) {
-+        if (V_VT(args+1) != VT_ERROR) {
-+           hres = to_int(args+1, &decimal_places);
-+           if (FAILED(hres))
-+              return hres;
-+        }
-+    }
-+
-+    if (args_cnt > 2) {
-+        if (V_VT(args+2) != VT_ERROR) {
-+           hres = to_int(args+2, &inc_leading_zero);
-+           if (FAILED(hres))
-+              return hres;
-+        }
-+    }
-+
-+    if (args_cnt > 3) {
-+        if (V_VT(args+3) != VT_ERROR) {
-+           hres = to_int(args+3, &use_parenthesis);
-+           if (FAILED(hres))
-+              return hres;
-+        }
-+    }
-+
-+    if (args_cnt > 4) {
-+        if (V_VT(args+4) != VT_ERROR) {
-+           hres = to_int(args+4, &group_digits);
-+           if (FAILED(hres))
-+              return hres;
-+        }
-+    }
-+    WCHAR format[128];
-+
-+    if (group_digits != -1)
-+        swprintf(format, ARRAY_SIZE(format), L"%%.%df", decimal_places);
-+    else {
-+        saved_locale = strdup(setlocale(LC_NUMERIC, NULL));
-+        setlocale(LC_NUMERIC, "");
-+
-+        swprintf(format, ARRAY_SIZE(format), L"%%'.%df", decimal_places);
-+    }
-+
-+    WCHAR buf[128];
-+    swprintf(buf, ARRAY_SIZE(buf), format, number);
-+
-+    WCHAR tmp_buf[128];
-+
-+    if (inc_leading_zero != -1) {
-+        if (*buf == L'0') {
-+            wcscpy(tmp_buf, buf + 1);
-+            wcscpy(buf, tmp_buf);
-+        }
-+        else if (*buf == L'-' && *(buf+1) == L'0') {
-+            wcscpy(tmp_buf, buf + 2);
-+            swprintf(buf, ARRAY_SIZE(buf), L"-%ls", tmp_buf);
-+        }
-+    }
-+
-+    if (use_parenthesis == -1 && number < 0) {
-+        wcscpy(tmp_buf, buf);
-+        swprintf(buf, ARRAY_SIZE(buf), L"(%ls)", tmp_buf);
-+    }
-+
-+    if (group_digits == -1) {
-+        setlocale(LC_NUMERIC, saved_locale);
-+        free(saved_locale);
-+    }
-+    return return_string(res, buf);
-+#endif
- }
- 
- static HRESULT Global_FormatCurrency(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
 --- wine/dlls/oleaut32/oleaut.c
 +++ libwinevbs/dlls/oleaut32/oleaut.c
 @@ -282,9 +282,13 @@
@@ -2912,140 +2849,3 @@
  
  /***********************************************************************
   *		DllRegisterServer (OLEAUT32.@)
---- wine/dlls/oleaut32/vartype.c
-+++ libwinevbs/dlls/oleaut32/vartype.c
-@@ -6198,6 +6198,12 @@
-     *pBoolOut = VARIANT_FALSE;
-   else if (!wcscmp(strIn, L"#TRUE#"))
-     *pBoolOut = VARIANT_TRUE;
-+#ifdef __LIBWINEVBS__
-+  else if (!wcsicmp(strIn, L"FALSE"))
-+    *pBoolOut = VARIANT_FALSE;
-+  else if (!wcsicmp(strIn, L"TRUE"))
-+    *pBoolOut = VARIANT_TRUE;
-+#endif
-   else
-   {
-     DOUBLE d;
-@@ -6540,15 +6546,21 @@
- static HRESULT VARIANT_BstrFromReal(DOUBLE dblIn, LCID lcid, ULONG dwFlags,
-                                     BSTR* pbstrOut, int ndigits)
- {
-+#ifndef __LIBWINEVBS__
-   _locale_t locale;
-+#endif
-   WCHAR *e, buff[256];
-   int len;
- 
-   if (!pbstrOut)
-     return E_INVALIDARG;
- 
-+#ifndef __LIBWINEVBS__
-   if (!(locale = _create_locale(LC_ALL, "C"))) return E_OUTOFMEMORY;
-   len = _swprintf_l(buff, ARRAY_SIZE(buff), L"%.*G", locale, ndigits, dblIn);
-+#else
-+  len = swprintf(buff, ARRAY_SIZE(buff), L"%.*G", ndigits, dblIn);
-+#endif
-   e = wcschr(buff, 'E');
-   if (e)
-   {
-@@ -6559,12 +6571,18 @@
-       extra_decimals = dot ? e - dot - 2 : 0;
-       if (labs(wcstol(e+1, NULL, 10)) + extra_decimals < ndigits)
-       {
-+#ifndef __LIBWINEVBS__
-           len = _swprintf_l(buff, ARRAY_SIZE(buff), L"%.*f", locale, ndigits, dblIn);
-+#else
-+          len = swprintf(buff, ARRAY_SIZE(buff), L"%.*f", ndigits, dblIn);
-+#endif          
-           while (len > 0 && (buff[len-1] == '0')) len--;
-       }
-   }
-   buff[len] = 0;
-+#ifndef __LIBWINEVBS__
-   _free_locale(locale);
-+#endif
- 
-   /* Negative zeroes are disallowed (some applications depend on this).
-      If buff starts with a minus, and then nothing follows but zeroes
-@@ -6837,6 +6855,7 @@
- 
-   *pbstrOut = NULL;
- 
-+#ifndef __LIBWINEVBS__
-   if (dwFlags & VAR_CALENDAR_THAI)
-       st.wYear += 553; /* Use the Thai buddhist calendar year */
-   else if (dwFlags & (VAR_CALENDAR_HIJRI|VAR_CALENDAR_GREGORIAN))
-@@ -6870,6 +6889,11 @@
-     if (!GetTimeFormatW(lcid, dwFormatFlags, &st, NULL, time, ARRAY_SIZE(date)-(time-date)))
-       return E_INVALIDARG;
-   }
-+#else
-+    swprintf(date, ARRAY_SIZE(date), L"%02d/%02d/%04d %02d:%02d:%02d",
-+             st.wMonth, st.wDay, st.wYear,
-+             st.wHour, st.wMinute, st.wSecond);
-+#endif
- 
-   *pbstrOut = SysAllocString(date);
-   if (*pbstrOut)
-@@ -6934,6 +6958,12 @@
-     dwResId++; /* Use negative form */
- 
- VarBstrFromBool_GetLocalised:
-+#ifdef __LIBWINEVBS__
-+  if (dwResId == 100 || dwResId == 101) {
-+    *pbstrOut = SysAllocString((dwResId == 100) ? L"True" : L"False");
-+    return *pbstrOut ? S_OK : E_OUTOFMEMORY;
-+  }
-+#endif
-   if (VARIANT_GetLocalisedText(langId, dwResId, szBuff))
-   {
-     *pbstrOut = SysAllocString(szBuff);
---- wine/dlls/oleaut32/varformat.c
-+++ libwinevbs/dlls/oleaut32/varformat.c
-@@ -2541,6 +2541,22 @@
-   if (dwFlags)
-     FIXME("Does not support flags %#lx, ignoring.\n", dwFlags);
- 
-+#ifdef __LIBWINEVBS__
-+  {
-+    static const WCHAR *month_names[] = {
-+      L"January", L"February", L"March", L"April", L"May", L"June",
-+      L"July", L"August", L"September", L"October", L"November", L"December"
-+    };
-+    static const WCHAR *abbrev_names[] = {
-+      L"Jan", L"Feb", L"Mar", L"Apr", L"May", L"Jun",
-+      L"Jul", L"Aug", L"Sep", L"Oct", L"Nov", L"Dec"
-+    };
-+    const WCHAR *name = fAbbrev ? abbrev_names[iMonth - 1] : month_names[iMonth - 1];
-+    *pbstrOut = SysAllocString(name);
-+    return *pbstrOut ? S_OK : E_OUTOFMEMORY;
-+  }
-+#endif
-+
-   if (fAbbrev)
- 	localeValue = LOCALE_SABBREVMONTHNAME1 + iMonth - 1;
-   else
-@@ -2597,6 +2613,22 @@
- 
-   if (dwFlags)
-     FIXME("Does not support flags %#lx, ignoring.\n", dwFlags);
-+
-+#ifdef __LIBWINEVBS__
-+  {
-+    static const WCHAR *day_names[] = {
-+      L"Monday", L"Tuesday", L"Wednesday", L"Thursday", L"Friday", L"Saturday", L"Sunday"
-+    };
-+    static const WCHAR *abbrev_day_names[] = {
-+      L"Mon", L"Tue", L"Wed", L"Thu", L"Fri", L"Sat", L"Sun"
-+    };
-+    if (iFirstDay == 0) iFirstDay = 1;
-+    int idx = (7 + iWeekday - 1 + iFirstDay - 2) % 7;
-+    const WCHAR *name = fAbbrev ? abbrev_day_names[idx] : day_names[idx];
-+    *pbstrOut = SysAllocString(name);
-+    return *pbstrOut ? S_OK : E_OUTOFMEMORY;
-+  }
-+#endif
- 
-   /* If we have to use the default firstDay, find which one it is */
-   if (iFirstDay == 0) {

@@ -222,18 +222,32 @@ HRESULT WINAPI LoadRegTypeLib(REFGUID rguid, WORD wVerMajor, WORD wVerMinor, LCI
    return 0;
 }
 
+/* oleaut32 IDS_TRUE..IDS_OFF (100-105) from oleaut32.rc, RT_STRING block 7 */
+static const WCHAR oleaut32_bool_strings[] =
+{
+   0, 0, 0, 0,
+   4, 'T', 'r', 'u', 'e',
+   5, 'F', 'a', 'l', 's', 'e',
+   3, 'Y', 'e', 's',
+   2, 'N', 'o',
+   2, 'O', 'n',
+   3, 'O', 'f', 'f'
+};
+
 HGLOBAL WINAPI LoadResource(HINSTANCE module, HRSRC rsrc)
 {
-   return 0;
+   return (HGLOBAL)rsrc;
 }
 
 LPVOID WINAPI LockResource(HGLOBAL handle)
 {
-   return NULL;
+   return handle;
 }
 
 HRSRC WINAPI FindResourceExW(HMODULE module, LPCWSTR type, LPCWSTR name, WORD lang)
 {
+   if (type == (LPCWSTR)RT_STRING && name == MAKEINTRESOURCEW(7))
+      return (HRSRC)oleaut32_bool_strings;
    return 0;
 }
 

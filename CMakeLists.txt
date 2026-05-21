@@ -57,7 +57,7 @@ elseif(PLATFORM STREQUAL "linux" OR PLATFORM STREQUAL "android")
    set(CMAKE_INSTALL_RPATH "$ORIGIN")
 endif()
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
@@ -113,6 +113,7 @@ set(LIBWINEVBS_SOURCES
    wine/dlls/atl/atl.c
 
    wine/dlls/kernelbase/locale.c
+   wine/dlls/kernelbase/libwinevbs_nls.c
 )
 
 set(LIBWINEVBS_INCLUDE_DIRS
@@ -121,6 +122,10 @@ set(LIBWINEVBS_INCLUDE_DIRS
    ${CMAKE_SOURCE_DIR}/atl/include
    ${CMAKE_SOURCE_DIR}/atlmfc/include
 )
+
+if(MINGW)
+   list(APPEND LIBWINEVBS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/wine/include/msvcrt)
+endif()
 
 set(LIBWINEVBS_PRIVATE_INCLUDE_DIRS
    ${CMAKE_SOURCE_DIR}/wine/dlls/vbscript

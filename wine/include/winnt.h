@@ -8067,8 +8067,7 @@ static FORCEINLINE void WriteNoFence64( LONG64 volatile *dest, LONG64 value )
 #endif
 }
 
-#ifdef __LIBWINVBS__
-#ifndef __MINGW32__
+#ifndef __LIBWINEVBS__
 static FORCEINLINE DECLSPEC_NORETURN void __fastfail(unsigned int code)
 {
 #if defined(__aarch64__) || defined(__arm64ec__)
@@ -8081,7 +8080,6 @@ static FORCEINLINE DECLSPEC_NORETURN void __fastfail(unsigned int code)
     for (;;) __asm__ __volatile__( "udf #0xfb" :: "r" (val) : "memory" );
 #endif
 }
-#endif
 #endif
 
 #endif  /* __GNUC__ */

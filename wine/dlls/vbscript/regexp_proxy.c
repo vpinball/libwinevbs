@@ -33,6 +33,20 @@ static HRESULT WINAPI RegExp_GetIDsOfNames(IRegExp *iface, REFIID riid, LPOLESTR
 	return DISP_E_MEMBERNOTFOUND;
 }
 
+static const char *RegExp_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "(default)";
+		case DISPID_REGEXP_PATTERN: return "Pattern";
+		case DISPID_REGEXP_IGNORECASE: return "IgnoreCase";
+		case DISPID_REGEXP_GLOBAL: return "Global";
+		case DISPID_REGEXP_EXECUTE: return "Execute";
+		case DISPID_REGEXP_TEST: return "Test";
+		case DISPID_REGEXP_REPLACE: return "Replace";
+		default: return "?";
+	}
+}
+
 static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 		REFIID riid, LCID lcid, WORD wFlags,
 		DISPPARAMS *pDispParams, VARIANT *pVarResult,
@@ -176,7 +190,7 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "RegExp_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "RegExp_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", RegExp_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -213,6 +227,21 @@ static HRESULT WINAPI RegExp2_GetIDsOfNames(IRegExp2 *iface, REFIID riid, LPOLES
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *RegExp2_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "(default)";
+		case DISPID_REGEXP_PATTERN: return "Pattern";
+		case DISPID_REGEXP_IGNORECASE: return "IgnoreCase";
+		case DISPID_REGEXP_GLOBAL: return "Global";
+		case DISPID_REGEXP_MULTILINE: return "Multiline";
+		case DISPID_REGEXP_EXECUTE: return "Execute";
+		case DISPID_REGEXP_TEST: return "Test";
+		case DISPID_REGEXP_REPLACE: return "Replace";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
@@ -378,7 +407,7 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "RegExp2_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "RegExp2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", RegExp2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -411,6 +440,16 @@ static HRESULT WINAPI Match_GetIDsOfNames(IMatch *iface, REFIID riid, LPOLESTR *
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *Match_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Value";
+		case DISPID_MATCH_FIRSTINDEX: return "FirstIndex";
+		case DISPID_MATCH_LENGTH: return "Length";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI Match_Invoke(IMatch *iface, DISPID dispIdMember,
@@ -465,7 +504,7 @@ static HRESULT WINAPI Match_Invoke(IMatch *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "Match_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "Match_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", Match_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -499,6 +538,17 @@ static HRESULT WINAPI Match2_GetIDsOfNames(IMatch2 *iface, REFIID riid, LPOLESTR
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *Match2_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Value";
+		case DISPID_MATCH_FIRSTINDEX: return "FirstIndex";
+		case DISPID_MATCH_LENGTH: return "Length";
+		case DISPID_MATCH_SUBMATCHES: return "SubMatches";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI Match2_Invoke(IMatch2 *iface, DISPID dispIdMember,
@@ -567,7 +617,7 @@ static HRESULT WINAPI Match2_Invoke(IMatch2 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "Match2_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "Match2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", Match2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -599,6 +649,16 @@ static HRESULT WINAPI MatchCollection_GetIDsOfNames(IMatchCollection *iface, REF
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *MatchCollection_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Item";
+		case DISPID_MATCHCOLLECTION_COUNT: return "Count";
+		case DISPID_NEWENUM: return "_NewEnum";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI MatchCollection_Invoke(IMatchCollection *iface, DISPID dispIdMember,
@@ -661,7 +721,7 @@ static HRESULT WINAPI MatchCollection_Invoke(IMatchCollection *iface, DISPID dis
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "MatchCollection_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "MatchCollection_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", MatchCollection_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -693,6 +753,16 @@ static HRESULT WINAPI MatchCollection2_GetIDsOfNames(IMatchCollection2 *iface, R
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *MatchCollection2_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Item";
+		case DISPID_MATCHCOLLECTION_COUNT: return "Count";
+		case DISPID_NEWENUM: return "_NewEnum";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI MatchCollection2_Invoke(IMatchCollection2 *iface, DISPID dispIdMember,
@@ -755,7 +825,7 @@ static HRESULT WINAPI MatchCollection2_Invoke(IMatchCollection2 *iface, DISPID d
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "MatchCollection2_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "MatchCollection2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", MatchCollection2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -787,6 +857,16 @@ static HRESULT WINAPI SubMatches_GetIDsOfNames(ISubMatches *iface, REFIID riid, 
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *SubMatches_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Item";
+		case DISPID_SUBMATCHES_COUNT: return "Count";
+		case DISPID_NEWENUM: return "_NewEnum";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI SubMatches_Invoke(ISubMatches *iface, DISPID dispIdMember,
@@ -848,7 +928,7 @@ static HRESULT WINAPI SubMatches_Invoke(ISubMatches *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "SubMatches_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "SubMatches_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", SubMatches_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }

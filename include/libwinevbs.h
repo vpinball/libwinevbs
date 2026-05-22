@@ -45,6 +45,10 @@ typedef enum {
 
 void external_log(libwinevbs_log_level_t level, const char* format, ...);
 
+/* Returns the symbolic name for a known HRESULT (e.g. "DISP_E_MEMBERNOTFOUND"),
+   or "?" when the value is not recognized. For diagnostic logging only. */
+const char* libwinevbs_hresult_name(HRESULT hr);
+
 typedef struct {
    void (*log)(libwinevbs_log_level_t level, const char* format, va_list args);
    HRESULT (*create_object)(const WCHAR* progid, IClassFactory* cf, IUnknown** obj);

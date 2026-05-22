@@ -38,6 +38,25 @@ static HRESULT WINAPI dictionary_GetIDsOfNames(IDictionary *iface, REFIID riid, 
 	return DISP_E_MEMBERNOTFOUND;
 }
 
+static const char *dictionary_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Item";
+		case 0x00000001: return "Add";
+		case 0x00000002: return "Count";
+		case 0x00000003: return "Exists";
+		case 0x00000004: return "Items";
+		case 0x00000005: return "Key";
+		case 0x00000006: return "Keys";
+		case 0x00000007: return "Remove";
+		case 0x00000008: return "RemoveAll";
+		case 0x00000009: return "CompareMode";
+		case DISPID_NEWENUM: return "_NewEnum";
+		case 0x0000000a: return "HashVal";
+		default: return "?";
+	}
+}
+
 static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 		REFIID riid, LCID lcid, WORD wFlags,
 		DISPPARAMS *pDispParams, VARIANT *pVarResult,
@@ -254,7 +273,7 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "dictionary_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "dictionary_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", dictionary_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }

@@ -230,6 +230,23 @@ public class IDLParserToC {
 		buffer.append(indent(fragment.toString(), 1));
 		buffer.append("}\n\n");
 
+		// dispId -> method name table, used for diagnostic logging in Invoke
+		fragment.setLength(0);
+		fragment.append("switch(dispId) {\n");
+		if (!hasDispIdValue) {
+			fragment.append("case DISPID_VALUE: return \"(default)\";\n");
+		}
+		for (String key : dispatchMap.keySet()) {
+			fragment.append("case " + dispatchMap.get(key).getId() + ": return \"" + key + "\";\n");
+		}
+		fragment.append("default: return \"?\";\n");
+		fragment.append("}\n");
+
+		buffer.append("static const char *" + idlInterface.getClassName() + "_dispid_name(DISPID dispId)\n");
+		buffer.append("{\n");
+		buffer.append(indent(fragment.toString(), 1));
+		buffer.append("}\n\n");
+
 		buffer.append("static HRESULT WINAPI " + idlInterface.getClassName() + "_Invoke(" + idlInterface.getInterfaceName() + " *iface, DISPID dispIdMember,\n"
 				+ "\t\tREFIID riid, LCID lcid, WORD wFlags,\n"
 				+ "\t\tDISPPARAMS *pDispParams, VARIANT *pVarResult,\n"
@@ -298,7 +315,7 @@ public class IDLParserToC {
 		fragment.append("\tVariantClear(&res);\n");
 		fragment.append("}\n");
 		fragment.append("else {\n");
-		fragment.append("external_log(LIBWINEVBS_LOG_WARN, \"" + idlInterface.getClassName() + "_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d\", dispIdMember, dispIdMember, wFlags, hres);\n");
+		fragment.append("external_log(LIBWINEVBS_LOG_WARN, \"" + idlInterface.getClassName() + "_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)\", " + idlInterface.getClassName() + "_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));\n");
 		fragment.append("}\n");
 		fragment.append("return hres;\n");
 

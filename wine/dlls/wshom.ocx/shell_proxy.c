@@ -30,6 +30,17 @@ static HRESULT WINAPI WshCollection_GetIDsOfNames(IWshCollection *iface, REFIID 
 	return DISP_E_MEMBERNOTFOUND;
 }
 
+static const char *WshCollection_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Item";
+		case 1: return "Count";
+		case 2: return "length";
+		case DISPID_NEWENUM: return "_NewEnum";
+		default: return "?";
+	}
+}
+
 static HRESULT WINAPI WshCollection_Invoke(IWshCollection *iface, DISPID dispIdMember,
 		REFIID riid, LCID lcid, WORD wFlags,
 		DISPPARAMS *pDispParams, VARIANT *pVarResult,
@@ -97,7 +108,7 @@ static HRESULT WINAPI WshCollection_Invoke(IWshCollection *iface, DISPID dispIdM
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshCollection_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "WshCollection_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshCollection_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -131,6 +142,18 @@ static HRESULT WINAPI WshEnvironment_GetIDsOfNames(IWshEnvironment *iface, REFII
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *WshEnvironment_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "Item";
+		case 1: return "Count";
+		case 2: return "length";
+		case DISPID_NEWENUM: return "_NewEnum";
+		case 0x03e9: return "Remove";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI WshEnvironment_Invoke(IWshEnvironment *iface, DISPID dispIdMember,
@@ -232,7 +255,7 @@ static HRESULT WINAPI WshEnvironment_Invoke(IWshEnvironment *iface, DISPID dispI
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshEnvironment_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "WshEnvironment_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshEnvironment_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -269,6 +292,21 @@ static HRESULT WINAPI WshExec_GetIDsOfNames(IWshExec *iface, REFIID riid, LPOLES
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *WshExec_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "(default)";
+		case 0x0001: return "Status";
+		case 0x0003: return "StdIn";
+		case 0x0004: return "StdOut";
+		case 0x0005: return "StdErr";
+		case 0x0006: return "ProcessID";
+		case 0x0007: return "ExitCode";
+		case 0x0008: return "Terminate";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI WshExec_Invoke(IWshExec *iface, DISPID dispIdMember,
@@ -375,7 +413,7 @@ static HRESULT WINAPI WshExec_Invoke(IWshExec *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshExec_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "WshExec_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshExec_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -416,6 +454,24 @@ static HRESULT WINAPI WshShortcut_GetIDsOfNames(IWshShortcut *iface, REFIID riid
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *WshShortcut_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "FullName";
+		case 0x03e8: return "Arguments";
+		case 0x03e9: return "Description";
+		case 0x03ea: return "Hotkey";
+		case 0x03eb: return "IconLocation";
+		case 0x03ec: return "RelativePath";
+		case 0x03ed: return "TargetPath";
+		case 0x03ee: return "WindowStyle";
+		case 0x03ef: return "WorkingDirectory";
+		case 0x07d0: return "Load";
+		case 0x07d1: return "Save";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI WshShortcut_Invoke(IWshShortcut *iface, DISPID dispIdMember,
@@ -631,7 +687,7 @@ static HRESULT WINAPI WshShortcut_Invoke(IWshShortcut *iface, DISPID dispIdMembe
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshShortcut_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "WshShortcut_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshShortcut_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -675,6 +731,28 @@ static HRESULT WINAPI WshShell3_GetIDsOfNames(IWshShell3 *iface, REFIID riid, LP
 			max = i-1;
 	}
 	return DISP_E_MEMBERNOTFOUND;
+}
+
+static const char *WshShell3_dispid_name(DISPID dispId)
+{
+	switch(dispId) {
+		case DISPID_VALUE: return "(default)";
+		case 0x0064: return "SpecialFolders";
+		case 0x00c8: return "Environment";
+		case 0x03e8: return "Run";
+		case 0x03e9: return "Popup";
+		case 0x03ea: return "CreateShortcut";
+		case 0x03ee: return "ExpandEnvironmentStrings";
+		case 0x07d0: return "RegRead";
+		case 0x07d1: return "RegWrite";
+		case 0x07d2: return "RegDelete";
+		case 0x0bb8: return "LogEvent";
+		case 0x0bc2: return "AppActivate";
+		case 0x0bc3: return "SendKeys";
+		case 0x0bc4: return "Exec";
+		case 0x0bc5: return "CurrentDirectory";
+		default: return "?";
+	}
 }
 
 static HRESULT WINAPI WshShell3_Invoke(IWshShell3 *iface, DISPID dispIdMember,
@@ -971,7 +1049,7 @@ static HRESULT WINAPI WshShell3_Invoke(IWshShell3 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshShell3_Invoke: dispId=%d (0x%08x), wFlags=%d, hres=%d", dispIdMember, dispIdMember, wFlags, hres);
+		external_log(LIBWINEVBS_LOG_WARN, "WshShell3_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshShell3_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }

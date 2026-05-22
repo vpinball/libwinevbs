@@ -42,273 +42,112 @@ BSTR get_vbscript_string(int id)
 #ifndef __LIBWINEVBS__
     if(!LoadStringW(vbscript_hinstance, id, buf, ARRAY_SIZE(buf))) return NULL;
 #else
-    switch (id) {
-        case VBSE_ILLEGAL_FUNC_CALL:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_ILLEGAL_FUNC_CALL");
-            break;
-        case VBSE_OVERFLOW:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OVERFLOW");
-            break;
-        case VBSE_OUT_OF_MEMORY:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OUT_OF_MEMORY");
-            break;
-        case VBSE_OUT_OF_BOUNDS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OUT_OF_BOUNDS");
-            break;
-        case VBSE_ARRAY_LOCKED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_ARRAY_LOCKED");
-            break;
-        case VBSE_DIVISION_BY_ZERO:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DIVISION_BY_ZERO");
-            break;
-        case VBSE_TYPE_MISMATCH:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_TYPE_MISMATCH");
-            break;
-        case VBSE_OUT_OF_STACK:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OUT_OF_STACK");
-            break;
-        case VBSE_FILE_NOT_FOUND:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_FILE_NOT_FOUND");
-            break;
-        case VBSE_IO_ERROR:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_IO_ERROR");
-            break;
-        case VBSE_FILE_ALREADY_EXISTS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_FILE_ALREADY_EXISTS");
-            break;
-        case VBSE_DISK_FULL:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DISK_FULL");
-            break;
-        case VBSE_TOO_MANY_FILES:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_TOO_MANY_FILES");
-            break;
-        case VBSE_PERMISSION_DENIED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PERMISSION_DENIED");
-            break;
-        case VBSE_PATH_FILE_ACCESS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PATH_FILE_ACCESS");
-            break;
-        case VBSE_PATH_NOT_FOUND:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PATH_NOT_FOUND");
-            break;
-        case VBSE_OBJECT_VARIABLE_NOT_SET:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OBJECT_VARIABLE_NOT_SET");
-            break;
-        case VBSE_FOR_LOOP_NOT_INITIALIZED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_FOR_LOOP_NOT_INITIALIZED");
-            break;
-        case VBSE_ILLEGAL_NULL_USE:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_ILLEGAL_NULL_USE");
-            break;
-        case VBSE_CANT_CREATE_TMP_FILE:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CANT_CREATE_TMP_FILE");
-            break;
-        case VBSE_OBJECT_REQUIRED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OBJECT_REQUIRED");
-            break;
-        case VBSE_CANT_CREATE_OBJECT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CANT_CREATE_OBJECT");
-            break;
-        case VBSE_OLE_NOT_SUPPORTED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OLE_NOT_SUPPORTED");
-            break;
-        case VBSE_OLE_FILE_NOT_FOUND:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OLE_FILE_NOT_FOUND");
-            break;
-        case VBSE_OLE_NO_PROP_OR_METHOD:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_OLE_NO_PROP_OR_METHOD");
-            break;
-        case VBSE_ACTION_NOT_SUPPORTED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_ACTION_NOT_SUPPORTED");
-            break;
-        case VBSE_NAMED_ARGS_NOT_SUPPORTED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_NAMED_ARGS_NOT_SUPPORTED");
-            break;
-        case VBSE_LOCALE_SETTING_NOT_SUPPORTED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_LOCALE_SETTING_NOT_SUPPORTED");
-            break;
-        case VBSE_NAMED_PARAM_NOT_FOUND:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_NAMED_PARAM_NOT_FOUND");
-            break;
-        case VBSE_PARAMETER_NOT_OPTIONAL:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PARAMETER_NOT_OPTIONAL");
-            break;
-        case VBSE_FUNC_ARITY_MISMATCH:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_FUNC_ARITY_MISMATCH");
-            break;
-        case VBSE_NOT_ENUM:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_NOT_ENUM");
-            break;
-        case VBSE_DUPLICATE_KEY:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DUPLICATE_KEY");
-            break;
-        case VBSE_INVALID_DLL_FUNCTION_NAME:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_DLL_FUNCTION_NAME");
-            break;
-        case VBSE_INVALID_TYPELIB_VARIABLE:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_TYPELIB_VARIABLE");
-            break;
-        case VBSE_SERVER_NOT_FOUND:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_SERVER_NOT_FOUND");
-            break;
-        case VBSE_VARIABLE_UNDEFINED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_VARIABLE_UNDEFINED");
-            break;
-        case VBSE_ILLEGAL_ASSIGNMENT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_ILLEGAL_ASSIGNMENT");
-            break;
-        case VBSE_UNQUALIFIED_REFERENCE:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNQUALIFIED_REFERENCE");
-            break;
-        case VBSE_CLASS_NOT_DEFINED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CLASS_NOT_DEFINED");
-            break;
-        case VBSE_SYNTAX_ERROR:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_SYNTAX_ERROR");
-            break;
-        case VBSE_EXPECTED_LPAREN:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LPAREN");
-            break;
-        case VBSE_EXPECTED_RPAREN:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_RPAREN");
-            break;
-        case VBSE_EXPECTED_RBRACKET:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_RBRACKET");
-            break;
-        case VBSE_EXPECTED_IDENTIFIER:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_IDENTIFIER");
-            break;
-        case VBSE_EXPECTED_ASSIGN:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_ASSIGN");
-            break;
-        case VBSE_EXPECTED_IF:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_IF");
-            break;
-        case VBSE_EXPECTED_TO:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_TO");
-            break;
-        case VBSE_EXPECTED_END:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_END");
-            break;
-        case VBSE_EXPECTED_FUNCTION:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_FUNCTION");
-            break;
-        case VBSE_EXPECTED_SUB:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_SUB");
-            break;
-        case VBSE_EXPECTED_THEN:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_THEN");
-            break;
-        case VBSE_EXPECTED_WEND:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_WEND");
-            break;
-        case VBSE_EXPECTED_LOOP:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LOOP");
-            break;
-        case VBSE_EXPECTED_NEXT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_NEXT");
-            break;
-        case VBSE_EXPECTED_CASE:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_CASE");
-            break;
-        case VBSE_EXPECTED_SELECT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_SELECT");
-            break;
-        case VBSE_EXPECTED_STATEMENT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_STATEMENT");
-            break;
-        case VBSE_EXPECTED_END_OF_STATEMENT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_END_OF_STATEMENT");
-            break;
-        case VBSE_EXPECTED_INTEGER_CONSTANT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_INTEGER_CONSTANT");
-            break;
-        case VBSE_EXPECTED_WHILE_UNTIL_EOS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_WHILE_UNTIL_EOS");
-            break;
-        case VBSE_EXPECTED_WITH:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_WITH");
-            break;
-        case VBSE_IDENTIFIER_TOO_LONG:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_IDENTIFIER_TOO_LONG");
-            break;
-        case VBSE_INVALID_NUMBER:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_NUMBER");
-            break;
-        case VBSE_INVALID_CHAR:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_CHAR");
-            break;
-        case VBSE_UNTERMINATED_STRING:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNTERMINATED_STRING");
-            break;
-        case VBSE_INVALID_USE_OF_ME:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_USE_OF_ME");
-            break;
-        case VBSE_LOOP_WITHOUT_DO:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_LOOP_WITHOUT_DO");
-            break;
-        case VBSE_INVALID_EXIT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_EXIT");
-            break;
-        case VBSE_INVALID_FOR_CONTROL:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_INVALID_FOR_CONTROL");
-            break;
-        case VBSE_NAME_REDEFINED:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_NAME_REDEFINED");
-            break;
-        case VBSE_MUST_BE_FIRST_STATEMENT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_MUST_BE_FIRST_STATEMENT");
-            break;
-        case VBSE_CANNOT_USE_PARENS_CALLING_SUB:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CANNOT_USE_PARENS_CALLING_SUB");
-            break;
-        case VBSE_EXPECTED_LITERAL_CONSTANT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LITERAL_CONSTANT");
-            break;
-        case VBSE_EXPECTED_IN:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_IN");
-            break;
-        case VBSE_EXPECTED_CLASS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_CLASS");
-            break;
-        case VBSE_MUST_BE_INSIDE_CLASS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_MUST_BE_INSIDE_CLASS");
-            break;
-        case VBSE_EXPECTED_LET_SET_GET:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_LET_SET_GET");
-            break;
-        case VBSE_EXPECTED_PROPERTY:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_EXPECTED_PROPERTY");
-            break;
-        case VBSE_PROPERTY_ARG_COUNT_MISMATCH:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PROPERTY_ARG_COUNT_MISMATCH");
-            break;
-        case VBSE_MULTIPLE_DEFAULT_MEMBERS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_MULTIPLE_DEFAULT_MEMBERS");
-            break;
-        case VBSE_CLASS_INIT_NO_ARGS:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_CLASS_INIT_NO_ARGS");
-            break;
-        case VBSE_PROPERTY_LET_SET_NEEDS_ARG:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_PROPERTY_LET_SET_NEEDS_ARG");
-            break;
-        case VBSE_UNEXPECTED_NEXT:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_UNEXPECTED_NEXT");
-            break;
-        case VBSE_DEFAULT_MUST_BE_PUBLIC:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DEFAULT_MUST_BE_PUBLIC");
-            break;
-        case VBSE_DEFAULT_ONLY_ON_PROPERTY_GET:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBSE_DEFAULT_ONLY_ON_PROPERTY_GET");
-            break;
-        case VBS_UNKNOWN_RUNTIME_ERROR:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBS_UNKNOWN_RUNTIME_ERROR");
-            break;
-        default:
-            swprintf(buf, ARRAY_SIZE(buf), L"VBS_UNKNOWN_ERROR (%d)", id);
-            break;
-        break;
+    /* English VBScript error strings. Generated from the vendored Wine resource
+       file wine/dlls/vbscript/vbscript.rc by scripts/genvbserrors.sh; libwinevbs
+       does not link the compiled resources, so we look them up here instead of
+       via LoadStringW. Re-run that script after bumping Wine to refresh them. */
+    static const struct {
+        int id;
+        const WCHAR *str;
+    } error_strings[] = {
+        /* BEGIN GENERATED ERROR STRINGS - do not edit by hand, see scripts/genvbserrors.sh */
+        { VBSE_ILLEGAL_FUNC_CALL,             L"Invalid procedure call or argument" },
+        { VBSE_OVERFLOW,                      L"Overflow" },
+        { VBSE_OUT_OF_MEMORY,                 L"Out of memory" },
+        { VBSE_OUT_OF_BOUNDS,                 L"Subscript out of range" },
+        { VBSE_ARRAY_LOCKED,                  L"This array is fixed or temporarily locked" },
+        { VBSE_DIVISION_BY_ZERO,              L"Division by zero" },
+        { VBSE_TYPE_MISMATCH,                 L"Type mismatch" },
+        { VBSE_OUT_OF_STACK,                  L"Out of stack space" },
+        { VBSE_FILE_NOT_FOUND,                L"File not found" },
+        { VBSE_IO_ERROR,                      L"Device I/O error" },
+        { VBSE_FILE_ALREADY_EXISTS,           L"File already exists" },
+        { VBSE_DISK_FULL,                     L"Disk full" },
+        { VBSE_TOO_MANY_FILES,                L"Too many files" },
+        { VBSE_PERMISSION_DENIED,             L"Permission denied" },
+        { VBSE_PATH_FILE_ACCESS,              L"Path/File access error" },
+        { VBSE_PATH_NOT_FOUND,                L"Path not found" },
+        { VBSE_OBJECT_VARIABLE_NOT_SET,       L"Object variable not set" },
+        { VBSE_FOR_LOOP_NOT_INITIALIZED,      L"For loop not initialized" },
+        { VBSE_ILLEGAL_NULL_USE,              L"Invalid use of Null" },
+        { VBSE_CANT_CREATE_TMP_FILE,          L"Can't create necessary temporary file" },
+        { VBSE_OBJECT_REQUIRED,               L"Object required" },
+        { VBSE_CANT_CREATE_OBJECT,            L"ActiveX component can't create object" },
+        { VBSE_OLE_NOT_SUPPORTED,             L"Class doesn't support Automation" },
+        { VBSE_OLE_FILE_NOT_FOUND,            L"File name or class name not found during Automation operation" },
+        { VBSE_OLE_NO_PROP_OR_METHOD,         L"Object doesn't support this property or method" },
+        { VBSE_ACTION_NOT_SUPPORTED,          L"Object doesn't support this action" },
+        { VBSE_NAMED_ARGS_NOT_SUPPORTED,      L"Object doesn't support named arguments" },
+        { VBSE_LOCALE_SETTING_NOT_SUPPORTED,  L"Object doesn't support current locale setting" },
+        { VBSE_NAMED_PARAM_NOT_FOUND,         L"Named argument not found" },
+        { VBSE_PARAMETER_NOT_OPTIONAL,        L"Argument not optional" },
+        { VBSE_FUNC_ARITY_MISMATCH,           L"Wrong number of arguments or invalid property assignment" },
+        { VBSE_NOT_ENUM,                      L"Object not a collection" },
+        { VBSE_DUPLICATE_KEY,                 L"This key is already associated with an element of this collection" },
+        { VBSE_INVALID_DLL_FUNCTION_NAME,     L"Specified DLL function not found" },
+        { VBSE_INVALID_TYPELIB_VARIABLE,      L"Variable uses an Automation type not supported in VBScript" },
+        { VBSE_SERVER_NOT_FOUND,              L"The remote server machine does not exist or is unavailable" },
+        { VBSE_VARIABLE_UNDEFINED,            L"Variable is undefined" },
+        { VBSE_ILLEGAL_ASSIGNMENT,            L"Illegal assignment" },
+        { VBSE_UNQUALIFIED_REFERENCE,         L"Invalid or unqualified reference" },
+        { VBSE_CLASS_NOT_DEFINED,             L"Class not defined" },
+        { VBSE_SYNTAX_ERROR,                  L"Syntax error" },
+        { VBSE_EXPECTED_LPAREN,               L"Expected '('" },
+        { VBSE_EXPECTED_RBRACKET,             L"Expected ']'" },
+        { VBSE_EXPECTED_RPAREN,               L"Expected ')'" },
+        { VBSE_EXPECTED_IDENTIFIER,           L"Expected identifier" },
+        { VBSE_EXPECTED_ASSIGN,               L"Expected '='" },
+        { VBSE_EXPECTED_IF,                   L"Expected 'If'" },
+        { VBSE_EXPECTED_TO,                   L"Expected 'To'" },
+        { VBSE_EXPECTED_END,                  L"Expected 'End'" },
+        { VBSE_EXPECTED_FUNCTION,             L"Expected 'Function'" },
+        { VBSE_EXPECTED_SUB,                  L"Expected 'Sub'" },
+        { VBSE_EXPECTED_THEN,                 L"Expected 'Then'" },
+        { VBSE_EXPECTED_WEND,                 L"Expected 'Wend'" },
+        { VBSE_EXPECTED_LOOP,                 L"Expected 'Loop'" },
+        { VBSE_EXPECTED_NEXT,                 L"Expected 'Next'" },
+        { VBSE_EXPECTED_CASE,                 L"Expected 'Case'" },
+        { VBSE_EXPECTED_SELECT,               L"Expected 'Select'" },
+        { VBSE_EXPECTED_STATEMENT,            L"Expected statement" },
+        { VBSE_EXPECTED_END_OF_STATEMENT,     L"Expected end of statement" },
+        { VBSE_EXPECTED_INTEGER_CONSTANT,     L"Expected integer constant" },
+        { VBSE_EXPECTED_WHILE_UNTIL_EOS,      L"Expected 'While', 'Until' or end of statement" },
+        { VBSE_IDENTIFIER_TOO_LONG,           L"Identifier too long" },
+        { VBSE_EXPECTED_WITH,                 L"Expected 'With'" },
+        { VBSE_INVALID_NUMBER,                L"Invalid number" },
+        { VBSE_INVALID_CHAR,                  L"Invalid character" },
+        { VBSE_UNTERMINATED_STRING,           L"Unterminated string constant" },
+        { VBSE_INVALID_USE_OF_ME,             L"Invalid use of 'Me' keyword" },
+        { VBSE_LOOP_WITHOUT_DO,               L"'loop' without 'do'" },
+        { VBSE_INVALID_EXIT,                  L"Invalid 'exit' statement" },
+        { VBSE_INVALID_FOR_CONTROL,           L"Invalid 'for' loop control variable" },
+        { VBSE_NAME_REDEFINED,                L"Name redefined" },
+        { VBSE_MUST_BE_FIRST_STATEMENT,       L"Must be first statement on the line" },
+        { VBSE_CANNOT_USE_PARENS_CALLING_SUB, L"Cannot use parentheses when calling a Sub" },
+        { VBSE_EXPECTED_LITERAL_CONSTANT,     L"Expected literal constant" },
+        { VBSE_EXPECTED_IN,                   L"Expected 'In'" },
+        { VBSE_EXPECTED_CLASS,                L"Expected 'Class'" },
+        { VBSE_MUST_BE_INSIDE_CLASS,          L"Must be defined inside a Class" },
+        { VBSE_EXPECTED_LET_SET_GET,          L"Expected Let or Set or Get in property declaration" },
+        { VBSE_EXPECTED_PROPERTY,             L"Expected 'Property'" },
+        { VBSE_PROPERTY_ARG_COUNT_MISMATCH,   L"Number of arguments must be consistent across properties specification" },
+        { VBSE_MULTIPLE_DEFAULT_MEMBERS,      L"Cannot have multiple default property/method in a Class" },
+        { VBSE_CLASS_INIT_NO_ARGS,            L"Class initialize or terminate do not have arguments" },
+        { VBSE_PROPERTY_LET_SET_NEEDS_ARG,    L"Property set or let must have at least one argument" },
+        { VBSE_UNEXPECTED_NEXT,               L"Unexpected 'Next'" },
+        { VBSE_DEFAULT_MUST_BE_PUBLIC,        L"'Default' specification must also specify 'Public'" },
+        { VBSE_DEFAULT_ONLY_ON_PROPERTY_GET,  L"'Default' specification can only be on Property Get" },
+        { VBS_COMPILE_ERROR,                  L"Microsoft VBScript compilation error" },
+        { VBS_RUNTIME_ERROR,                  L"Microsoft VBScript runtime error" },
+        { VBS_UNKNOWN_RUNTIME_ERROR,          L"Unknown runtime error" },
+        /* END GENERATED ERROR STRINGS */
+    };
+    unsigned i;
+    for(i = 0; i < ARRAY_SIZE(error_strings); i++) {
+        if(error_strings[i].id == id)
+            return SysAllocString(error_strings[i].str);
     }
+    swprintf(buf, ARRAY_SIZE(buf), L"Unknown VBScript error %d", id);
 #endif
     return SysAllocString(buf);
 }

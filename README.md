@@ -263,6 +263,34 @@ cd /path/to/libwinevbs
 ./scripts/winediff.sh /path/to/wine
 ```
 
+## Upgrading Wine
+
+The sources under `wine/` are a snapshot of a single upstream Wine commit. The
+hash is recorded both in the `deps: bump to wine X.Y` commit message and in the
+`wine/wine-<hash>.patch` filename. Every local change is guarded with
+`#ifdef __LIBWINEVBS__` / `#ifndef __LIBWINEVBS__` so it can be carried across a
+re-sync.
+
+To move to a newer Wine release:
+
+1. Check out and build the target Wine commit (see [Wine Source Base](#wine-source-base)).
+   The build is required because IDL compilation generates header files.
+2. Carry the libwinevbs delta onto the new sources. `./scripts/winediff.sh
+   /path/to/wine` lists every local modification, plus `# libwinevbs-only:` for
+   files that exist only here, so you can re-apply the `#ifdef __LIBWINEVBS__`
+   blocks.
+3. If any `.idl` changed, regenerate the IDispatch proxies with
+   `./scripts/genproxy.sh` (see [IDL Parser](#idl-parser)).
+4. Regenerate the VBScript error-string table from the updated
+   `wine/dlls/vbscript/vbscript.rc` with `./scripts/genvbserrors.sh` (see
+   [Error Strings](#error-strings)). If `winediff.sh` reports changes to
+   `vbscript.rc`, the table needs refreshing.
+5. Rebuild and run the smoke test:
+   `cmake --build build --target winevbs_test && ./build/winevbs_test`.
+6. Regenerate the reference patch and rename it to the new hash:
+   `./scripts/winediff.sh /path/to/wine > wine/wine-<new-hash>.patch`
+   (delete the old `wine-<hash>.patch`).
+
 ## IDL Parser
 
 `tools/idl-parser` is a development-only Java tool that regenerates the `*_proxy.c` IDispatch dispatchers from the Wine `.idl` files. End users do not need it; it only runs when the Wine IDL definitions change and the proxy stubs need to be regenerated.
@@ -274,6 +302,25 @@ Requires Java 11+ and Gradle. To regenerate:
 ```
 
 Output is written directly into `wine/dlls/<module>/<module>_proxy.c`. The list of IDLs and interfaces to process is hardcoded in `tools/idl-parser/src/main/java/org/vpinball/IDLParserToC.java`.
+
+## Error Strings
+
+VBScript runtime and compile errors carry English descriptions (surfaced through
+`Err.Description` and `EXCEPINFO.bstrDescription`). Wine normally loads these
+from compiled string resources via `LoadStringW`, but libwinevbs does not link
+the resource/locale stack, so `get_vbscript_string()` reads them from a static
+table instead.
+
+That table is generated from the vendored, English-only resource file
+`wine/dlls/vbscript/vbscript.rc` (Wine keeps translations in separate `po`
+files, so this `.rc` holds only English). To refresh it after bumping Wine:
+
+```bash
+./scripts/genvbserrors.sh
+```
+
+It rewrites the region between the `BEGIN/END GENERATED ERROR STRINGS` markers in
+`wine/dlls/vbscript/vbscript_main.c`. Requires `python3`.
 
 ## Wine Issues
 

@@ -3,6 +3,8 @@ EXPORTS
 ; libwinevbs public API
 libwinevbs_init
 libwinevbs_shutdown
+libwinevbs_log
+libwinevbs_hresult_name
 
 ; COM/OLE
 CoCreateInstance

@@ -315,7 +315,7 @@ public class IDLParserToC {
 		fragment.append("\tVariantClear(&res);\n");
 		fragment.append("}\n");
 		fragment.append("else {\n");
-		fragment.append("external_log(LIBWINEVBS_LOG_WARN, \"" + idlInterface.getClassName() + "_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)\", " + idlInterface.getClassName() + "_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));\n");
+		fragment.append("libwinevbs_log(LIBWINEVBS_LOG_WARN, \"" + idlInterface.getClassName() + "_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)\", " + idlInterface.getClassName() + "_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));\n");
 		fragment.append("}\n");
 		fragment.append("return hres;\n");
 

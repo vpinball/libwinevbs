@@ -86,7 +86,7 @@ int WINAPI __wine_dbg_write(const char *str, unsigned int len)
       *end = '\0';
 
 #ifdef _DEBUG
-      external_log(LIBWINEVBS_LOG_DEBUG, "%s", dbg_buffer);
+      libwinevbs_log(LIBWINEVBS_LOG_DEBUG, "%s", dbg_buffer);
 #endif
 
       *dbg_buffer = '\0';
@@ -1011,14 +1011,14 @@ DWORD WINAPI GetModuleFileNameA(HMODULE module, LPSTR filename, DWORD size)
 
 INT WINAPI MessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type)
 {
-   external_log(LIBWINEVBS_LOG_INFO, "MessageBoxA(): title=%s, text=%s", title, text);
+   libwinevbs_log(LIBWINEVBS_LOG_INFO, "MessageBoxA(): title=%s, text=%s", title, text);
 
    return 0;
 }
 
 VOID WINAPI OutputDebugStringA(LPCSTR text)
 {
-   external_log(LIBWINEVBS_LOG_INFO, "OutputDebugStringA(): text=%s", text);
+   libwinevbs_log(LIBWINEVBS_LOG_INFO, "OutputDebugStringA(): text=%s", text);
 }
 
 __forceinline DWORD WINAPI CharLowerBuffW(WCHAR *str, DWORD len)

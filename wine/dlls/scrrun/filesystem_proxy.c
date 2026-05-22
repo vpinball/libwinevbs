@@ -197,7 +197,7 @@ static HRESULT WINAPI drive_Invoke(IDrive *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "drive_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", drive_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "drive_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", drive_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -301,7 +301,7 @@ static HRESULT WINAPI drivecoll_Invoke(IDriveCollection *iface, DISPID dispIdMem
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "drivecoll_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", drivecoll_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "drivecoll_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", drivecoll_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -533,7 +533,7 @@ static HRESULT WINAPI textstream_Invoke(ITextStream *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "textstream_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", textstream_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "textstream_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", textstream_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -828,7 +828,7 @@ static HRESULT WINAPI file_Invoke(IFile *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "file_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", file_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "file_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", file_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -932,7 +932,7 @@ static HRESULT WINAPI filecoll_Invoke(IFileCollection *iface, DISPID dispIdMembe
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "filecoll_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", filecoll_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "filecoll_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", filecoll_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -1054,7 +1054,7 @@ static HRESULT WINAPI foldercoll_Invoke(IFolderCollection *iface, DISPID dispIdM
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "foldercoll_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", foldercoll_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "foldercoll_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", foldercoll_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -1399,7 +1399,7 @@ static HRESULT WINAPI folder_Invoke(IFolder *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "folder_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", folder_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "folder_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", folder_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -2010,7 +2010,7 @@ static HRESULT WINAPI filesys_Invoke(IFileSystem3 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "filesys_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", filesys_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "filesys_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", filesys_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }

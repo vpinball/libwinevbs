@@ -562,9 +562,9 @@ static IUnknown *create_object(script_ctx_t *ctx, const WCHAR *progid)
         hres = WshShellFactory_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
     }
     else {
-        hres = external_create_object(progid, cf, &obj);
+        hres = libwinevbs_create_object(progid, cf, &obj);
         if(FAILED(hres))
-            external_log(LIBWINEVBS_LOG_WARN, "vbscript: could not create object %s", debugstr_w(progid));
+            libwinevbs_log(LIBWINEVBS_LOG_WARN, "vbscript: could not create object %s", debugstr_w(progid));
     }
 #endif
     if(FAILED(hres))
@@ -2772,7 +2772,7 @@ static HRESULT Global_MsgBox(BuiltinDisp *This, VARIANT *args, unsigned args_cnt
     if(SUCCEEDED(hres)) {
         char buf[2048];
         WideCharToMultiByte(CP_ACP, 0, prompt, -1, buf, sizeof(buf) - 1, NULL, NULL);
-        external_log(LIBWINEVBS_LOG_INFO, "vbscript: MsgBox prompt=%s", buf);
+        libwinevbs_log(LIBWINEVBS_LOG_INFO, "vbscript: MsgBox prompt=%s", buf);
     }
 #endif
 

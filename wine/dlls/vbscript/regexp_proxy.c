@@ -190,7 +190,7 @@ static HRESULT WINAPI RegExp_Invoke(IRegExp *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "RegExp_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", RegExp_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "RegExp_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", RegExp_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -407,7 +407,7 @@ static HRESULT WINAPI RegExp2_Invoke(IRegExp2 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "RegExp2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", RegExp2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "RegExp2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", RegExp2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -504,7 +504,7 @@ static HRESULT WINAPI Match_Invoke(IMatch *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "Match_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", Match_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "Match_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", Match_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -617,7 +617,7 @@ static HRESULT WINAPI Match2_Invoke(IMatch2 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "Match2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", Match2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "Match2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", Match2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -721,7 +721,7 @@ static HRESULT WINAPI MatchCollection_Invoke(IMatchCollection *iface, DISPID dis
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "MatchCollection_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", MatchCollection_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "MatchCollection_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", MatchCollection_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -825,7 +825,7 @@ static HRESULT WINAPI MatchCollection2_Invoke(IMatchCollection2 *iface, DISPID d
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "MatchCollection2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", MatchCollection2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "MatchCollection2_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", MatchCollection2_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -928,7 +928,7 @@ static HRESULT WINAPI SubMatches_Invoke(ISubMatches *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "SubMatches_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", SubMatches_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "SubMatches_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", SubMatches_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }

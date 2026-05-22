@@ -14,7 +14,7 @@ void libwinevbs_shutdown(void)
    memset(&g_callbacks, 0, sizeof(g_callbacks));
 }
 
-void external_log(libwinevbs_log_level_t level, const char* format, ...)
+void libwinevbs_log(libwinevbs_log_level_t level, const char* format, ...)
 {
    if (g_callbacks.log) {
       va_list args;
@@ -24,7 +24,7 @@ void external_log(libwinevbs_log_level_t level, const char* format, ...)
    }
 }
 
-HRESULT external_create_object(const WCHAR* progid, IClassFactory* cf, IUnknown** obj)
+HRESULT libwinevbs_create_object(const WCHAR* progid, IClassFactory* cf, IUnknown** obj)
 {
    if (g_callbacks.create_object)
       return g_callbacks.create_object(progid, cf, obj);

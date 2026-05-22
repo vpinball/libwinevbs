@@ -108,7 +108,7 @@ static HRESULT WINAPI WshCollection_Invoke(IWshCollection *iface, DISPID dispIdM
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshCollection_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshCollection_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "WshCollection_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshCollection_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -255,7 +255,7 @@ static HRESULT WINAPI WshEnvironment_Invoke(IWshEnvironment *iface, DISPID dispI
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshEnvironment_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshEnvironment_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "WshEnvironment_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshEnvironment_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -413,7 +413,7 @@ static HRESULT WINAPI WshExec_Invoke(IWshExec *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshExec_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshExec_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "WshExec_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshExec_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -687,7 +687,7 @@ static HRESULT WINAPI WshShortcut_Invoke(IWshShortcut *iface, DISPID dispIdMembe
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshShortcut_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshShortcut_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "WshShortcut_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshShortcut_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }
@@ -1049,7 +1049,7 @@ static HRESULT WINAPI WshShell3_Invoke(IWshShell3 *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "WshShell3_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshShell3_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "WshShell3_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", WshShell3_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }

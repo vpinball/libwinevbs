@@ -3,7 +3,7 @@
 
 #define LIBWINEVBS_VERSION_MAJOR 0
 #define LIBWINEVBS_VERSION_MINOR 6
-#define LIBWINEVBS_VERSION_PATCH 0
+#define LIBWINEVBS_VERSION_PATCH 5
 
 #define _LIBWINEVBS_STR(x) #x
 #define LIBWINEVBS_STR(x) _LIBWINEVBS_STR(x)
@@ -43,7 +43,7 @@ typedef enum {
    LIBWINEVBS_LOG_ERROR
 } libwinevbs_log_level_t;
 
-void external_log(libwinevbs_log_level_t level, const char* format, ...);
+void libwinevbs_log(libwinevbs_log_level_t level, const char* format, ...);
 
 /* Returns the symbolic name for a known HRESULT (e.g. "DISP_E_MEMBERNOTFOUND"),
    or "?" when the value is not recognized. For diagnostic logging only. */

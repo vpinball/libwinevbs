@@ -242,7 +242,7 @@ static HRESULT WINAPI WshExec_get_Status(IWshExec *iface, WshExecStatus *status)
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.Status is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.Status is not implemented");
     if (status) *status = WshFinished;
     return S_OK;
 #endif
@@ -260,7 +260,7 @@ static HRESULT WINAPI WshExec_get_StdIn(IWshExec *iface, ITextStream **stream)
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdIn is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdIn is not implemented");
     if (stream) *stream = NULL;
     return E_NOTIMPL;
 #endif
@@ -278,7 +278,7 @@ static HRESULT WINAPI WshExec_get_StdOut(IWshExec *iface, ITextStream **stream)
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdOut is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdOut is not implemented");
     if (stream) *stream = NULL;
     return E_NOTIMPL;
 #endif
@@ -296,7 +296,7 @@ static HRESULT WINAPI WshExec_get_StdErr(IWshExec *iface, ITextStream **stream)
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdErr is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.StdErr is not implemented");
     if (stream) *stream = NULL;
     return E_NOTIMPL;
 #endif
@@ -315,7 +315,7 @@ static HRESULT WINAPI WshExec_get_ProcessID(IWshExec *iface, int *pid)
     *pid = This->info.dwProcessId;
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.ProcessID is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.ProcessID is not implemented");
     if (pid) *pid = 0;
     return S_OK;
 #endif
@@ -330,7 +330,7 @@ static HRESULT WINAPI WshExec_get_ExitCode(IWshExec *iface, int *code)
 
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.ExitCode is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.ExitCode is not implemented");
     if (code) *code = 0;
     return S_OK;
 #endif
@@ -369,7 +369,7 @@ static HRESULT WINAPI WshExec_Terminate(IWshExec *iface)
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.Terminate is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec.Terminate is not implemented");
     return S_OK;
 #endif
 }
@@ -632,7 +632,7 @@ static HRESULT WINAPI WshEnvironment_get_Item(IWshEnvironment *iface, BSTR name,
 
     return get_env_var(name, value);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Item get(%s) is not implemented", debugstr_w(name));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Item get(%s) is not implemented", debugstr_w(name));
     if (!value) return E_POINTER;
     *value = SysAllocString(L"");
     return *value ? S_OK : E_OUTOFMEMORY;
@@ -646,7 +646,7 @@ static HRESULT WINAPI WshEnvironment_put_Item(IWshEnvironment *iface, BSTR name,
     FIXME("(%p)->(%s %s): stub\n", This, debugstr_w(name), debugstr_w(value));
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Item put(%s, %s) is not implemented", debugstr_w(name), debugstr_w(value));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Item put(%s, %s) is not implemented", debugstr_w(name), debugstr_w(value));
     return S_OK;
 #endif
 }
@@ -658,7 +658,7 @@ static HRESULT WINAPI WshEnvironment_Count(IWshEnvironment *iface, LONG *count)
     FIXME("(%p)->(%p): stub\n", This, count);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Count is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Count is not implemented");
     if (count) *count = 0;
     return S_OK;
 #endif
@@ -671,7 +671,7 @@ static HRESULT WINAPI WshEnvironment_get_length(IWshEnvironment *iface, LONG *le
     FIXME("(%p)->(%p): stub\n", This, len);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.length is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.length is not implemented");
     if (len) *len = 0;
     return S_OK;
 #endif
@@ -684,7 +684,7 @@ static HRESULT WINAPI WshEnvironment__NewEnum(IWshEnvironment *iface, IUnknown *
     FIXME("(%p)->(%p): stub\n", This, penum);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment._NewEnum is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment._NewEnum is not implemented");
     if (penum) *penum = NULL;
     return E_NOTIMPL;
 #endif
@@ -697,7 +697,7 @@ static HRESULT WINAPI WshEnvironment_Remove(IWshEnvironment *iface, BSTR name)
     FIXME("(%p)->(%s): stub\n", This, debugstr_w(name));
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Remove(%s) is not implemented", debugstr_w(name));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment.Remove(%s) is not implemented", debugstr_w(name));
     return S_OK;
 #endif
 }
@@ -891,7 +891,7 @@ static HRESULT WINAPI WshCollection_Item(IWshCollection *iface, VARIANT *index, 
 
     return hr;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.Item is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.Item is not implemented");
     if (!value) return E_POINTER;
     V_VT(value) = VT_BSTR;
     V_BSTR(value) = SysAllocString(L"");
@@ -906,7 +906,7 @@ static HRESULT WINAPI WshCollection_Count(IWshCollection *iface, LONG *count)
     FIXME("(%p)->(%p): stub\n", This, count);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.Count is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.Count is not implemented");
     if (count) *count = 0;
     return S_OK;
 #endif
@@ -919,7 +919,7 @@ static HRESULT WINAPI WshCollection_get_length(IWshCollection *iface, LONG *coun
     FIXME("(%p)->(%p): stub\n", This, count);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.length is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders.length is not implemented");
     if (count) *count = 0;
     return S_OK;
 #endif
@@ -932,7 +932,7 @@ static HRESULT WINAPI WshCollection__NewEnum(IWshCollection *iface, IUnknown **E
     FIXME("(%p)->(%p): stub\n", This, Enum);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders._NewEnum is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders._NewEnum is not implemented");
     if (Enum) *Enum = NULL;
     return E_NOTIMPL;
 #endif
@@ -1088,7 +1088,7 @@ static HRESULT WINAPI WshShortcut_get_FullName(IWshShortcut *iface, BSTR *name)
     FIXME("(%p)->(%p): stub\n", This, name);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.FullName get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.FullName get is not implemented");
     if (!name) return E_POINTER;
     *name = SysAllocString(L"");
     return *name ? S_OK : E_OUTOFMEMORY;
@@ -1116,7 +1116,7 @@ static HRESULT WINAPI WshShortcut_get_Arguments(IWshShortcut *iface, BSTR *Argum
     *Arguments = SysAllocString(buffW);
     return *Arguments ? S_OK : E_OUTOFMEMORY;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Arguments get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Arguments get is not implemented");
     if (!Arguments) return E_POINTER;
     *Arguments = SysAllocString(L"");
     return *Arguments ? S_OK : E_OUTOFMEMORY;
@@ -1132,7 +1132,7 @@ static HRESULT WINAPI WshShortcut_put_Arguments(IWshShortcut *iface, BSTR Argume
 
     return IShellLinkW_SetArguments(This->link, Arguments);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Arguments put(%s) is not implemented", debugstr_w(Arguments));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Arguments put(%s) is not implemented", debugstr_w(Arguments));
     return S_OK;
 #endif
 }
@@ -1144,7 +1144,7 @@ static HRESULT WINAPI WshShortcut_get_Description(IWshShortcut *iface, BSTR *Des
     FIXME("(%p)->(%p): stub\n", This, Description);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Description get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Description get is not implemented");
     if (!Description) return E_POINTER;
     *Description = SysAllocString(L"");
     return *Description ? S_OK : E_OUTOFMEMORY;
@@ -1158,7 +1158,7 @@ static HRESULT WINAPI WshShortcut_put_Description(IWshShortcut *iface, BSTR Desc
     TRACE("(%p)->(%s)\n", This, debugstr_w(Description));
     return IShellLinkW_SetDescription(This->link, Description);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Description put(%s) is not implemented", debugstr_w(Description));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Description put(%s) is not implemented", debugstr_w(Description));
     return S_OK;
 #endif
 }
@@ -1170,7 +1170,7 @@ static HRESULT WINAPI WshShortcut_get_Hotkey(IWshShortcut *iface, BSTR *Hotkey)
     FIXME("(%p)->(%p): stub\n", This, Hotkey);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Hotkey get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Hotkey get is not implemented");
     if (!Hotkey) return E_POINTER;
     *Hotkey = SysAllocString(L"");
     return *Hotkey ? S_OK : E_OUTOFMEMORY;
@@ -1184,7 +1184,7 @@ static HRESULT WINAPI WshShortcut_put_Hotkey(IWshShortcut *iface, BSTR Hotkey)
     FIXME("(%p)->(%s): stub\n", This, debugstr_w(Hotkey));
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Hotkey put(%s) is not implemented", debugstr_w(Hotkey));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Hotkey put(%s) is not implemented", debugstr_w(Hotkey));
     return S_OK;
 #endif
 }
@@ -1211,7 +1211,7 @@ static HRESULT WINAPI WshShortcut_get_IconLocation(IWshShortcut *iface, BSTR *Ic
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.IconLocation get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.IconLocation get is not implemented");
     if (!IconPath) return E_POINTER;
     *IconPath = SysAllocString(L"");
     return *IconPath ? S_OK : E_OUTOFMEMORY;
@@ -1250,7 +1250,7 @@ static HRESULT WINAPI WshShortcut_put_IconLocation(IWshShortcut *iface, BSTR Ico
 
     return hr;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.IconLocation put(%s) is not implemented", debugstr_w(IconPath));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.IconLocation put(%s) is not implemented", debugstr_w(IconPath));
     return S_OK;
 #endif
 }
@@ -1262,7 +1262,7 @@ static HRESULT WINAPI WshShortcut_put_RelativePath(IWshShortcut *iface, BSTR rhs
     FIXME("(%p)->(%s): stub\n", This, debugstr_w(rhs));
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.RelativePath put(%s) is not implemented", debugstr_w(rhs));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.RelativePath put(%s) is not implemented", debugstr_w(rhs));
     return S_OK;
 #endif
 }
@@ -1285,7 +1285,7 @@ static HRESULT WINAPI WshShortcut_get_TargetPath(IWshShortcut *iface, BSTR *Path
     *Path = SysAllocString(fn);
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.TargetPath get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.TargetPath get is not implemented");
     if (!Path) return E_POINTER;
     *Path = SysAllocString(L"");
     return *Path ? S_OK : E_OUTOFMEMORY;
@@ -1299,7 +1299,7 @@ static HRESULT WINAPI WshShortcut_put_TargetPath(IWshShortcut *iface, BSTR Path)
     TRACE("(%p)->(%s)\n", This, debugstr_w(Path));
     return IShellLinkW_SetPath(This->link, Path);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.TargetPath put(%s) is not implemented", debugstr_w(Path));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.TargetPath put(%s) is not implemented", debugstr_w(Path));
     return S_OK;
 #endif
 }
@@ -1311,7 +1311,7 @@ static HRESULT WINAPI WshShortcut_get_WindowStyle(IWshShortcut *iface, int *Show
     TRACE("(%p)->(%p)\n", This, ShowCmd);
     return IShellLinkW_GetShowCmd(This->link, ShowCmd);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WindowStyle get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WindowStyle get is not implemented");
     if (ShowCmd) *ShowCmd = 0;
     return S_OK;
 #endif
@@ -1324,7 +1324,7 @@ static HRESULT WINAPI WshShortcut_put_WindowStyle(IWshShortcut *iface, int ShowC
     TRACE("(%p)->(%d)\n", This, ShowCmd);
     return IShellLinkW_SetShowCmd(This->link, ShowCmd);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WindowStyle put(%d) is not implemented", ShowCmd);
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WindowStyle put(%d) is not implemented", ShowCmd);
     return S_OK;
 #endif
 }
@@ -1348,7 +1348,7 @@ static HRESULT WINAPI WshShortcut_get_WorkingDirectory(IWshShortcut *iface, BSTR
     *WorkingDirectory = SysAllocString(buffW);
     return *WorkingDirectory ? S_OK : E_OUTOFMEMORY;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WorkingDirectory get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WorkingDirectory get is not implemented");
     if (!WorkingDirectory) return E_POINTER;
     *WorkingDirectory = SysAllocString(L"");
     return *WorkingDirectory ? S_OK : E_OUTOFMEMORY;
@@ -1362,7 +1362,7 @@ static HRESULT WINAPI WshShortcut_put_WorkingDirectory(IWshShortcut *iface, BSTR
     TRACE("(%p)->(%s)\n", This, debugstr_w(WorkingDirectory));
     return IShellLinkW_SetWorkingDirectory(This->link, WorkingDirectory);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WorkingDirectory put(%s) is not implemented", debugstr_w(WorkingDirectory));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.WorkingDirectory put(%s) is not implemented", debugstr_w(WorkingDirectory));
     return S_OK;
 #endif
 }
@@ -1374,7 +1374,7 @@ static HRESULT WINAPI WshShortcut_Load(IWshShortcut *iface, BSTR PathLink)
     FIXME("(%p)->(%s): stub\n", This, debugstr_w(PathLink));
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Load(%s) is not implemented", debugstr_w(PathLink));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Load(%s) is not implemented", debugstr_w(PathLink));
     return S_OK;
 #endif
 }
@@ -1394,7 +1394,7 @@ static HRESULT WINAPI WshShortcut_Save(IWshShortcut *iface)
 
     return hr;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Save is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Shortcut.Save is not implemented");
     return S_OK;
 #endif
 }
@@ -1580,7 +1580,7 @@ static HRESULT WINAPI WshShell3_get_SpecialFolders(IWshShell3 *iface, IWshCollec
     TRACE("(%p)\n", folders);
     return WshCollection_Create(folders);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SpecialFolders is not implemented");
     return WshCollection_Create(folders);
 #endif
 }
@@ -1591,7 +1591,7 @@ static HRESULT WINAPI WshShell3_get_Environment(IWshShell3 *iface, VARIANT *type
     FIXME("(%s %p): semi-stub\n", debugstr_variant(type), env);
     return WshEnvironment_Create(env);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Environment is not implemented");
     return WshEnvironment_Create(env);
 #endif
 }
@@ -1693,7 +1693,7 @@ static HRESULT WINAPI WshShell3_Run(IWshShell3 *iface, BSTR cmd, VARIANT *style,
     }
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Run(%s) is not implemented", debugstr_w(cmd));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Run(%s) is not implemented", debugstr_w(cmd));
     if (exit_code) *exit_code = 0;
     return S_OK;
 #endif
@@ -1775,7 +1775,7 @@ static HRESULT WINAPI WshShell3_Popup(IWshShell3 *iface, BSTR text, VARIANT *sec
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Popup(%s) is not implemented", debugstr_w(text));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Popup(%s) is not implemented", debugstr_w(text));
     if (button) *button = -1;
     return S_OK;
 #endif
@@ -1787,7 +1787,7 @@ static HRESULT WINAPI WshShell3_CreateShortcut(IWshShell3 *iface, BSTR PathLink,
     TRACE("(%s %p)\n", debugstr_w(PathLink), Shortcut);
     return WshShortcut_Create(PathLink, Shortcut);
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CreateShortcut(%s) is not implemented", debugstr_w(PathLink));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CreateShortcut(%s) is not implemented", debugstr_w(PathLink));
     return WshShortcut_Create(PathLink, Shortcut);
 #endif
 }
@@ -1814,7 +1814,7 @@ static HRESULT WINAPI WshShell3_ExpandEnvironmentStrings(IWshShell3 *iface, BSTR
         return HRESULT_FROM_WIN32(GetLastError());
     }
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: ExpandEnvironmentStrings(%s) is not implemented", debugstr_w(Src));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: ExpandEnvironmentStrings(%s) is not implemented", debugstr_w(Src));
     if (!Dst) return E_POINTER;
     *Dst = SysAllocString(Src ? Src : L"");
     return *Dst ? S_OK : E_OUTOFMEMORY;
@@ -2018,7 +2018,7 @@ fail:
         free(subkey);
     return hr;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegRead(%s) is not implemented", debugstr_w(name));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegRead(%s) is not implemented", debugstr_w(name));
 
     if (value)
         VariantInit(value);
@@ -2109,7 +2109,7 @@ fail:
         free(subkey);
     return hr;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegWrite(%s) is not implemented", debugstr_w(name));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegWrite(%s) is not implemented", debugstr_w(name));
     return S_OK;
 #endif
 }
@@ -2120,7 +2120,7 @@ static HRESULT WINAPI WshShell3_RegDelete(IWshShell3 *iface, BSTR Name)
     FIXME("(%s): stub\n", debugstr_w(Name));
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegDelete(%s) is not implemented", debugstr_w(Name));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: RegDelete(%s) is not implemented", debugstr_w(Name));
     return S_OK;
 #endif
 }
@@ -2131,7 +2131,7 @@ static HRESULT WINAPI WshShell3_LogEvent(IWshShell3 *iface, VARIANT *Type, BSTR 
     FIXME("(%s %s %s %p): stub\n", debugstr_variant(Type), debugstr_w(Message), debugstr_w(Target), out_Success);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: LogEvent(%s, %s) is not implemented", debugstr_w(Message), debugstr_w(Target));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: LogEvent(%s, %s) is not implemented", debugstr_w(Message), debugstr_w(Target));
     if (out_Success) *out_Success = VARIANT_TRUE;
     return S_OK;
 #endif
@@ -2143,7 +2143,7 @@ static HRESULT WINAPI WshShell3_AppActivate(IWshShell3 *iface, VARIANT *App, VAR
     FIXME("(%s %s %p): stub\n", debugstr_variant(App), debugstr_variant(Wait), out_Success);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: AppActivate is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: AppActivate is not implemented");
     if (out_Success) *out_Success = VARIANT_FALSE;
     return S_OK;
 #endif
@@ -2155,7 +2155,7 @@ static HRESULT WINAPI WshShell3_SendKeys(IWshShell3 *iface, BSTR Keys, VARIANT *
     FIXME("(%s %p): stub\n", debugstr_w(Keys), Wait);
     return E_NOTIMPL;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SendKeys(%s) is not implemented", debugstr_w(Keys));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: SendKeys(%s) is not implemented", debugstr_w(Keys));
     return S_OK;
 #endif
 }
@@ -2182,7 +2182,7 @@ static HRESULT WINAPI WshShell3_Exec(IWshShell3 *iface, BSTR command, IWshExec *
     SysFreeString(expandedcmd);
     return hr;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec(%s) is not implemented", debugstr_w(command));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: Exec(%s) is not implemented", debugstr_w(command));
     if (ret) *ret = NULL;
     return E_NOTIMPL;
 #endif
@@ -2212,7 +2212,7 @@ static HRESULT WINAPI WshShell3_get_CurrentDirectory(IWshShell3 *iface, BSTR *di
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CurrentDirectory get is not implemented");
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CurrentDirectory get is not implemented");
     if (!dir) return E_POINTER;
     *dir = SysAllocString(L"");
     return *dir ? S_OK : E_OUTOFMEMORY;
@@ -2232,7 +2232,7 @@ static HRESULT WINAPI WshShell3_put_CurrentDirectory(IWshShell3 *iface, BSTR dir
 
     return S_OK;
 #else
-    external_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CurrentDirectory put(%s) is not implemented", debugstr_w(dir));
+    libwinevbs_log(LIBWINEVBS_LOG_WARN, "WScript.Shell: CurrentDirectory put(%s) is not implemented", debugstr_w(dir));
     return S_OK;
 #endif
 }

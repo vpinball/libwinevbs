@@ -36,7 +36,7 @@
 
 #ifdef __LIBWINEVBS__
 #include "libwinevbs.h"
-HRESULT external_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
+HRESULT libwinevbs_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 #endif
 
 typedef struct {

@@ -273,7 +273,7 @@ static HRESULT WINAPI dictionary_Invoke(IDictionary *iface, DISPID dispIdMember,
 			VariantClear(&res);
 	}
 	else {
-		external_log(LIBWINEVBS_LOG_WARN, "dictionary_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", dictionary_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
+		libwinevbs_log(LIBWINEVBS_LOG_WARN, "dictionary_Invoke: %s (dispId=%d 0x%08x), wFlags=%d, hres=0x%08x (%s)", dictionary_dispid_name(dispIdMember), dispIdMember, dispIdMember, wFlags, hres, libwinevbs_hresult_name(hres));
 	}
 	return hres;
 }

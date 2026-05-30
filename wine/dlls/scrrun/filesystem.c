@@ -3753,10 +3753,8 @@ static HRESULT WINAPI filesys_GetExtensionName(IFileSystem3 *iface, BSTR path,
 
 static HRESULT WINAPI filesys_GetAbsolutePathName(IFileSystem3 *iface, BSTR path, BSTR *pbstrResult)
 {
-    WCHAR buf[MAX_PATH], ch;
-    DWORD i, beg, len, exp_len;
-    WIN32_FIND_DATAW fdata;
-    HANDLE fh;
+    WCHAR buf[MAX_PATH];
+    DWORD len;
 
     TRACE("%p, %s, %p.\n", iface, debugstr_w(path), pbstrResult);
 
@@ -3770,24 +3768,6 @@ static HRESULT WINAPI filesys_GetAbsolutePathName(IFileSystem3 *iface, BSTR path
     buf[0] = towupper(buf[0]);
     if(len>3 && buf[len-1] == '\\')
         buf[--len] = 0;
-
-    for(beg=3, i=3; i<=len; i++) {
-        if(buf[i]!='\\' && buf[i])
-            continue;
-
-        ch = buf[i];
-        buf[i] = 0;
-        fh = FindFirstFileW(buf, &fdata);
-        if(fh == INVALID_HANDLE_VALUE)
-            break;
-
-        exp_len = lstrlenW(fdata.cFileName);
-        if(exp_len == i-beg)
-            memcpy(buf+beg, fdata.cFileName, exp_len*sizeof(WCHAR));
-        FindClose(fh);
-        buf[i] = ch;
-        beg = i+1;
-    }
 
     *pbstrResult = SysAllocString(buf);
     if(!*pbstrResult)

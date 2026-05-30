@@ -1476,10 +1476,8 @@ DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lp
          ptr = ptrBackslash;
       else if (ptrSlash)
          ptr = ptrSlash;
-      if (ptr) {
-         ptr++;
-         lpFilePart = (LPWSTR*)ptr;
-      }
+      if (ptr && lpFilePart)
+         *lpFilePart = ptr + 1;
    }
    return len;
 }

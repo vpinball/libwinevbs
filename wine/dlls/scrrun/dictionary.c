@@ -119,6 +119,7 @@ static inline BOOL is_numeric_key(const VARIANT *key)
         case VT_DATE:
         case VT_R4:
         case VT_R8:
+        case VT_BOOL:
             return TRUE;
         default:
             return FALSE;
@@ -162,10 +163,38 @@ static inline BOOL numeric_key_eq(const VARIANT *key1, const VARIANT *key2)
     return V_R4(&v1) == V_R4(&v2);
 }
 
+/* Empty matches the zero/default value of the other key's type: any numeric
+ * zero, the empty string, or another Empty. */
+static BOOL empty_matches_key(const VARIANT *key)
+{
+    VARIANT v;
+
+    switch (V_VT(key))
+    {
+        case VT_EMPTY:
+            return TRUE;
+        case VT_BSTR:
+        {
+            const WCHAR *str = get_key_strptr(key);
+            return !str || !*str;
+        }
+        default:
+            if (!is_numeric_key(key))
+                return FALSE;
+            VariantInit(&v);
+            if (FAILED(VariantChangeType(&v, key, 0, VT_R4)))
+                return FALSE;
+            return V_R4(&v) == 0.0f;
+    }
+}
+
 static BOOL is_matching_key(const struct dictionary *dict, const struct keyitem_pair *pair, const VARIANT *key, DWORD hash)
 {
-    if (is_string_key(key) != is_string_key(&pair->key))
+    if (V_VT(key) == VT_EMPTY || V_VT(&pair->key) == VT_EMPTY)
     {
+        return empty_matches_key(V_VT(key) == VT_EMPTY ? &pair->key : key);
+    }
+    else if (is_string_key(key) != is_string_key(&pair->key))    {
         return FALSE;
     }
     else if (is_string_key(key) && is_string_key(&pair->key))
@@ -188,9 +217,9 @@ static BOOL is_matching_key(const struct dictionary *dict, const struct keyitem_
     {
         return hash == pair->hash && numeric_key_eq(key, &pair->key);
     }
-    else if (V_VT(&pair->key) == VT_EMPTY || V_VT(&pair->key) == VT_NULL)
+    else if (V_VT(&pair->key) == VT_NULL)
     {
-        return V_VT(&pair->key) == V_VT(key);
+        return V_VT(key) == VT_NULL;
     }
     else
     {
@@ -977,6 +1006,10 @@ static HRESULT WINAPI dictionary_get_HashVal(IDictionary *iface, VARIANT *key, V
     case VT_R8|VT_BYREF:
     case VT_R8:
         return get_flt_hash(V_VT(key) & VT_BYREF ? *V_R8REF(key) : V_R8(key), &V_I4(hash));
+    case VT_BOOL|VT_BYREF:
+    case VT_BOOL:
+        V_I4(hash) = get_num_hash(V_VT(key) & VT_BYREF ? *V_BOOLREF(key) : V_BOOL(key));
+        break;
     case VT_EMPTY:
     case VT_NULL:
         V_I4(hash) = 0;

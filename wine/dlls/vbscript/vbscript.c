@@ -140,7 +140,12 @@ HRESULT exec_global_code(script_ctx_t *ctx, vbscode_t *code, VARIANT *res, BOOL 
 
     for (i = 0; i < code->main_code.var_cnt; i++)
     {
-        if (script_disp_find_var(obj, code->main_code.vars[i].name))
+        dynamic_var_t *existing = script_disp_find_var(obj, code->main_code.vars[i].name);
+
+        /* A Dim may shadow a const from a previous compile unit: it creates a
+           fresh variable that name lookups resolve to from now on, while the
+           defining compile unit keeps using the inlined const value. */
+        if (existing && !existing->is_const)
             continue;
 
         if (!(var = heap_pool_alloc(&obj->heap, sizeof(*var))))
@@ -153,6 +158,8 @@ HRESULT exec_global_code(script_ctx_t *ctx, vbscode_t *code, VARIANT *res, BOOL 
         var->is_const = FALSE;
         var->array = NULL;
         var->index = obj->global_vars_cnt;
+        if (existing)
+            rb_remove(&obj->var_tree, &existing->entry);
         rb_put(&obj->var_tree, var->name, &var->entry);
 
         obj->global_vars[obj->global_vars_cnt++] = var;
@@ -284,7 +291,7 @@ static void release_script(script_ctx_t *ctx)
     vbscode_t *code, *code_next;
 
     collect_objects(ctx);
-    clear_ei(&ctx->ei);
+    clear_error(ctx);
 
     LIST_FOR_EACH_ENTRY_SAFE(code, code_next, &ctx->code_list, vbscode_t, entry)
     {
@@ -605,6 +612,28 @@ HRESULT report_script_error(script_ctx_t *ctx, vbscode_t *code, unsigned loc, BO
     error->ei = ctx->ei;
     memset(&ctx->ei, 0, sizeof(ctx->ei));
     result = error->ei.scode;
+
+    /* The description passed to the host names the offending identifier,
+       while the Err object exposes only the bare error text. */
+    if(ctx->ei_identifier) {
+        if(error->ei.bstrDescription) {
+            unsigned desc_len = SysStringLen(error->ei.bstrDescription);
+            unsigned ident_len = SysStringLen(ctx->ei_identifier);
+            BSTR new_desc = SysAllocStringLen(NULL, desc_len + 3 + ident_len + 1);
+            if(new_desc) {
+                memcpy(new_desc, error->ei.bstrDescription, desc_len * sizeof(WCHAR));
+                new_desc[desc_len] = ':';
+                new_desc[desc_len + 1] = ' ';
+                new_desc[desc_len + 2] = '\'';
+                memcpy(new_desc + desc_len + 3, ctx->ei_identifier, ident_len * sizeof(WCHAR));
+                new_desc[desc_len + 3 + ident_len] = '\'';
+                SysFreeString(error->ei.bstrDescription);
+                error->ei.bstrDescription = new_desc;
+            }
+        }
+        SysFreeString(ctx->ei_identifier);
+        ctx->ei_identifier = NULL;
+    }
 
     p = code->source;
     error->cookie = code->cookie;

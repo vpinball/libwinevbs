@@ -29,9 +29,10 @@
 #include "wine/debug.h"
 
 #ifdef __LIBWINEVBS__
+#include "libwinevbs.h"
 #include <locale.h>
 #include "scrrun_private.h"
-
+HRESULT libwinevbs_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 extern HRESULT WINAPI WshShellFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 #endif
 
@@ -5173,7 +5174,7 @@ static HRESULT Err_Clear(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VA
 {
     TRACE("\n");
 
-    clear_ei(&This->ctx->ei);
+    clear_error(This->ctx);
     return S_OK;
 }
 
@@ -5202,6 +5203,9 @@ static HRESULT Err_Raise(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VA
 
     if(SUCCEEDED(hres)) {
         script_ctx_t *ctx = This->ctx;
+
+        SysFreeString(ctx->ei_identifier);
+        ctx->ei_identifier = NULL;
 
         if(source) {
             SysFreeString(ctx->ei.bstrSource);

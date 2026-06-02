@@ -1,3 +1,4 @@
+# libwinevbs-only: wine-f6c044e1890e84a4aa5e77e76ba7276a615630e1.patch
 # libwinevbs-only: wine-2cac6ccf33c0807f374dc96f5a20e35a2da86157.patch
 --- wine/include/winternl.h
 +++ libwinevbs/include/winternl.h
@@ -487,7 +488,7 @@
  
 --- wine/dlls/scrrun/dictionary.c
 +++ libwinevbs/dlls/scrrun/dictionary.c
-@@ -528,7 +528,11 @@
+@@ -562,7 +562,11 @@
      return get_typeinfo(IDictionary_tid, ppTInfo);
  }
  
@@ -499,7 +500,7 @@
                  UINT cNames, LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -545,9 +549,15 @@
+@@ -579,9 +583,15 @@
  
      return hr;
  }
@@ -515,7 +516,7 @@
                  EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -565,6 +575,7 @@
+@@ -599,6 +609,7 @@
  
      return hr;
  }
@@ -523,7 +524,7 @@
  
  static HRESULT WINAPI dictionary_putref_Item(IDictionary *iface, VARIANT *key, VARIANT *item)
  {
-@@ -1019,3 +1030,7 @@
+@@ -1069,3 +1080,7 @@
  
      return S_OK;
  }
@@ -531,7 +532,6 @@
 +#ifdef __LIBWINEVBS__
 +#include "dictionary_proxy.c"
 +#endif
-\ No newline at end of file
 # libwinevbs-only: dlls/scrrun/dictionary_proxy.c
 --- wine/dlls/scrrun/filesystem.c
 +++ libwinevbs/dlls/scrrun/filesystem.c
@@ -2215,7 +2215,7 @@
  
  typedef HRESULT (*instr_func_t)(exec_ctx_t*);
  
-@@ -1936,6 +1943,20 @@
+@@ -2079,6 +2086,20 @@
      }else {
          named_item_t *item;
          disp = NULL;
@@ -2237,20 +2237,6 @@
              if(!(item->flags & SCRIPTITEM_GLOBALMEMBERS)) continue;
              disp = item->disp;
 # libwinevbs-only: dlls/vbscript/regexp_proxy.c
---- wine/dlls/vbscript/vbscript.h
-+++ libwinevbs/dlls/vbscript/vbscript.h
-@@ -34,6 +34,11 @@
- #include "wine/list.h"
- #include "wine/rbtree.h"
- 
-+#ifdef __LIBWINEVBS__
-+#include "libwinevbs.h"
-+HRESULT libwinevbs_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
-+#endif
-+
- typedef struct {
-     void **blocks;
-     DWORD block_cnt;
 --- wine/dlls/vbscript/vbscript_main.c
 +++ libwinevbs/dlls/vbscript/vbscript_main.c
 @@ -39,7 +39,116 @@
@@ -2702,21 +2688,22 @@
 +#endif
 --- wine/dlls/vbscript/global.c
 +++ libwinevbs/dlls/vbscript/global.c
-@@ -28,6 +28,13 @@
+@@ -28,6 +28,14 @@
  
  #include "wine/debug.h"
  
 +#ifdef __LIBWINEVBS__
++#include "libwinevbs.h"
 +#include <locale.h>
 +#include "scrrun_private.h"
-+
++HRESULT libwinevbs_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 +extern HRESULT WINAPI WshShellFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 +#endif
 +
  WINE_DEFAULT_DEBUG_CHANNEL(vbscript);
  
  #define VB_E_CANNOT_CREATE_OBJ 0x800a01ad
-@@ -536,6 +543,7 @@
+@@ -536,6 +544,7 @@
      if(FAILED(hres))
          return NULL;
  
@@ -2724,7 +2711,7 @@
      hres = IClassFactory_QueryInterface(cf, &IID_IClassFactoryEx, (void**)&cfex);
      if(SUCCEEDED(hres)) {
          FIXME("Use IClassFactoryEx\n");
-@@ -543,6 +551,22 @@
+@@ -543,6 +552,22 @@
      }
  
      hres = IClassFactory_CreateInstance(cf, NULL, &IID_IUnknown, (void**)&obj);
@@ -2747,7 +2734,7 @@
      if(FAILED(hres))
          return NULL;
  
-@@ -2804,8 +2828,16 @@
+@@ -2804,8 +2829,16 @@
          hres = E_NOTIMPL;
      }
  
@@ -2764,7 +2751,7 @@
  
      SysFreeString(prompt);
      SysFreeString(title);
-@@ -4187,6 +4219,7 @@
+@@ -4187,6 +4220,7 @@
  
  static HRESULT Global_FormatNumber(BuiltinDisp *This, VARIANT *args, unsigned args_cnt, VARIANT *res)
  {
@@ -2772,7 +2759,7 @@
      int a[4] = {-1, -2, -2, -2};
      HRESULT hres;
      BSTR str;
-@@ -4199,6 +4232,88 @@
+@@ -4199,6 +4233,88 @@
      hres = format_number_lcid(This->ctx->lcid, args, a[0], a[1], a[2], a[3], &str);
      if(FAILED(hres)) return hres;
      return return_bstr(res, str);

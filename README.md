@@ -394,6 +394,11 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - vbscript: Resolve UBound/LBound default member and match native errors [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10895)
 - vbscript: Mark class member fixed-size arrays as FADF_FIXEDSIZE [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10927)
 - vbscript: Parse double literals via ucrtbase _wcstod_l. [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10937)
+- vbscript: Allow Dim to shadow a global const from a previous compile unit. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/11121)
+- vbscript: Report specific compile errors for trailing tokens and missing identifiers. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/11120)
+- vbscript: vbscript: Handle class declaration scope in the parser. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10897)
+- vbscript: Bind local variables and arguments at compile time. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10515)
+- scrrun/dictionary: Match native semantics for Empty and Boolean keys. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10960)
 
 ### Enhancements
 

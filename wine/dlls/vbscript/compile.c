@@ -63,6 +63,7 @@ typedef struct {
 
     function_t *func;
     function_decl_t *func_decls;
+    dim_decl_t *class_props;
 } compile_ctx_t;
 
 static HRESULT compile_expression(compile_ctx_t*,expression_t*);
@@ -189,6 +190,32 @@ static HRESULT push_instr_uint(compile_ctx_t *ctx, vbsop_t op, unsigned arg)
         return E_OUTOFMEMORY;
 
     instr_ptr(ctx, ret)->arg1.uint = arg;
+    return S_OK;
+}
+
+static HRESULT push_instr_int_uint(compile_ctx_t *ctx, vbsop_t op, LONG arg1, unsigned arg2)
+{
+    unsigned ret;
+
+    ret = push_instr(ctx, op);
+    if(!ret)
+        return E_OUTOFMEMORY;
+
+    instr_ptr(ctx, ret)->arg1.lng = arg1;
+    instr_ptr(ctx, ret)->arg2.uint = arg2;
+    return S_OK;
+}
+
+static HRESULT push_instr_uint_uint(compile_ctx_t *ctx, vbsop_t op, unsigned arg1, unsigned arg2)
+{
+    unsigned ret;
+
+    ret = push_instr(ctx, op);
+    if(!ret)
+        return E_OUTOFMEMORY;
+
+    instr_ptr(ctx, ret)->arg1.uint = arg1;
+    instr_ptr(ctx, ret)->arg2.uint = arg2;
     return S_OK;
 }
 
@@ -493,6 +520,54 @@ static BOOL lookup_func_decls(compile_ctx_t *ctx, const WCHAR *name)
     return FALSE;
 }
 
+/* Resolve an identifier to a local variable or argument index at compile time.
+ * Returns TRUE if bound, with *ret set to: non-negative = dim var index, negative = arg index (-1 = arg 0, etc.).
+ * This mirrors jscript's bind_local() / local_off() convention. */
+static BOOL bind_local(compile_ctx_t *ctx, const WCHAR *name, int *ret)
+{
+    dim_decl_t *dim_decl;
+    unsigned i;
+
+    if(ctx->func->type == FUNC_GLOBAL)
+        return FALSE;
+
+    for(dim_decl = ctx->dim_decls, i = 0; dim_decl; dim_decl = dim_decl->next, i++) {
+        if(!vbs_wcsicmp(dim_decl->name, name)) {
+            *ret = i;
+            return TRUE;
+        }
+    }
+
+    for(i = 0; i < ctx->func->arg_cnt; i++) {
+        if(!vbs_wcsicmp(ctx->func->args[i].name, name)) {
+            *ret = -(int)i - 1;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+/* Resolve an identifier to a class property index at compile time.
+ * Only valid when compiling inside a class method (ctx->class_props != NULL). */
+static BOOL bind_class_prop(compile_ctx_t *ctx, const WCHAR *name, unsigned *ret)
+{
+    dim_decl_t *prop;
+    unsigned i;
+
+    if(!ctx->class_props)
+        return FALSE;
+
+    for(prop = ctx->class_props, i = 0; prop; prop = prop->next, i++) {
+        if(!vbs_wcsicmp(prop->name, name)) {
+            *ret = i;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static HRESULT compile_args(compile_ctx_t *ctx, expression_t *args, unsigned *ret)
 {
     unsigned arg_cnt = 0;
@@ -544,6 +619,8 @@ static HRESULT compile_member_expression(compile_ctx_t *ctx, member_expression_t
 {
     expression_t *const_expr;
     HRESULT hres;
+    unsigned prop_ref;
+    int local_ref;
 
     if (expr->obj_expr) {
         hres = compile_expression(ctx, expr->obj_expr);
@@ -552,11 +629,16 @@ static HRESULT compile_member_expression(compile_ctx_t *ctx, member_expression_t
         return push_instr_bstr(ctx, OP_mget, expr->identifier);
     }
 
-    if (!lookup_dim_decls(ctx, expr->identifier) && !lookup_args_name(ctx, expr->identifier)) {
-        const_expr = lookup_const_decls(ctx, expr->identifier, TRUE);
-        if(const_expr)
-            return compile_expression(ctx, const_expr);
-    }
+    if(bind_local(ctx, expr->identifier, &local_ref))
+        return push_instr_int(ctx, OP_local, local_ref);
+
+    if(bind_class_prop(ctx, expr->identifier, &prop_ref))
+        return push_instr_uint(ctx, OP_local_prop, prop_ref);
+
+    const_expr = lookup_const_decls(ctx, expr->identifier, TRUE);
+    if(const_expr)
+        return compile_expression(ctx, const_expr);
+
     return push_instr_bstr(ctx, OP_ident, expr->identifier);
 }
 
@@ -944,7 +1026,11 @@ static HRESULT compile_forto_statement(compile_ctx_t *ctx, forto_statement_t *st
     statement_ctx_t loop_ctx = {3};
     unsigned step_instr, instr, expr_err_label, past_err_label, body_label, from_offset;
     BSTR identifier;
+    int local_ref;
+    BOOL is_local;
     HRESULT hres;
+
+    is_local = bind_local(ctx, stat->identifier, &local_ref);
 
     identifier = alloc_bstr_arg(ctx, stat->identifier);
     if(!identifier)
@@ -1014,10 +1100,17 @@ static HRESULT compile_forto_statement(compile_ctx_t *ctx, forto_statement_t *st
     if(!loop_ctx.for_end_label)
         return E_OUTOFMEMORY;
 
-    step_instr = push_instr(ctx, OP_step);
-    if(!step_instr)
-        return E_OUTOFMEMORY;
-    instr_ptr(ctx, step_instr)->arg2.bstr = identifier;
+    if(is_local) {
+        step_instr = push_instr(ctx, OP_step_local);
+        if(!step_instr)
+            return E_OUTOFMEMORY;
+        instr_ptr(ctx, step_instr)->arg2.lng = local_ref;
+    }else {
+        step_instr = push_instr(ctx, OP_step);
+        if(!step_instr)
+            return E_OUTOFMEMORY;
+        instr_ptr(ctx, step_instr)->arg2.bstr = identifier;
+    }
     instr_ptr(ctx, step_instr)->arg1.uint = loop_ctx.for_end_label;
 
     if(!emit_catch(ctx, 3))
@@ -1029,11 +1122,19 @@ static HRESULT compile_forto_statement(compile_ctx_t *ctx, forto_statement_t *st
     if(FAILED(hres))
         return hres;
 
-
-    instr = push_instr(ctx, OP_incc);
-    if(!instr)
-        return E_OUTOFMEMORY;
-    instr_ptr(ctx, instr)->arg1.bstr = identifier;
+    /* We need a separated OP_step here so that errors jump to the end-of-loop catch. */
+    ctx->loc = stat->stat.loc;
+    if(is_local) {
+        instr = push_instr(ctx, OP_incc_local);
+        if(!instr)
+            return E_OUTOFMEMORY;
+        instr_ptr(ctx, instr)->arg1.lng = local_ref;
+    }else {
+        instr = push_instr(ctx, OP_incc);
+        if(!instr)
+            return E_OUTOFMEMORY;
+        instr_ptr(ctx, instr)->arg1.bstr = identifier;
+    }
 
     instr = push_instr(ctx, OP_step);
     if(!instr)
@@ -1266,6 +1367,33 @@ static HRESULT compile_assignment(compile_ctx_t *ctx, expression_t *left, expres
         hres = compile_args(ctx, call_expr->args, &args_cnt);
         if(FAILED(hres))
             return hres;
+    }
+
+    if(!member_expr->obj_expr) {
+        int local_ref;
+        unsigned prop_ref;
+        if(bind_local(ctx, member_expr->identifier, &local_ref)) {
+            hres = push_instr_int_uint(ctx, is_set ? OP_set_local : OP_assign_local,
+                                       local_ref, args_cnt);
+            if(FAILED(hres))
+                return hres;
+
+            if(!emit_catch(ctx, 0))
+                return E_OUTOFMEMORY;
+
+            return S_OK;
+        }
+        if(bind_class_prop(ctx, member_expr->identifier, &prop_ref)) {
+            hres = push_instr_uint_uint(ctx, is_set ? OP_set_local_prop : OP_assign_local_prop,
+                                        prop_ref, args_cnt);
+            if(FAILED(hres))
+                return hres;
+
+            if(!emit_catch(ctx, 0))
+                return E_OUTOFMEMORY;
+
+            return S_OK;
+        }
     }
 
     hres = push_instr_bstr_uint(ctx, op, member_expr->identifier, args_cnt);
@@ -2077,6 +2205,7 @@ static HRESULT compile_class(compile_ctx_t *ctx, class_decl_t *class_decl)
        before compiling the methods. Same-class collisions are caught below. */
     ctx->dim_decls = ctx->dim_decls_tail = NULL;
     ctx->const_decls = NULL;
+    ctx->class_props = class_decl->props;
 
     for(func_decl = class_decl->funcs, i=1; func_decl; func_decl = func_decl->next, i++) {
         for(func_prop_decl = func_decl; func_prop_decl; func_prop_decl = func_prop_decl->next_prop_func) {
@@ -2114,6 +2243,8 @@ static HRESULT compile_class(compile_ctx_t *ctx, class_decl_t *class_decl)
         if(FAILED(hres))
             return hres;
     }
+
+    ctx->class_props = NULL;
 
     for(prop_decl = class_decl->props; prop_decl; prop_decl = prop_decl->next)
         class_desc->prop_cnt++;

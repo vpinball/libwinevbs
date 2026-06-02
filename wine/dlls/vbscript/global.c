@@ -29,9 +29,10 @@
 #include "wine/debug.h"
 
 #ifdef __LIBWINEVBS__
+#include "libwinevbs.h"
 #include <locale.h>
 #include "scrrun_private.h"
-
+HRESULT libwinevbs_create_object(const WCHAR *progid, IClassFactory* cf, IUnknown** obj);
 extern HRESULT WINAPI WshShellFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,void**);
 #endif
 

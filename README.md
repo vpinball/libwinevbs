@@ -394,6 +394,7 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - vbscript: Resolve UBound/LBound default member and match native errors [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10895)
 - vbscript: Mark class member fixed-size arrays as FADF_FIXEDSIZE [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10927)
 - vbscript: Parse double literals via ucrtbase _wcstod_l. [11.10](https://gitlab.winehq.org/wine/wine/-/merge_requests/10937)
+- scrrun/dictionary: Match native semantics for Empty and Boolean keys. [MR](https://gitlab.winehq.org/wine/wine/-/merge_requests/10960)
 
 ### Enhancements
 

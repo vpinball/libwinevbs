@@ -1,5 +1,4 @@
-# libwinevbs-only: wine-f6c044e1890e84a4aa5e77e76ba7276a615630e1.patch
-# libwinevbs-only: wine-2cac6ccf33c0807f374dc96f5a20e35a2da86157.patch
+# libwinevbs-only: wine-996020f410e7a1aa2dd6b44cf740854ea524d31a.patch
 --- wine/include/winternl.h
 +++ libwinevbs/include/winternl.h
 @@ -21,7 +21,22 @@
@@ -1937,7 +1936,7 @@
 +#endif
 --- wine/dlls/vbscript/vbdisp.c
 +++ libwinevbs/dlls/vbscript/vbdisp.c
-@@ -553,6 +553,213 @@
+@@ -651,6 +651,213 @@
      return hr;
  }
  
@@ -2151,7 +2150,7 @@
  static HRESULT WINAPI DispatchEx_GetTypeInfo(IDispatchEx *iface, UINT iTInfo, LCID lcid,
                                                ITypeInfo **ppTInfo)
  {
-@@ -565,7 +772,11 @@
+@@ -663,7 +870,11 @@
      if(iTInfo) return DISP_E_BADINDEX;
      if(!This->desc) return E_UNEXPECTED;
  
@@ -2215,7 +2214,7 @@
  
  typedef HRESULT (*instr_func_t)(exec_ctx_t*);
  
-@@ -2079,6 +2086,20 @@
+@@ -2101,6 +2108,20 @@
      }else {
          named_item_t *item;
          disp = NULL;

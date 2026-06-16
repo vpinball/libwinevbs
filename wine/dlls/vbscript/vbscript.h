@@ -119,9 +119,33 @@ typedef struct _dynamic_var_t {
     const WCHAR *name;
     BOOL is_const;
     SAFEARRAY *array;
-    struct rb_entry entry;
     size_t index;
 } dynamic_var_t;
+
+typedef enum {
+    SCRIPTDISP_VAR,
+    SCRIPTDISP_FUNC,
+    SCRIPTDISP_HOSTPROP,
+    SCRIPTDISP_BUILTIN,
+} scriptdisp_entry_type_t;
+
+/* A single named member of a ScriptDisp. A global name resolves to exactly
+   one member, so variables and functions share one tree; the payload selected
+   by type also caches a host property resolved through a named item's
+   dispatch, so a name found on the host is looked up only once. */
+typedef struct {
+    struct rb_entry entry;
+    const WCHAR *name;
+    scriptdisp_entry_type_t type;
+    union {
+        dynamic_var_t *var;
+        function_t *func;
+        struct {
+            IDispatch *disp;
+            DISPID id;
+        } host;
+    } u;
+} scriptdisp_entry_t;
 
 typedef struct {
     IDispatchEx IDispatchEx_iface;
@@ -130,12 +154,13 @@ typedef struct {
     dynamic_var_t **global_vars;
     size_t global_vars_cnt;
     size_t global_vars_size;
-    struct rb_tree var_tree;
 
     function_t **global_funcs;
     size_t global_funcs_cnt;
     size_t global_funcs_size;
-    struct rb_tree func_tree;
+
+    /* maps a global name to its scriptdisp_entry_t */
+    struct rb_tree members;
 
     class_desc_t *classes;
 
@@ -145,6 +170,11 @@ typedef struct {
     unsigned int rnd;
 } ScriptDisp;
 
+scriptdisp_entry_t *script_disp_find_member(ScriptDisp *disp, const WCHAR *name);
+scriptdisp_entry_t *script_disp_add_var(ScriptDisp *disp, dynamic_var_t *var);
+scriptdisp_entry_t *script_disp_add_func(ScriptDisp *disp, function_t *func);
+scriptdisp_entry_t *script_disp_add_hostprop(ScriptDisp *disp, const WCHAR *name, IDispatch *disp_obj, DISPID id);
+scriptdisp_entry_t *script_disp_add_builtin(ScriptDisp *disp, const WCHAR *name, IDispatch *disp_obj, DISPID id);
 dynamic_var_t *script_disp_find_var(ScriptDisp *disp, const WCHAR *name);
 
 typedef struct _builtin_prop_t builtin_prop_t;
@@ -165,6 +195,7 @@ typedef struct named_item_t {
     LPWSTR name;
 
     struct list entry;
+    struct list bucket_entry;
 } named_item_t;
 
 HRESULT create_vbdisp(const class_desc_t*,vbdisp_t**);
@@ -232,6 +263,10 @@ struct _script_ctx_t {
     struct list objects;
     struct list code_list;
     struct list named_items;
+
+    /* named items indexed by name, each tree entry listing the items
+       sharing that name in registration order */
+    struct rb_tree named_item_tree;
 };
 
 HRESULT init_global(script_ctx_t*);
@@ -391,7 +426,6 @@ struct _function_t {
     unsigned code_off;
     vbscode_t *code_ctx;
     function_t *next;
-    struct rb_entry entry;
     size_t index;
 };
 

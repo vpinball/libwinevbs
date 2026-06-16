@@ -29,36 +29,134 @@ static const GUID GUID_VBScriptTypeInfo = {0xc59c6b12,0xf6c1,0x11cf,{0x88,0x35,0
 #define DISPID_FUNCTION_MASK 0x20000000
 #define FDEX_VERSION_MASK 0xf0000000
 
-static int func_name_cmp(const void *key, const struct rb_entry *entry)
+static int scriptdisp_member_cmp(const void *key, const struct rb_entry *entry)
 {
-    function_t *func = RB_ENTRY_VALUE(entry, function_t, entry);
-    return vbs_wcsicmp(key, func->name);
+    scriptdisp_entry_t *member = RB_ENTRY_VALUE(entry, scriptdisp_entry_t, entry);
+    return vbs_wcsicmp(key, member->name);
 }
 
-static int var_name_cmp(const void *key, const struct rb_entry *entry)
+scriptdisp_entry_t *script_disp_find_member(ScriptDisp *disp, const WCHAR *name)
 {
-    dynamic_var_t *var = RB_ENTRY_VALUE(entry, dynamic_var_t, entry);
-    return vbs_wcsicmp(key, var->name);
+    struct rb_entry *entry = rb_get(&disp->members, name);
+    return entry ? RB_ENTRY_VALUE(entry, scriptdisp_entry_t, entry) : NULL;
+}
+
+/* Insert name into the member tree, or return the existing entry for it; the
+   caller fills in the type and payload. The name string must stay valid for
+   the lifetime of the entry. */
+static scriptdisp_entry_t *script_disp_add_member(ScriptDisp *disp, const WCHAR *name)
+{
+    scriptdisp_entry_t *member = script_disp_find_member(disp, name);
+
+    if (member) {
+        member->name = name;
+        return member;
+    }
+
+    if (!(member = heap_pool_alloc(&disp->heap, sizeof(*member))))
+        return NULL;
+    member->name = name;
+    rb_put(&disp->members, name, &member->entry);
+    return member;
+}
+
+scriptdisp_entry_t *script_disp_add_var(ScriptDisp *disp, dynamic_var_t *var)
+{
+    scriptdisp_entry_t *member = script_disp_add_member(disp, var->name);
+
+    if (member) {
+        member->type = SCRIPTDISP_VAR;
+        member->u.var = var;
+    }
+    return member;
+}
+
+scriptdisp_entry_t *script_disp_add_func(ScriptDisp *disp, function_t *func)
+{
+    scriptdisp_entry_t *member = script_disp_add_member(disp, func->name);
+
+    if (member) {
+        member->type = SCRIPTDISP_FUNC;
+        member->u.func = func;
+    }
+    return member;
+}
+
+/* Cache a host property resolved through a named item's dispatch. Returns NULL
+   without caching when a real variable or function already owns the name, so a
+   later script declaration is never shadowed by a stale host entry. */
+scriptdisp_entry_t *script_disp_add_hostprop(ScriptDisp *disp, const WCHAR *name, IDispatch *disp_obj, DISPID id)
+{
+    scriptdisp_entry_t *member = script_disp_find_member(disp, name);
+
+    if (member) {
+        if (member->type != SCRIPTDISP_HOSTPROP)
+            return NULL;
+    } else {
+        WCHAR *str;
+        size_t size = (lstrlenW(name) + 1) * sizeof(WCHAR);
+
+        /* The name must outlive the entry; the caller's bytecode string may not,
+           so keep a copy in the dispatch's own pool. */
+        if (!(str = heap_pool_alloc(&disp->heap, size)))
+            return NULL;
+        memcpy(str, name, size);
+
+        if (!(member = script_disp_add_member(disp, str)))
+            return NULL;
+    }
+
+    member->type = SCRIPTDISP_HOSTPROP;
+    member->u.host.disp = disp_obj;
+    member->u.host.id = id;
+    return member;
+}
+
+/* Cache a builtin function resolved through the global object, so subsequent
+   lookups find it in the tree instead of querying the builtins again. */
+scriptdisp_entry_t *script_disp_add_builtin(ScriptDisp *disp, const WCHAR *name, IDispatch *disp_obj, DISPID id)
+{
+    scriptdisp_entry_t *member = script_disp_find_member(disp, name);
+
+    if (member) {
+        if (member->type != SCRIPTDISP_BUILTIN)
+            return NULL;
+    } else {
+        WCHAR *str;
+        size_t size = (lstrlenW(name) + 1) * sizeof(WCHAR);
+
+        if (!(str = heap_pool_alloc(&disp->heap, size)))
+            return NULL;
+        memcpy(str, name, size);
+
+        if (!(member = script_disp_add_member(disp, str)))
+            return NULL;
+    }
+
+    member->type = SCRIPTDISP_BUILTIN;
+    member->u.host.disp = disp_obj;
+    member->u.host.id = id;
+    return member;
 }
 
 function_t *script_disp_find_func(ScriptDisp *disp, const WCHAR *name)
 {
-    struct rb_entry *entry = rb_get(&disp->func_tree, name);
+    scriptdisp_entry_t *member = script_disp_find_member(disp, name);
 
-    if (!entry)
+    if (!member || member->type != SCRIPTDISP_FUNC)
         return NULL;
 
-    return RB_ENTRY_VALUE(entry, function_t, entry);
+    return member->u.func;
 }
 
 dynamic_var_t *script_disp_find_var(ScriptDisp *disp, const WCHAR *name)
 {
-    struct rb_entry *entry = rb_get(&disp->var_tree, name);
+    scriptdisp_entry_t *member = script_disp_find_member(disp, name);
 
-    if (!entry)
+    if (!member || member->type != SCRIPTDISP_VAR)
         return NULL;
 
-    return RB_ENTRY_VALUE(entry, dynamic_var_t, entry);
+    return member->u.var;
 }
 
 static inline BOOL is_func_id(vbdisp_t *This, DISPID id)
@@ -1420,10 +1518,10 @@ static HRESULT WINAPI ScriptTypeInfo_GetIDsOfNames(ITypeInfo *iface, LPOLESTR *r
     }
 
     {
-        struct rb_entry *entry = rb_get(&This->disp->var_tree, name);
-        if (entry)
+        dynamic_var_t *var = script_disp_find_var(This->disp, name);
+        if (var)
         {
-            pMemId[0] = RB_ENTRY_VALUE(entry, dynamic_var_t, entry)->index + 1;
+            pMemId[0] = var->index + 1;
             return S_OK;
         }
     }
@@ -1724,10 +1822,9 @@ static HRESULT WINAPI ScriptTypeComp_Bind(ITypeComp *iface, LPOLESTR szName, ULO
     }
 
     {
-        struct rb_entry *entry = rb_get(&This->disp->var_tree, szName);
-        if (entry)
+        dynamic_var_t *var = script_disp_find_var(This->disp, szName);
+        if (var)
         {
-            dynamic_var_t *var = RB_ENTRY_VALUE(entry, dynamic_var_t, entry);
             if (!(flags & INVOKE_PROPERTYGET)) return TYPE_E_TYPEMISMATCH;
 
             hr = ITypeInfo_GetVarDesc(&This->ITypeInfo_iface, var->index, &pBindPtr->lpvardesc);
@@ -1947,24 +2044,24 @@ static HRESULT WINAPI ScriptDisp_Invoke(IDispatchEx *iface, DISPID dispIdMember,
 static HRESULT WINAPI ScriptDisp_GetDispID(IDispatchEx *iface, BSTR bstrName, DWORD grfdex, DISPID *pid)
 {
     ScriptDisp *This = ScriptDisp_from_IDispatchEx(iface);
-    struct rb_entry *entry;
+    scriptdisp_entry_t *member;
 
     TRACE("(%p)->(%s %lx %p)\n", This, debugstr_w(bstrName), grfdex, pid);
 
     if(!This->ctx)
         return E_UNEXPECTED;
 
-    entry = rb_get(&This->var_tree, bstrName);
-    if(entry) {
-        *pid = RB_ENTRY_VALUE(entry, dynamic_var_t, entry)->index + 1;
-        return S_OK;
-    }
-
-    entry = rb_get(&This->func_tree, bstrName);
-    if(entry) {
-        function_t *func = RB_ENTRY_VALUE(entry, function_t, entry);
-        *pid = func->index + 1 + DISPID_FUNCTION_MASK;
-        return S_OK;
+    member = script_disp_find_member(This, bstrName);
+    if(member) {
+        /* Host properties cached on this dispatch are not script members. */
+        if(member->type == SCRIPTDISP_FUNC) {
+            *pid = member->u.func->index + 1 + DISPID_FUNCTION_MASK;
+            return S_OK;
+        }
+        if(member->type == SCRIPTDISP_VAR) {
+            *pid = member->u.var->index + 1;
+            return S_OK;
+        }
     }
 
     *pid = -1;
@@ -2103,8 +2200,7 @@ HRESULT create_script_disp(script_ctx_t *ctx, ScriptDisp **ret)
     script_disp->ref = 1;
     script_disp->ctx = ctx;
     heap_pool_init(&script_disp->heap);
-    rb_init(&script_disp->func_tree, func_name_cmp);
-    rb_init(&script_disp->var_tree, var_name_cmp);
+    rb_init(&script_disp->members, scriptdisp_member_cmp);
     script_disp->rnd = 0x50000;
 
     *ret = script_disp;

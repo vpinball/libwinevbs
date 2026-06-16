@@ -398,6 +398,11 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - vbscript: Report specific compile errors for trailing tokens and missing identifiers. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/11120)
 - vbscript: vbscript: Handle class declaration scope in the parser. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10897)
 - vbscript: Bind local variables and arguments at compile time. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10515)
+- vbscript: Store global variables and functions in a single tagged tree. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11196)
+- vbscript: Look up named items before builtin functions. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11128)
+- vbscript: Cache host DISPIDs as entries in the unified global tree. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11212)
+- vbscript: Parse a bare '&' followed by octal digits as an octal literal. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11229)
+- vbscript: Raise type mismatch when comparing an array. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11252)
 - scrrun/dictionary: Match native semantics for Empty and Boolean keys. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10960)
 
 ### Enhancements

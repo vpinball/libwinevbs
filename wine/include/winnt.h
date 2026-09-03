@@ -5477,6 +5477,9 @@ typedef enum tagSID_NAME_USE {
 #define MAXIMUM_ALLOWED            0x02000000
 #define ACCESS_SYSTEM_SECURITY     0x01000000
 
+#define ALPC_PORT_QUERY_STATE      0x0001
+#define ALPC_PORT_ALL_ACCESS       (STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE|ALPC_PORT_QUERY_STATE)
+
 #define EVENT_QUERY_STATE          0x0001
 #define EVENT_MODIFY_STATE         0x0002
 #define EVENT_ALL_ACCESS           (STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE|0x3)
@@ -7737,7 +7740,7 @@ static FORCEINLINE LONGLONG WINAPI InterlockedCompareExchange64( LONGLONG volati
 static FORCEINLINE LONG WINAPI InterlockedExchange( LONG volatile *dest, LONG val )
 {
     LONG ret;
-#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7))
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)) || defined(__clang__)
     ret = __atomic_exchange_n( dest, val, __ATOMIC_SEQ_CST );
 #elif defined(__i386__) || defined(__x86_64__)
     __asm__ __volatile__( "lock; xchgl %0,(%1)"
@@ -7751,7 +7754,7 @@ static FORCEINLINE LONG WINAPI InterlockedExchange( LONG volatile *dest, LONG va
 static FORCEINLINE char WINAPI InterlockedExchange8( char volatile *dest, char val )
 {
     char ret;
-#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7))
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)) || defined(__clang__)
     ret = __atomic_exchange_n( dest, val, __ATOMIC_SEQ_CST );
 #elif defined(__i386__) || defined(__x86_64__)
     __asm__ __volatile__( "lock; xchgb %0,(%1)"
@@ -7765,7 +7768,7 @@ static FORCEINLINE char WINAPI InterlockedExchange8( char volatile *dest, char v
 static FORCEINLINE short WINAPI InterlockedExchange16( short volatile *dest, short val )
 {
     short ret;
-#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7))
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)) || defined(__clang__)
     ret = __atomic_exchange_n( dest, val, __ATOMIC_SEQ_CST );
 #elif defined(__i386__) || defined(__x86_64__)
     __asm__ __volatile__( "lock; xchgw %0,(%1)"
@@ -7829,7 +7832,7 @@ static FORCEINLINE LONGLONG WINAPI InterlockedDecrement64( LONGLONG volatile *de
 static FORCEINLINE void * WINAPI InterlockedExchangePointer( void *volatile *dest, void *val )
 {
     void *ret;
-#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7))
+#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 7)) || defined(__clang__)
     ret = __atomic_exchange_n( dest, val, __ATOMIC_SEQ_CST );
 #elif defined(__x86_64__)
     __asm__ __volatile__( "lock; xchgq %0,(%1)" : "=r" (ret) :"r" (dest), "0" (val) : "memory" );
@@ -7886,7 +7889,7 @@ static FORCEINLINE void MemoryBarrier(void)
     __sync_synchronize();
 }
 
-#if defined(__arm__) || defined(__aarch64__)
+#if defined(__arm__) || defined(__aarch64__) || defined(__arm64ec__)
 
 static FORCEINLINE LONG WINAPI InterlockedAddAcquire( LONG volatile *dest, LONG val ) { return __atomic_add_fetch( dest, val, __ATOMIC_ACQUIRE ); }
 static FORCEINLINE LONG WINAPI InterlockedAddNoFence( LONG volatile *dest, LONG val ) { return __atomic_add_fetch( dest, val, __ATOMIC_RELAXED ); }
@@ -8068,11 +8071,11 @@ static FORCEINLINE void WriteNoFence64( LONG64 volatile *dest, LONG64 value )
 #ifndef __MINGW32__
 static FORCEINLINE DECLSPEC_NORETURN void __fastfail(unsigned int code)
 {
-#if defined(__x86_64__) || defined(__i386__)
-    for (;;) __asm__ __volatile__( "int $0x29" :: "c" ((ULONG_PTR)code) : "memory" );
-#elif defined(__aarch64__)
+#if defined(__aarch64__) || defined(__arm64ec__)
     register ULONG_PTR val __asm__("x0") = code;
     for (;;) __asm__ __volatile__( "brk #0xf003" :: "r" (val) : "memory" );
+#elif defined(__x86_64__) || defined(__i386__)
+    for (;;) __asm__ __volatile__( "int $0x29" :: "c" ((ULONG_PTR)code) : "memory" );
 #elif defined(__arm__)
     register ULONG_PTR val __asm__("r0") = code;
     for (;;) __asm__ __volatile__( "udf #0xfb" :: "r" (val) : "memory" );

@@ -267,10 +267,10 @@
  #endif
  
  #endif /* !defined(__WINESRC__) || defined(WINE_NO_INLINE_STRING) */
-# libwinevbs-only: wine-8da89f8493b21ebfbe344a54dbef0cde23c7ea59.patch
+# libwinevbs-only: wine-36b6a2cf679fb395f668a917b76537190e212d9c.patch
 --- wine/dlls/atl/atl.c
 +++ libwinevbs/dlls/atl/atl.c
-@@ -967,6 +967,7 @@
+@@ -968,6 +968,7 @@
      return _ATL_VER;
  }
  
@@ -278,14 +278,14 @@
  BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
  {
      TRACE("(0x%p, %ld, %p)\n", hinstDLL, fdwReason, lpvReserved);
-@@ -983,3 +984,4 @@
+@@ -984,3 +985,4 @@
  
      return TRUE;
  }
 +#endif
 --- wine/dlls/kernelbase/locale.c
 +++ libwinevbs/dlls/kernelbase/locale.c
-@@ -594,6 +594,7 @@
+@@ -596,6 +596,7 @@
  
  static const NLS_LOCALE_LCID_INDEX *find_lcid_entry( LCID lcid )
  {
@@ -293,7 +293,7 @@
      int min = 0, max = locale_table->nb_lcids - 1;
  
      while (min <= max)
-@@ -603,6 +604,7 @@
+@@ -605,6 +606,7 @@
          else if (lcid > lcids_index[pos].id) min = pos + 1;
          else return &lcids_index[pos];
      }
@@ -301,7 +301,23 @@
      return NULL;
  }
  
-@@ -675,6 +677,7 @@
+@@ -692,6 +694,7 @@
+         *name = locale_strings + user_ui_locale->sname + 1;
+         break;
+     default:
++#ifndef __LIBWINEVBS__
+         if (lcid == user_lcid || lcid == system_lcid) break;
+         if (!(entry = find_lcid_entry( lcid )))
+         {
+@@ -700,6 +703,7 @@
+             return FALSE;
+         }
+         *name = locale_strings + entry->name + 1;
++#endif
+         break;
+     }
+     return TRUE;
+@@ -708,6 +712,7 @@
  
  static const struct sortguid *get_language_sort( const WCHAR *name )
  {
@@ -309,7 +325,7 @@
      const NLS_LOCALE_LCNAME_INDEX *entry;
      const NLS_LOCALE_DATA *locale;
      WCHAR guidstr[39];
-@@ -726,6 +729,9 @@
+@@ -759,6 +764,9 @@
      if (!ret) ret = &sort.guids[0];
      locale_sorts[entry - lcnames_index] = ret;
      return ret;
@@ -319,7 +335,7 @@
  }
  
  
-@@ -1642,7 +1648,11 @@
+@@ -1677,7 +1685,11 @@
  
      if (id != CAL_GREGORIAN && type != CAL_ITWODIGITYEARMAX)
      {
@@ -331,7 +347,7 @@
          for (i = 0; i < ids[0]; i++) if (ids[1 + i] == id) break;
          if (i == ids[0]) goto invalid;
      }
-@@ -2157,7 +2167,11 @@
+@@ -2196,7 +2208,11 @@
      if (pos >> 13)
      {
          if (get_char_props( norm_info, ch ) != 0xbf) return NULL;
@@ -343,7 +359,7 @@
          len = pos >> 13;
      }
      else
-@@ -2172,7 +2186,11 @@
+@@ -2211,7 +2227,11 @@
          for ( ; pos < end; pos++)
          {
              if (pairs[pos].src != (WCHAR)ch) continue;
@@ -355,7 +371,7 @@
              len = pairs[pos].dst >> 13;
              break;
          }
-@@ -2189,7 +2207,11 @@
+@@ -2228,7 +2248,11 @@
  static WCHAR compose_chars( WCHAR ch1, WCHAR ch2 )
  {
      const USHORT *table = (const USHORT *)norm_info + norm_info->comp_hash;
@@ -367,7 +383,7 @@
      unsigned int hash, start, end, i;
      WCHAR ch[3];
  
-@@ -2234,6 +2256,11 @@
+@@ -2273,6 +2297,11 @@
  {
      static const CPTABLEINFO utf7_cpinfo = { CP_UTF7, 5, '?', 0xfffd, '?', '?' };
      static const CPTABLEINFO utf8_cpinfo = { CP_UTF8, 4, '?', 0xfffd, '?', '?' };
@@ -379,7 +395,7 @@
      unsigned int i;
      USHORT *ptr;
      SIZE_T size;
-@@ -3867,6 +3894,7 @@
+@@ -3906,6 +3935,7 @@
  static int compare_string( const struct sortguid *sortid, DWORD flags,
                             const WCHAR *src1, int srclen1, const WCHAR *src2, int srclen2 )
  {
@@ -387,7 +403,7 @@
      struct sortkey_state s1;
      struct sortkey_state s2;
      BYTE primary1[32];
-@@ -3927,6 +3955,12 @@
+@@ -3966,6 +3996,12 @@
      free_sortkey_state( &s1 );
      free_sortkey_state( &s2 );
      return ret;
@@ -400,7 +416,7 @@
  }
  
  
-@@ -4369,7 +4403,11 @@
+@@ -4408,7 +4444,11 @@
      if (id == ENUM_ALL_CALENDARS)
      {
          count = locale_strings[locale->scalendartype];
@@ -412,7 +428,7 @@
      }
      else if (id <= CAL_UMALQURA)
      {
-@@ -4447,7 +4485,11 @@
+@@ -4486,7 +4526,11 @@
          return FALSE;
      }
  
@@ -424,7 +440,7 @@
  
      switch (flags & ~LOCALE_USE_CP_ACP)
      {
-@@ -4784,7 +4826,9 @@
+@@ -4823,7 +4867,9 @@
          return 0;
      }
  
@@ -434,23 +450,7 @@
  
      if (!str1 || !str2)
      {
-@@ -4902,6 +4946,7 @@
-     case LOCALE_CUSTOM_UI_DEFAULT:
-         break;
-     default:
-+#ifndef __LIBWINEVBS__
-         if (lcid == user_lcid || lcid == system_lcid) break;
-         if (!(entry = find_lcid_entry( lcid )))
-         {
-@@ -4910,6 +4955,7 @@
-             return 0;
-         }
-         locale = locale_strings + entry->name + 1;
-+#endif
-         break;
-     }
- 
-@@ -5829,6 +5875,7 @@
+@@ -5826,6 +5872,7 @@
  BOOL WINAPI DECLSPEC_HOTPATCH GetFileMUIInfo( DWORD flags, const WCHAR *path,
                                                FILEMUIINFO *info, DWORD *size )
  {
@@ -458,7 +458,7 @@
      DWORD off, mui_size, type = MUI_FILETYPE_NOT_LANGUAGE_NEUTRAL;
      struct mui_resource *mui = NULL;
      HMODULE hmod;
-@@ -5983,6 +6030,9 @@
+@@ -5980,6 +6027,9 @@
  
      FreeLibrary( hmod );
      return TRUE;
@@ -468,7 +468,15 @@
  }
  
  
-@@ -6754,6 +6804,7 @@
+@@ -6492,7 +6542,6 @@
+     return lang;
+ }
+ 
+-
+ /******************************************************************************
+  *	GetUserGeoID   (kernelbase.@)
+  */
+@@ -6796,6 +6845,7 @@
   */
  BOOL WINAPI DECLSPEC_HOTPATCH IsValidLocale( LCID lcid, DWORD flags )
  {
@@ -476,7 +484,7 @@
      switch (lcid)
      {
      case LOCALE_NEUTRAL:
-@@ -6763,6 +6814,9 @@
+@@ -6805,6 +6855,9 @@
      default:
          return !!NlsValidateLocale( &lcid, LOCALE_ALLOW_NEUTRAL_NAMES );
      }
@@ -575,7 +583,18 @@
  
  static HRESULT WINAPI textstream_get_Line(ITextStream *iface, LONG *line)
  {
-@@ -1057,8 +1070,13 @@
+@@ -489,7 +502,10 @@
+     if (stream->eof) return S_OK;
+ 
+     if (!ReadFile(stream->file, buf, sizeof(buf), &read, NULL))
++    {
++        ITextStream_Release(&stream->ITextStream_iface);
+         return create_error(GetLastError());
++    }
+ 
+     stream->eof = read != sizeof(buf);
+     return append_read_data(stream, buf, read);
+@@ -1054,8 +1070,13 @@
      return get_typeinfo(IDrive_tid, ppTInfo);
  }
  
@@ -589,7 +608,7 @@
                                          LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -1075,10 +1093,17 @@
+@@ -1072,10 +1093,17 @@
  
      return hr;
  }
@@ -607,7 +626,7 @@
                                        EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -1097,6 +1122,7 @@
+@@ -1094,6 +1122,7 @@
  
      return hr;
  }
@@ -615,7 +634,7 @@
  
  static HRESULT WINAPI drive_get_Path(IDrive *iface, BSTR *path)
  {
-@@ -1890,8 +1916,13 @@
+@@ -1887,8 +1916,13 @@
      return get_typeinfo(IFolderCollection_tid, ppTInfo);
  }
  
@@ -629,7 +648,7 @@
                                          LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -1908,10 +1939,17 @@
+@@ -1905,10 +1939,17 @@
  
      return hr;
  }
@@ -647,7 +666,7 @@
                                        EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -1930,6 +1968,7 @@
+@@ -1927,6 +1968,7 @@
  
      return hr;
  }
@@ -655,7 +674,7 @@
  
  static HRESULT WINAPI foldercoll_Add(IFolderCollection *iface, BSTR name, IFolder **folder)
  {
-@@ -2092,8 +2131,13 @@
+@@ -2089,8 +2131,13 @@
      return get_typeinfo(IFileCollection_tid, ppTInfo);
  }
  
@@ -669,7 +688,7 @@
                                          LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -2110,10 +2154,17 @@
+@@ -2107,10 +2154,17 @@
  
      return hr;
  }
@@ -687,7 +706,7 @@
                                        EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -2132,6 +2183,7 @@
+@@ -2129,6 +2183,7 @@
  
      return hr;
  }
@@ -695,7 +714,7 @@
  
  static HRESULT WINAPI filecoll_get_Item(IFileCollection *iface, VARIANT Key, IFile **file)
  {
-@@ -2282,8 +2334,13 @@
+@@ -2279,8 +2334,13 @@
      return get_typeinfo(IDriveCollection_tid, ppTInfo);
  }
  
@@ -709,7 +728,7 @@
                                          LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -2300,10 +2357,17 @@
+@@ -2297,10 +2357,17 @@
  
      return hr;
  }
@@ -727,7 +746,7 @@
                                        EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -2322,6 +2386,7 @@
+@@ -2319,6 +2386,7 @@
  
      return hr;
  }
@@ -735,7 +754,7 @@
  
  static HRESULT WINAPI drivecoll_get_Item(IDriveCollection *iface, VARIANT key, IDrive **drive)
  {
-@@ -2456,8 +2521,13 @@
+@@ -2453,8 +2521,13 @@
      return get_typeinfo(IFolder_tid, ppTInfo);
  }
  
@@ -749,7 +768,7 @@
                                          LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -2474,10 +2544,17 @@
+@@ -2471,10 +2544,17 @@
  
      return hr;
  }
@@ -767,7 +786,7 @@
                                        EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -2496,6 +2573,7 @@
+@@ -2493,6 +2573,7 @@
  
      return hr;
  }
@@ -775,7 +794,7 @@
  
  static HRESULT WINAPI folder_get_Path(IFolder *iface, BSTR *path)
  {
-@@ -2964,7 +3042,11 @@
+@@ -2961,7 +3042,11 @@
      return get_typeinfo(IFile_tid, ppTInfo);
  }
  
@@ -787,7 +806,7 @@
          LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -2980,8 +3062,13 @@
+@@ -2977,8 +3062,13 @@
      }
      return hr;
  }
@@ -801,7 +820,7 @@
          DISPPARAMS *pDispParams, VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -2999,6 +3086,7 @@
+@@ -2996,6 +3086,7 @@
      }
      return hr;
  }
@@ -809,7 +828,7 @@
  
  static HRESULT WINAPI file_get_Path(IFile *iface, BSTR *path)
  {
-@@ -3434,8 +3522,13 @@
+@@ -3431,8 +3522,13 @@
      return get_typeinfo(IFileSystem3_tid, ppTInfo);
  }
  
@@ -823,7 +842,7 @@
                                          LCID lcid, DISPID *rgDispId)
  {
      ITypeInfo *typeinfo;
-@@ -3452,10 +3545,17 @@
+@@ -3449,10 +3545,17 @@
  
      return hr;
  }
@@ -841,7 +860,7 @@
                                        EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      ITypeInfo *typeinfo;
-@@ -3474,6 +3574,7 @@
+@@ -3471,6 +3574,7 @@
  
      return hr;
  }
@@ -849,7 +868,7 @@
  
  static HRESULT WINAPI filesys_get_Drives(IFileSystem3 *iface, IDriveCollection **ppdrives)
  {
-@@ -4472,3 +4573,7 @@
+@@ -4469,3 +4573,7 @@
      init_classinfo(&CLSID_FileSystemObject, (IUnknown *)&filesystem.IFileSystem3_iface, &filesystem.classinfo);
      return IFileSystem3_QueryInterface(&filesystem.IFileSystem3_iface, riid, ppv);
  }
@@ -2215,7 +2234,7 @@
  
  typedef HRESULT (*instr_func_t)(exec_ctx_t*);
  
-@@ -2101,6 +2108,20 @@
+@@ -2107,6 +2114,20 @@
      }else {
          named_item_t *item;
          disp = NULL;

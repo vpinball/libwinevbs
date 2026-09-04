@@ -403,6 +403,9 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - vbscript: Cache host DISPIDs as entries in the unified global tree. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11212)
 - vbscript: Parse a bare '&' followed by octal digits as an octal literal. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11229)
 - vbscript: Raise type mismatch when comparing an array. [11.12](https://gitlab.winehq.org/wine/wine/-/merge_requests/11252)
+- vbscript: Treat a dot right after a keyword as a with-statement dot. [11.17](https://gitlab.winehq.org/wine/wine/-/merge_requests/11820)
+- vbscript: Return "Object not a collection" for For Each on Nothing. [11.17](https://gitlab.winehq.org/wine/wine/-/merge_requests/11831)
+- vbscript: Initialize the function pointer before the recursion limit check. [11.17](https://gitlab.winehq.org/wine/wine/-/merge_requests/11837)
 - scrrun/dictionary: Match native semantics for Empty and Boolean keys. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10960)
 
 ### Enhancements

@@ -472,16 +472,6 @@ NTSTATUS WINAPI NtGetNlsSectionPtr(ULONG type, ULONG id, void *unknown, void **p
    return 0;
 }
 
-NTSTATUS WINAPI NtQueryDefaultLocale(BOOLEAN user, LCID *lcid)
-{
-   return 0;
-}
-
-NTSTATUS WINAPI NtQueryInstallUILanguage(LANGID *lang)
-{
-   return 0;
-}
-
 LSTATUS WINAPI RegCloseKey(HKEY hkey)
 {
    return 0;
@@ -578,6 +568,10 @@ BOOLEAN WINAPI RtlFreeHeap(HANDLE heap, ULONG flags, void *ptr)
    return FALSE;
 }
 
+void WINAPI RtlFreeUnicodeString(UNICODE_STRING *str)
+{
+}
+
 NTSTATUS WINAPI RtlGetSystemPreferredUILanguages(DWORD flags, ULONG unknown, ULONG *count,
                                       WCHAR *buffer, ULONG *size)
 {
@@ -629,6 +623,11 @@ NTSTATUS WINAPI RtlIsNormalizedString(ULONG form, const WCHAR *str, INT len, BOO
    return 0;
 }
 
+NTSTATUS WINAPI RtlLcidToLocaleName(LCID lcid, UNICODE_STRING *name, ULONG flags, BOOLEAN alloc)
+{
+   return 0;
+}
+
 NTSTATUS WINAPI RtlLeaveCriticalSection(RTL_CRITICAL_SECTION *crit)
 {
    return 0;
@@ -666,6 +665,11 @@ NTSTATUS WINAPI RtlSetThreadPreferredUILanguages(DWORD flags, PCZZWSTR buffer, U
 }
 
 NTSTATUS WINAPI RtlSetTimeZoneInformation(const RTL_TIME_ZONE_INFORMATION *tzinfo)
+{
+   return 0;
+}
+
+NTSTATUS WINAPI RtlpQueryDefaultUILanguage(LANGID *lang, BOOLEAN system)
 {
    return 0;
 }

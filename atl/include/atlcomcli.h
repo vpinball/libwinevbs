@@ -341,7 +341,7 @@ public:
     HRESULT hr = ::VariantClear(pDest);
     if (SUCCEEDED(hr))
     {
-      ::VariantCopy(const_cast<VARIANT*>(pDest), this);
+      memcpy(pDest, static_cast<VARIANT*>(this), sizeof(VARIANT));
       V_VT(this) = VT_EMPTY;
       hr = S_OK;
     }

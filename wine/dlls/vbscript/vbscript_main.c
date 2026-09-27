@@ -171,7 +171,13 @@ void *heap_pool_alloc(heap_pool_t *heap, size_t size)
     struct list *list;
     void *tmp;
 
+#ifdef __LIBWINEVBS__
+    /* round to 8 bytes, VARIANT needs it on 64 bit */
+    size = (size+7)&~7;
+    heap->offset = (heap->offset+7)&~7;
+#else
     size = (size+3)&~3;
+#endif
 
     if(!heap->block_cnt) {
         if(!heap->blocks) {

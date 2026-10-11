@@ -1206,9 +1206,14 @@ static HRESULT WINAPI RegExp2_GetTypeInfo(IRegExp2 *iface,
 
     TRACE("(%p)->(%u %lu %p)\n", This, iTInfo, lcid, ppTInfo);
 
+#ifdef __LIBWINEVBS__
+    *ppTInfo = NULL;
+    return E_NOTIMPL;
+#else
     *ppTInfo = typeinfos[RegExp2_tid];
     ITypeInfo_AddRef(*ppTInfo);
     return S_OK;
+#endif
 }
 
 #ifdef __LIBWINEVBS__

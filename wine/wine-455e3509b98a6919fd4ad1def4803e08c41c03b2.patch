@@ -2655,19 +2655,28 @@
  
      ret = calloc(1, sizeof(*ret));
      if(!ret)
-@@ -1148,7 +1211,11 @@
+@@ -1143,11 +1206,20 @@
+ 
+     TRACE("(%p)->(%u %lu %p)\n", This, iTInfo, lcid, ppTInfo);
+ 
++#ifdef __LIBWINEVBS__
++    *ppTInfo = NULL;
++    return E_NOTIMPL;
++#else
+     *ppTInfo = typeinfos[RegExp2_tid];
+     ITypeInfo_AddRef(*ppTInfo);
      return S_OK;
++#endif
  }
  
 +#ifdef __LIBWINEVBS__
- static HRESULT WINAPI RegExp2_GetIDsOfNames(IRegExp2 *iface, REFIID riid,
++static HRESULT WINAPI RegExp2_GetIDsOfNames(IRegExp2 *iface, REFIID riid,
 +        LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
 +#else
-+static HRESULT WINAPI RegExp2_GetIDsOfNames(IRegExp2 *iface, REFIID riid,
+ static HRESULT WINAPI RegExp2_GetIDsOfNames(IRegExp2 *iface, REFIID riid,
          LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId)
  {
-     RegExp2 *This = impl_from_IRegExp2(iface);
-@@ -1158,9 +1225,15 @@
+@@ -1158,9 +1230,15 @@
  
      return ITypeInfo_GetIDsOfNames(typeinfos[RegExp2_tid], rgszNames, cNames, rgDispId);
  }
@@ -2683,7 +2692,7 @@
          VARIANT *pVarResult, EXCEPINFO *pExcepInfo, UINT *puArgErr)
  {
      RegExp2 *This = impl_from_IRegExp2(iface);
-@@ -1171,6 +1244,7 @@
+@@ -1171,6 +1249,7 @@
      return ITypeInfo_Invoke(typeinfos[RegExp2_tid], iface, dispIdMember, wFlags,
              pDispParams, pVarResult, pExcepInfo, puArgErr);
  }
@@ -2691,7 +2700,7 @@
  
  static HRESULT WINAPI RegExp2_get_Pattern(IRegExp2 *iface, BSTR *pPattern)
  {
-@@ -1713,21 +1787,32 @@
+@@ -1713,21 +1792,32 @@
      return IRegExp2_GetTypeInfo(&This->IRegExp2_iface, iTInfo, lcid, ppTInfo);
  }
  
@@ -2724,7 +2733,7 @@
  
  static HRESULT WINAPI RegExp_get_Pattern(IRegExp *iface, BSTR *pPattern)
  {
-@@ -1813,9 +1898,11 @@
+@@ -1813,9 +1903,11 @@
      RegExp2 *regexp;
      HRESULT hres;
  
@@ -2736,7 +2745,7 @@
  
      regexp = calloc(1, sizeof(*regexp));
      if(!regexp)
-@@ -1857,3 +1944,7 @@
+@@ -1857,3 +1949,7 @@
      if(typelib)
          ITypeLib_Release(typelib);
  }

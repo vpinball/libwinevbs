@@ -217,6 +217,25 @@ int main(void)
    if (FAILED(hr))
       printf("WScript.Shell test failed: 0x%08X\n", hr);
 
+   printf("\n--- Test 5: TypeName / GetObject without a type library ---\n");
+   hr = ASP_ParseScriptText(parser,
+      L"Print \"Dictionary: \" & TypeName(CreateObject(\"Scripting.Dictionary\"))\n"
+      L"Print \"FileSystemObject: \" & TypeName(CreateObject(\"Scripting.FileSystemObject\"))\n"
+      L"Print \"WScript.Shell: \" & TypeName(CreateObject(\"WScript.Shell\"))\n"
+      L"Print \"RegExp: \" & TypeName(New RegExp)\n"
+      L"On Error Resume Next\n"
+      L"Dim o\n"
+      L"Set o = GetObject(\"winmgmts:\")\n"
+      L"If Err.Number <> 0 Then\n"
+      L"   Print \"GetObject failed as expected: \" & Hex(Err.Number)\n"
+      L"Else\n"
+      L"   Print \"GetObject unexpectedly succeeded\"\n"
+      L"End If\n",
+      NULL, NULL, NULL, 0, 0,
+      0, NULL, &ei);
+   if (FAILED(hr))
+      printf("TypeName test failed: 0x%08X\n", hr);
+
    IActiveScript_Close(engine);
    IActiveScript_Release(engine);
    ASP_Release(parser);

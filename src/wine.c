@@ -179,7 +179,8 @@ HRESULT WINAPI CLSIDFromProgID(LPCOLESTR progid, CLSID *clsid)
 
 HRESULT WINAPI CreateBindCtx(DWORD reserved, IBindCtx **bind_context)
 {
-   return 0;
+   *bind_context = NULL;
+   return E_NOTIMPL;
 }
 
 BOOL WINAPI DisableThreadLibraryCalls(HMODULE module)
@@ -219,7 +220,8 @@ BOOL WINAPI IsBadStringPtrW(LPCWSTR str, UINT_PTR max)
 
 HRESULT WINAPI LoadRegTypeLib(REFGUID rguid, WORD wVerMajor, WORD wVerMinor, LCID lcid, ITypeLib **ppTLib)
 {
-   return 0;
+   *ppTLib = NULL;
+   return TYPE_E_LIBNOTREGISTERED;
 }
 
 /* oleaut32 IDS_TRUE..IDS_OFF (100-105) from oleaut32.rc, RT_STRING block 7 */
@@ -258,7 +260,8 @@ INT WINAPI LoadStringW(HINSTANCE instance, UINT resource_id, LPWSTR buffer, INT 
 
 HRESULT WINAPI LoadTypeLib(const OLECHAR *szFile, ITypeLib * *pptLib)
 {
-   return 0;
+   *pptLib = NULL;
+   return TYPE_E_CANTLOADLIBRARY;
 }
 
 INT WINAPI MessageBoxW(HWND hwnd, LPCWSTR text, LPCWSTR title, UINT type)
@@ -280,11 +283,28 @@ INT WINAPI ShowCursor(BOOL bShow)
 
 HRESULT WINAPI MkParseDisplayName(LPBC pbc, LPCOLESTR szDisplayName, LPDWORD pchEaten, LPMONIKER *ppmk)
 {
-   return 0;
+   if (pchEaten)
+      *pchEaten = 0;
+   *ppmk = NULL;
+   return MK_E_SYNTAX;
 }
 
 void WINAPI GetSystemTime(SYSTEMTIME *systime)
 {
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
+
+    time_t current_seconds = current_time.tv_sec;
+    struct tm* utc_time = gmtime(&current_seconds);
+
+    systime->wYear = utc_time->tm_year + 1900;
+    systime->wMonth = utc_time->tm_mon + 1;
+    systime->wDayOfWeek = utc_time->tm_wday;
+    systime->wDay = utc_time->tm_mday;
+    systime->wHour = utc_time->tm_hour;
+    systime->wMinute = utc_time->tm_min;
+    systime->wSecond = utc_time->tm_sec;
+    systime->wMilliseconds = current_time.tv_usec / 1000;
 }
 
 DWORD WINAPI GetVersion(void)
@@ -357,7 +377,8 @@ void WINAPI CoTaskMemFree(LPVOID ptr)
 
 HRESULT WINAPI CoGetMalloc(DWORD dwMemContext, LPMALLOC* lpMalloc)
 {
-   return 0;
+   *lpMalloc = NULL;
+   return E_NOTIMPL;
 }
 
 HRESULT WINAPI CoGetClassObject(REFCLSID rclsid, DWORD clscontext, COSERVERINFO *server_info, REFIID riid, void **obj)

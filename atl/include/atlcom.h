@@ -269,7 +269,16 @@ template <const CLSID* pcoclsid, const IID* psrcid,
           WORD wMinor = 0, class tihclass = CComTypeInfoHolder>
 class ATL_NO_VTABLE IProvideClassInfo2Impl : public IProvideClassInfo2 {
 public:
-  STDMETHOD(GetClassInfo)(ITypeInfo** pptinfo) { return E_NOTIMPL; }
+  STDMETHOD(GetClassInfo)(ITypeInfo** pptinfo) {
+    IDispatch* disp = nullptr;
+    if (FAILED(QueryInterface(IID_IDispatch, (void**)&disp)) || !disp) {
+      *pptinfo = nullptr;
+      return E_NOTIMPL;
+    }
+    HRESULT hr = disp->GetTypeInfo(0, 0, pptinfo);
+    disp->Release();
+    return hr;
+  }
   STDMETHOD(GetGUID)(DWORD dwGuidKind, GUID* pGUID) { return E_FAIL; }
 };
 

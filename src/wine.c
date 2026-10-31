@@ -1088,6 +1088,7 @@ DWORD WINAPI CharLowerBuffA(char *str, DWORD len)
 
 void WINAPI Sleep(DWORD timeout)
 {
+   usleep(timeout * 1000);
 }
 
 WINBASEAPI void WINAPI InitializeCriticalSection(CRITICAL_SECTION *lpCrit)

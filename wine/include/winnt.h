@@ -2111,6 +2111,15 @@ typedef ARM64_NT_CONTEXT CONTEXT, *PCONTEXT;
 
 #endif /* __aarch64__ */
 
+#ifdef __LIBWINEVBS__
+#if !defined(CONTEXT_FULL)
+#define CONTEXT_FULL 0
+typedef struct _CONTEXT { DWORD ContextFlags; } CONTEXT, *PCONTEXT;
+typedef struct _RUNTIME_FUNCTION { DWORD BeginAddress; DWORD EndAddress; DWORD UnwindData; } RUNTIME_FUNCTION, *PRUNTIME_FUNCTION;
+typedef struct _KNONVOLATILE_CONTEXT_POINTERS { PDWORD Dummy; } KNONVOLATILE_CONTEXT_POINTERS, *PKNONVOLATILE_CONTEXT_POINTERS;
+#endif
+#endif
+
 #if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)
 #error You need to define a CONTEXT for your CPU
 #endif

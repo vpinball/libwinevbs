@@ -58,7 +58,23 @@
  
  /* Eliminate Microsoft C/C++ compiler warning 4715 */
  #ifdef _MSC_VER
-@@ -2699,6 +2711,7 @@
+@@ -2099,6 +2111,15 @@
+ 
+ #endif /* __aarch64__ */
+ 
++#ifdef __LIBWINEVBS__
++#if !defined(CONTEXT_FULL)
++#define CONTEXT_FULL 0
++typedef struct _CONTEXT { DWORD ContextFlags; } CONTEXT, *PCONTEXT;
++typedef struct _RUNTIME_FUNCTION { DWORD BeginAddress; DWORD EndAddress; DWORD UnwindData; } RUNTIME_FUNCTION, *PRUNTIME_FUNCTION;
++typedef struct _KNONVOLATILE_CONTEXT_POINTERS { PDWORD Dummy; } KNONVOLATILE_CONTEXT_POINTERS, *PKNONVOLATILE_CONTEXT_POINTERS;
++#endif
++#endif
++
+ #if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)
+ #error You need to define a CONTEXT for your CPU
+ #endif
+@@ -2699,6 +2720,7 @@
  
  struct _TEB;
  
@@ -66,7 +82,7 @@
  #ifdef WINE_UNIX_LIB
  # ifdef __GNUC__
  NTSYSAPI struct _TEB * WINAPI NtCurrentTeb(void) __attribute__((pure));
-@@ -2760,6 +2773,13 @@
+@@ -2760,6 +2782,13 @@
  #elif !defined(RC_INVOKED)
  # error You must define NtCurrentTeb() for your architecture
  #endif
@@ -80,7 +96,7 @@
  
  #ifdef NONAMELESSUNION
  #define GetCurrentFiber()  (((NT_TIB *)NtCurrentTeb())->u.FiberData)
-@@ -8291,6 +8311,7 @@
+@@ -8291,6 +8320,7 @@
  #endif
  }
  
@@ -88,7 +104,7 @@
  static FORCEINLINE DECLSPEC_NORETURN void __fastfail(unsigned int code)
  {
  #if defined(__aarch64__) || defined(__arm64ec__)
-@@ -8303,6 +8324,7 @@
+@@ -8303,6 +8333,7 @@
      for (;;) __asm__ __volatile__( "udf #0xfb" :: "r" (val) : "memory" );
  #endif
  }

@@ -211,9 +211,39 @@
  # elif defined(__GNUC__)
  #  define __WINE_UUID_ATTR __attribute__((visibility("hidden"),weak))
  # endif
+--- wine/include/basetsd.h
++++ libwinevbs/include/basetsd.h
+@@ -37,8 +37,14 @@
+  */
+ 
+ #if (defined(__x86_64__) || defined(__powerpc64__) || defined(__aarch64__)) && !defined(_WIN64)
++#define _WIN64
++#endif
++
++#ifdef __LIBWINEVBS__
++#if defined(__wasm64__) && !defined(_WIN64)
+ #define _WIN64
+ #endif
++#endif
+ 
+ /* Type model independent typedefs */
+ /* The __intXX types are native types defined by the MS C compiler.
 --- wine/include/minwindef.h
 +++ libwinevbs/include/minwindef.h
-@@ -57,6 +57,7 @@
+@@ -41,6 +41,12 @@
+ #define _WIN64
+ #endif
+ 
++#ifdef __LIBWINEVBS__
++#if defined(__wasm64__) && !defined(_WIN64)
++#define _WIN64
++#endif
++#endif
++
+ #ifndef _WIN64
+ # if defined(__i386__) && !defined(_X86_)
+ #  define _X86_
+@@ -57,6 +63,7 @@
  #undef __fastcall
  #undef __thiscall
  
@@ -221,7 +251,7 @@
  #ifdef WINE_UNIX_LIB
  # define __stdcall
  # define __cdecl
-@@ -86,7 +87,17 @@
+@@ -86,7 +93,17 @@
  #endif  /* WINE_UNIX_LIB */
  
  #endif  /* _MSC_VER || __MINGW32__ */
@@ -239,7 +269,7 @@
  #if !defined(__ms_va_list) && !defined(WINE_UNIX_LIB)
  # define __ms_va_list va_list
  #endif
-@@ -267,7 +278,9 @@
+@@ -267,7 +284,9 @@
  
  /* Handle types */
  
@@ -249,7 +279,7 @@
  DECLARE_HANDLE(HINSTANCE);
  DECLARE_HANDLE(HKEY);
  typedef HKEY *PHKEY;
-@@ -280,6 +293,7 @@
+@@ -280,6 +299,7 @@
  
  /* Handle types that must remain interchangeable even with strict on */
  
@@ -257,14 +287,14 @@
  typedef HINSTANCE HMODULE;
  typedef HANDLE HGLOBAL;
  typedef HANDLE HLOCAL;
-@@ -296,6 +310,7 @@
- typedef INT_PTR (CALLBACK *FARPROC)();
+@@ -297,6 +317,7 @@
  typedef INT_PTR (CALLBACK *NEARPROC)();
  typedef INT_PTR (CALLBACK *PROC)();
-+#endif
  #endif
++#endif
  
  /* Macros to split words and longs. */
+ 
 --- wine/include/unknwn.h
 +++ libwinevbs/include/unknwn.h
 @@ -71,7 +71,11 @@

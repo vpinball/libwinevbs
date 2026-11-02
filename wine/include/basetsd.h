@@ -40,6 +40,12 @@ extern "C" {
 #define _WIN64
 #endif
 
+#ifdef __LIBWINEVBS__
+#if defined(__wasm64__) && !defined(_WIN64)
+#define _WIN64
+#endif
+#endif
+
 /* Type model independent typedefs */
 /* The __intXX types are native types defined by the MS C compiler.
  * Apps that make use of them before they get defined here, can

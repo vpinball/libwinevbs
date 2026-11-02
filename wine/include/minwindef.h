@@ -41,6 +41,12 @@ extern "C" {
 #define _WIN64
 #endif
 
+#ifdef __LIBWINEVBS__
+#if defined(__wasm64__) && !defined(_WIN64)
+#define _WIN64
+#endif
+#endif
+
 #ifndef _WIN64
 # if defined(__i386__) && !defined(_X86_)
 #  define _X86_

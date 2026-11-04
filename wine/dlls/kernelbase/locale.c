@@ -4011,10 +4011,22 @@ done:
     free_sortkey_state( &s2 );
     return ret;
 #else
-    if (flags & NORM_IGNORECASE)
-        return wcsicmp(src1, src2);
-    else
-        return wcscmp(src1, src2);
+    /* Ordinal compare bounded by the given lengths (BSTRs may contain embedded NULs), with ASCII-only case folding */
+    int len = srclen1 < srclen2 ? srclen1 : srclen2;
+    int i;
+
+    for (i = 0; i < len; i++)
+    {
+        WCHAR c1 = src1[i], c2 = src2[i];
+
+        if (flags & NORM_IGNORECASE)
+        {
+            if (c1 >= 'A' && c1 <= 'Z') c1 += 'a' - 'A';
+            if (c2 >= 'A' && c2 <= 'Z') c2 += 'a' - 'A';
+        }
+        if (c1 != c2) return c1 - c2;
+    }
+    return srclen1 - srclen2;
 #endif
 }
 

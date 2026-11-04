@@ -541,20 +541,32 @@
      struct sortkey_state s1;
      struct sortkey_state s2;
      BYTE primary1[32];
-@@ -3966,6 +4010,12 @@
+@@ -3966,6 +4010,25 @@
      free_sortkey_state( &s1 );
      free_sortkey_state( &s2 );
      return ret;
 +#else
-+    if (flags & NORM_IGNORECASE)
-+        return wcsicmp(src1, src2);
-+    else
-+        return wcscmp(src1, src2);
++    /* Ordinal compare bounded by the given lengths (BSTRs may contain embedded NULs), with ASCII-only case folding */
++    int len = srclen1 < srclen2 ? srclen1 : srclen2;
++    int i;
++
++    for (i = 0; i < len; i++)
++    {
++        WCHAR c1 = src1[i], c2 = src2[i];
++
++        if (flags & NORM_IGNORECASE)
++        {
++            if (c1 >= 'A' && c1 <= 'Z') c1 += 'a' - 'A';
++            if (c2 >= 'A' && c2 <= 'Z') c2 += 'a' - 'A';
++        }
++        if (c1 != c2) return c1 - c2;
++    }
++    return srclen1 - srclen2;
 +#endif
  }
  
  
-@@ -4408,7 +4458,11 @@
+@@ -4408,7 +4470,11 @@
      if (id == ENUM_ALL_CALENDARS)
      {
          count = locale_strings[locale->scalendartype];
@@ -566,7 +578,7 @@
      }
      else if (id <= CAL_UMALQURA)
      {
-@@ -4486,7 +4540,11 @@
+@@ -4486,7 +4552,11 @@
          return FALSE;
      }
  
@@ -578,7 +590,7 @@
  
      switch (flags & ~LOCALE_USE_CP_ACP)
      {
-@@ -4823,7 +4881,9 @@
+@@ -4823,7 +4893,9 @@
          return 0;
      }
  
@@ -588,7 +600,7 @@
  
      if (!str1 || !str2)
      {
-@@ -5826,6 +5886,7 @@
+@@ -5826,6 +5898,7 @@
  BOOL WINAPI DECLSPEC_HOTPATCH GetFileMUIInfo( DWORD flags, const WCHAR *path,
                                                FILEMUIINFO *info, DWORD *size )
  {
@@ -596,7 +608,7 @@
      DWORD off, mui_size, type = MUI_FILETYPE_NOT_LANGUAGE_NEUTRAL;
      struct mui_resource *mui = NULL;
      HMODULE hmod;
-@@ -5980,6 +6041,9 @@
+@@ -5980,6 +6053,9 @@
  
      FreeLibrary( hmod );
      return TRUE;
@@ -606,7 +618,7 @@
  }
  
  
-@@ -6796,6 +6860,7 @@
+@@ -6796,6 +6872,7 @@
   */
  BOOL WINAPI DECLSPEC_HOTPATCH IsValidLocale( LCID lcid, DWORD flags )
  {
@@ -614,7 +626,7 @@
      switch (lcid)
      {
      case LOCALE_NEUTRAL:
-@@ -6805,6 +6870,9 @@
+@@ -6805,6 +6882,9 @@
      default:
          return !!NlsValidateLocale( &lcid, LOCALE_ALLOW_NEUTRAL_NAMES );
      }

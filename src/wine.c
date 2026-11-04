@@ -1646,11 +1646,8 @@ BOOL WINAPI GetFileVersionInfoW(LPCWSTR filename, DWORD handle, DWORD datasize, 
 DWORD WINAPI GetTickCount()
 {
    struct timespec ts;
-   unsigned theTick = 0U;
-   clock_gettime(CLOCK_REALTIME, &ts);
-   theTick  = ts.tv_nsec / 1000000;
-   theTick += ts.tv_sec * 1000;
-   return theTick;
+   clock_gettime(CLOCK_MONOTONIC, &ts);
+   return (DWORD)((ULONGLONG)ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 
 LCID WINAPI GetThreadLocale(void)

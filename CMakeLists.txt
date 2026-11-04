@@ -6,6 +6,7 @@ set(ARCH "x64" CACHE STRING "Arch")
 option(BUILD_SHARED "Option to build shared library" ON)
 option(BUILD_STATIC "Option to build static library" ON)
 option(ENABLE_SANITIZERS "Enable AddressSanitizer and UBSan for Debug builds" OFF)
+option(ENABLE_LTO "Enable link-time optimization for the shared library (non-Debug builds)" ON)
 
 message(STATUS "PLATFORM: ${PLATFORM}")
 message(STATUS "ARCH: ${ARCH}")
@@ -151,6 +152,32 @@ set(LIBWINEVBS_COMPILE_OPTIONS
    $<$<NOT:$<BOOL:${MINGW}>>:-fvisibility=default>
 )
 
+# Symbols use default visibility (hosts call Wine APIs directly), so on ELF
+# every call between translation units would otherwise be treated as
+# interposable: routed through the PLT and never inlined. Tell the compiler
+# and linker that calls inside the library bind locally.
+include(CheckCCompilerFlag)
+include(CheckLinkerFlag)
+include(CheckIPOSupported)
+
+if(NOT MINGW)
+   check_c_compiler_flag(-fno-semantic-interposition HAVE_FNO_SEMANTIC_INTERPOSITION)
+   if(HAVE_FNO_SEMANTIC_INTERPOSITION)
+      list(APPEND LIBWINEVBS_COMPILE_OPTIONS -fno-semantic-interposition)
+   endif()
+endif()
+
+if(CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+   check_linker_flag(C "-Wl,-Bsymbolic-functions" HAVE_BSYMBOLIC_FUNCTIONS)
+endif()
+
+if(ENABLE_LTO AND BUILD_SHARED)
+   check_ipo_supported(RESULT HAVE_IPO OUTPUT IPO_ERROR LANGUAGES C)
+   if(NOT HAVE_IPO)
+      message(STATUS "LTO not supported: ${IPO_ERROR}")
+   endif()
+endif()
+
 if(PLATFORM STREQUAL "win-mingw" AND ARCH STREQUAL "x64")
    set(LIBWINEVBS_OUTPUT_NAME "winevbs64")
 else()
@@ -166,6 +193,22 @@ if(BUILD_SHARED)
 
    if(UNIX AND NOT APPLE)
       target_link_libraries(winevbs_shared PRIVATE m)
+   endif()
+
+   if(HAVE_BSYMBOLIC_FUNCTIONS)
+      target_link_options(winevbs_shared PRIVATE -Wl,-Bsymbolic-functions)
+   endif()
+
+   # LTO lets the trivial shims in src/wine.c (HeapAlloc, critical sections,
+   # wcsicmp, ...) inline into the Wine code that calls them. Only the shared
+   # library uses it: a static archive of LTO objects would tie consumers to
+   # this exact compiler.
+   if(HAVE_IPO)
+      set_target_properties(winevbs_shared PROPERTIES
+         INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+         INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE
+         INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL TRUE
+      )
    endif()
 
    if(MINGW)

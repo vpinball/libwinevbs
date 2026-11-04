@@ -513,20 +513,20 @@ LSTATUS WINAPI RegCloseKey(HKEY hkey)
 }
 
 LSTATUS WINAPI RegCreateKeyExW(HKEY hkey, LPCWSTR name, DWORD reserved, LPWSTR class,
-                      DWORD options, REGSAM access, SECURITY_ATTRIBUTES *sa,
-                      PHKEY retkey, LPDWORD dispos)
+                               DWORD options, REGSAM access, SECURITY_ATTRIBUTES *sa,
+                               PHKEY retkey, LPDWORD dispos)
 {
    return 0;
 }
 
 LSTATUS WINAPI RegEnumKeyExW(HKEY hkey, DWORD index, LPWSTR name, LPDWORD name_len,
-                     LPDWORD reserved, LPWSTR class, LPDWORD class_len, FILETIME *ft)
+                             LPDWORD reserved, LPWSTR class, LPDWORD class_len, FILETIME *ft)
 {
    return 0;
 }
 
 LSTATUS WINAPI RegEnumValueW(HKEY hkey, DWORD index, LPWSTR value, LPDWORD val_count,
-                       LPDWORD reserved, LPDWORD type, LPBYTE data, LPDWORD count)
+                             LPDWORD reserved, LPDWORD type, LPBYTE data, LPDWORD count)
 {
    return 0;
 }
@@ -537,7 +537,7 @@ LSTATUS WINAPI RegOpenKeyExW(HKEY hkey, LPCWSTR name, DWORD options, REGSAM acce
 }
 
 LSTATUS WINAPI RegQueryValueExW(HKEY hkey, LPCWSTR name, LPDWORD reserved, LPDWORD type,
-                                       LPBYTE data, LPDWORD count)
+                                LPBYTE data, LPDWORD count)
 {
    return 0;
 }
@@ -548,7 +548,7 @@ LONG WINAPI RegSetKeyValueW(HKEY hkey, LPCWSTR subkey, LPCWSTR name, DWORD type,
 }
 
 LSTATUS WINAPI RegSetValueExW(HKEY hkey, LPCWSTR name, DWORD reserved,
-                                     DWORD type, const BYTE *data, DWORD count)
+                              DWORD type, const BYTE *data, DWORD count)
 {
    return 0;
 }
@@ -560,15 +560,22 @@ void *WINAPI RtlAllocateHeap(HANDLE heap, ULONG flags, SIZE_T size)
 
 LONG WINAPI RtlCompareUnicodeStrings(const WCHAR *s1, SIZE_T len1, const WCHAR *s2, SIZE_T len2, BOOLEAN case_insensitive)
 {
-   WCHAR wz1[len1 + 1];
-   memset(wz1, 0, sizeof(wz1));
-   wcsncpy(wz1, s1, len1);
+   SIZE_T len = len1 < len2 ? len1 : len2;
 
-   WCHAR wz2[len2 + 1];
-   memset(wz2, 0, sizeof(wz2));
-   wcsncpy(wz2, s2, len2);
+   for (SIZE_T i = 0; i < len; i++) {
+      WCHAR c1 = s1[i];
+      WCHAR c2 = s2[i];
 
-   return case_insensitive ? wcsicmp(wz1, wz2) : wcscmp(wz1, wz2);
+      /* Like ntdll, fold to upper case (ASCII only) when ignoring case */
+      if (case_insensitive) {
+         if ((unsigned)(c1 - 'a') <= ('z' - 'a')) c1 -= 'a' - 'A';
+         if ((unsigned)(c2 - 'a') <= ('z' - 'a')) c2 -= 'a' - 'A';
+      }
+      if (c1 != c2)
+         return (LONG)c1 - (LONG)c2;
+   }
+
+   return len1 < len2 ? -1 : (len1 > len2 ? 1 : 0);
 }
 
 NTSTATUS WINAPI RtlEnterCriticalSection(RTL_CRITICAL_SECTION *crit)

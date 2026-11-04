@@ -1507,33 +1507,41 @@ BOOL WINAPI GetFileSizeEx(HANDLE hFile, PLARGE_INTEGER lpFileSize)
 
 DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR *lpFilePart)
 {
+   /* Win32 semantics: if the buffer is too small (or NULL), return the
+    * required size including the NUL; on success, return the number of
+    * characters copied, excluding the NUL. */
+   WCHAR cwdW[4096];
+   const WCHAR *src = lpFileName;
+   BOOL is_cwd = FALSE;
+
+   if (!lpFileName)
+      return 0;
+
    if (wcscmp(lpFileName, L".") == 0) {
-      char currentDirBuffer[4096];
-      size_t i;
-      if (!getcwd(currentDirBuffer, sizeof(currentDirBuffer))) return 0;
-      int len = strlen(currentDirBuffer) + 1;
-      if (lpBuffer && nBufferLength >= len) {
-         for (i = 0; i < strlen(currentDirBuffer); i++) lpBuffer[i] = (WCHAR)currentDirBuffer[i];
-         lpBuffer[i] = L'\0';
-         if (lpFilePart) *lpFilePart = NULL;
-      }
-      return len;
+      char cwd[4096];
+      if (!getcwd(cwd, sizeof(cwd))) return 0;
+      if (MultiByteToWideChar(LIBWINEVBS_PATH_CP, 0, cwd, -1, cwdW, ARRAY_SIZE(cwdW)) <= 0) return 0;
+      src = cwdW;
+      is_cwd = TRUE;
    }
 
-   int len = wcslen(lpFileName) + 1;
-   if (lpBuffer) {
-      wcsncpy(lpBuffer, lpFileName, nBufferLength);
-      WCHAR* ptrBackslash = wcsrchr(lpBuffer, L'\\');
-      WCHAR* ptrSlash = wcsrchr(lpBuffer, L'/');
-      WCHAR* ptr = NULL;
-      if (ptrBackslash && ptrSlash)
-         ptr = (ptrBackslash > ptrSlash) ? ptrBackslash : ptrSlash;
-      else if (ptrBackslash)
-         ptr = ptrBackslash;
-      else if (ptrSlash)
-         ptr = ptrSlash;
-      if (ptr && lpFilePart)
-         *lpFilePart = ptr + 1;
+   DWORD len = wcslen(src);
+   if (!lpBuffer || nBufferLength <= len)
+      return len + 1;
+
+   memcpy(lpBuffer, src, (len + 1) * sizeof(WCHAR));
+
+   if (lpFilePart) {
+      if (is_cwd)
+         *lpFilePart = NULL;
+      else {
+         WCHAR *ptr = wcsrchr(lpBuffer, L'\\');
+         WCHAR *ptrSlash = wcsrchr(lpBuffer, L'/');
+         if (!ptr || (ptrSlash && ptrSlash > ptr))
+            ptr = ptrSlash;
+         if (ptr)
+            *lpFilePart = ptr + 1;
+      }
    }
    return len;
 }
@@ -1617,14 +1625,11 @@ BOOL WINAPI SetFilePointerEx(HANDLE hFile, LARGE_INTEGER liDistanceToMove, PLARG
 
 BOOL WINAPI WriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-   char* pBuffer = (char*)lpBuffer;
-   *lpNumberOfBytesWritten = 0;
-   while (*lpNumberOfBytesWritten < nNumberOfBytesToWrite) {
-      fputc(*pBuffer++, hFile);
-      if(feof(hFile)) break;
-      (*lpNumberOfBytesWritten)++;
-   }
-   return TRUE;
+   size_t written = nNumberOfBytesToWrite ? fwrite(lpBuffer, 1, nNumberOfBytesToWrite, hFile) : 0;
+
+   if (lpNumberOfBytesWritten)
+      *lpNumberOfBytesWritten = (DWORD)written;
+   return written == nNumberOfBytesToWrite;
 }
 
 BOOL WINAPI VerQueryValueW(LPCVOID pBlock, LPCWSTR lpSubBlock,

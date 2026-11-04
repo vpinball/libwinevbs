@@ -171,7 +171,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
    check_linker_flag(C "-Wl,-Bsymbolic-functions" HAVE_BSYMBOLIC_FUNCTIONS)
 endif()
 
-if(ENABLE_LTO AND BUILD_SHARED)
+if(ENABLE_LTO AND BUILD_SHARED AND NOT MINGW)
    check_ipo_supported(RESULT HAVE_IPO OUTPUT IPO_ERROR LANGUAGES C)
    if(NOT HAVE_IPO)
       message(STATUS "LTO not supported: ${IPO_ERROR}")

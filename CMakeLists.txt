@@ -160,7 +160,7 @@ include(CheckCCompilerFlag)
 include(CheckLinkerFlag)
 include(CheckIPOSupported)
 
-if(NOT MINGW)
+if(NOT MINGW AND NOT APPLE)
    check_c_compiler_flag(-fno-semantic-interposition HAVE_FNO_SEMANTIC_INTERPOSITION)
    if(HAVE_FNO_SEMANTIC_INTERPOSITION)
       list(APPEND LIBWINEVBS_COMPILE_OPTIONS -fno-semantic-interposition)

@@ -54,7 +54,7 @@ HRESULT WINAPI VBScriptFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,vo
 
 HINSTANCE hProxyDll = 0;
 
-const WCHAR* system_dir = L".";
+const WCHAR system_dir[] = L".";
 
 const ExtendedProxyFileInfo oleaut32_oaidl_ProxyFileInfo = { 0 };
 

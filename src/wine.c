@@ -54,14 +54,15 @@ HRESULT WINAPI VBScriptFactory_CreateInstance(IClassFactory*,IUnknown*,REFIID,vo
 
 HINSTANCE hProxyDll = 0;
 
-const WCHAR* system_dir = L".";
+/* kernelbase.h externs this */
+const WCHAR system_dir[] = L".";
 
 const ExtendedProxyFileInfo oleaut32_oaidl_ProxyFileInfo = { 0 };
 
 struct debug_info
 {
-   unsigned int str_pos;      /* current position in strings buffer */
-   unsigned int out_pos;      /* current position in output buffer */
+   unsigned int str_pos;     /* current position in strings buffer */
+   unsigned int out_pos;     /* current position in output buffer */
    char       strings[1020]; /* buffer for temporary strings */
    char       output[1020];  /* current output line */
 } g_debug_info;
@@ -1613,14 +1614,47 @@ BOOL WINAPI SetFileAttributesW(LPCWSTR lpFileName, DWORD dwFileAttributes)
    return 0;
 }
 
-DWORD WINAPI SetFilePointer(HANDLE hFile, LONG lDistanceToMove, LPLONG lpDistanceToMoveHigh, DWORD dwMoveMethod)
-{
-   return 0;
-}
-
 BOOL WINAPI SetFilePointerEx(HANDLE hFile, LARGE_INTEGER liDistanceToMove, PLARGE_INTEGER lpNewFilePointer, DWORD dwMoveMethod)
 {
-   return 0;
+   /* File handles are stdio FILE*s (see CreateFileW) */
+   static const int whence[] = { SEEK_SET, SEEK_CUR, SEEK_END };
+#ifdef _WIN32
+   /* off_t is 32-bit on MinGW */
+   __int64 pos;
+#define file_seek _fseeki64
+#define file_tell _ftelli64
+#else
+   off_t pos;
+#define file_seek fseeko
+#define file_tell ftello
+#endif
+
+   if (!hFile || hFile == INVALID_HANDLE_VALUE || dwMoveMethod > FILE_END)
+      return FALSE;
+   if (file_seek((FILE *)hFile, liDistanceToMove.QuadPart, whence[dwMoveMethod]) != 0)
+      return FALSE;
+   if (lpNewFilePointer) {
+      if ((pos = file_tell((FILE *)hFile)) < 0)
+         return FALSE;
+      lpNewFilePointer->QuadPart = pos;
+   }
+#undef file_seek
+#undef file_tell
+   return TRUE;
+}
+
+DWORD WINAPI SetFilePointer(HANDLE hFile, LONG lDistanceToMove, LPLONG lpDistanceToMoveHigh, DWORD dwMoveMethod)
+{
+   LARGE_INTEGER dist, pos;
+
+   dist.QuadPart = lpDistanceToMoveHigh
+      ? (LONGLONG)(((ULONGLONG)(DWORD)*lpDistanceToMoveHigh << 32) | (DWORD)lDistanceToMove)
+      : lDistanceToMove;
+   if (!SetFilePointerEx(hFile, dist, &pos, dwMoveMethod))
+      return INVALID_SET_FILE_POINTER;
+   if (lpDistanceToMoveHigh)
+      *lpDistanceToMoveHigh = pos.u.HighPart;
+   return pos.u.LowPart;
 }
 
 BOOL WINAPI WriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
@@ -1651,7 +1685,12 @@ BOOL WINAPI GetFileVersionInfoW(LPCWSTR filename, DWORD handle, DWORD datasize, 
 DWORD WINAPI GetTickCount()
 {
    struct timespec ts;
-   clock_gettime(CLOCK_MONOTONIC, &ts);
+   /* Count time spent suspended, as Windows does: on Linux, CLOCK_MONOTONIC
+    * stops during suspend, but CLOCK_BOOTTIME doesn't */
+#ifdef CLOCK_BOOTTIME
+   if (clock_gettime(CLOCK_BOOTTIME, &ts) != 0)
+#endif
+      clock_gettime(CLOCK_MONOTONIC, &ts);
    return (DWORD)((ULONGLONG)ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 

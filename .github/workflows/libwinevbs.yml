@@ -122,6 +122,10 @@ jobs:
       #
       - if: (matrix.platform == 'android')
         name: Build (android)
+        env:
+          ANDROID_NDK: /usr/local/lib/android/sdk/ndk/29.0.14206865
+          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/29.0.14206865
+          ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/29.0.14206865
         run: |
           cmake \
             -DCMAKE_BUILD_TYPE=Release \

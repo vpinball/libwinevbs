@@ -160,14 +160,10 @@ include(CheckCCompilerFlag)
 include(CheckLinkerFlag)
 include(CheckIPOSupported)
 
-if(NOT MINGW)
-   check_c_compiler_flag(-fno-semantic-interposition HAVE_FNO_SEMANTIC_INTERPOSITION)
-   if(HAVE_FNO_SEMANTIC_INTERPOSITION)
-      list(APPEND LIBWINEVBS_COMPILE_OPTIONS -fno-semantic-interposition)
-   endif()
-endif()
-
+# ELF-only, and only meaningful for PIC code: added to the shared library alone,
+# since clang warns "argument unused" otherwise (static objects, Apple, wasm).
 if(CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+   check_c_compiler_flag(-fno-semantic-interposition HAVE_FNO_SEMANTIC_INTERPOSITION)
    check_linker_flag(C "-Wl,-Bsymbolic-functions" HAVE_BSYMBOLIC_FUNCTIONS)
 endif()
 
@@ -193,6 +189,10 @@ if(BUILD_SHARED)
 
    if(UNIX AND NOT APPLE)
       target_link_libraries(winevbs_shared PRIVATE m)
+   endif()
+
+   if(HAVE_FNO_SEMANTIC_INTERPOSITION)
+      target_compile_options(winevbs_shared PRIVATE -fno-semantic-interposition)
    endif()
 
    if(HAVE_BSYMBOLIC_FUNCTIONS)

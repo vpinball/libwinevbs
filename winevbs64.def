@@ -35,6 +35,8 @@ SafeArrayGetUBound
 SafeArrayGetDim
 SafeArrayAccessData
 SafeArrayUnaccessData
+SafeArrayLock
+SafeArrayUnlock
 
 ; ATL
 AtlInternalQueryInterface

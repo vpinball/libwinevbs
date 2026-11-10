@@ -1,3 +1,18 @@
+--- wine/include/basetsd.h
++++ libwinevbs/include/basetsd.h
+@@ -40,6 +40,12 @@
+ #define _WIN64
+ #endif
+ 
++#ifdef __LIBWINEVBS__
++#if defined(__wasm64__) && !defined(_WIN64)
++#define _WIN64
++#endif
++#endif
++
+ /* Type model independent typedefs */
+ /* The __intXX types are native types defined by the MS C compiler.
+  * Apps that make use of them before they get defined here, can
 --- wine/include/winternl.h
 +++ libwinevbs/include/winternl.h
 @@ -21,7 +21,22 @@
@@ -58,7 +73,7 @@
  
  /* Eliminate Microsoft C/C++ compiler warning 4715 */
  #ifdef _MSC_VER
-@@ -2099,6 +2111,15 @@
+@@ -2106,6 +2118,15 @@
  
  #endif /* __aarch64__ */
  
@@ -74,7 +89,7 @@
  #if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)
  #error You need to define a CONTEXT for your CPU
  #endif
-@@ -2699,6 +2720,7 @@
+@@ -2706,6 +2727,7 @@
  
  struct _TEB;
  
@@ -82,7 +97,7 @@
  #ifdef WINE_UNIX_LIB
  # ifdef __GNUC__
  NTSYSAPI struct _TEB * WINAPI NtCurrentTeb(void) __attribute__((pure));
-@@ -2760,6 +2782,13 @@
+@@ -2767,6 +2789,13 @@
  #elif !defined(RC_INVOKED)
  # error You must define NtCurrentTeb() for your architecture
  #endif
@@ -96,7 +111,7 @@
  
  #ifdef NONAMELESSUNION
  #define GetCurrentFiber()  (((NT_TIB *)NtCurrentTeb())->u.FiberData)
-@@ -8291,6 +8320,7 @@
+@@ -8589,6 +8618,7 @@
  #endif
  }
  
@@ -104,7 +119,7 @@
  static FORCEINLINE DECLSPEC_NORETURN void __fastfail(unsigned int code)
  {
  #if defined(__aarch64__) || defined(__arm64ec__)
-@@ -8303,6 +8333,7 @@
+@@ -8601,6 +8631,7 @@
      for (;;) __asm__ __volatile__( "udf #0xfb" :: "r" (val) : "memory" );
  #endif
  }
@@ -211,23 +226,6 @@
  # elif defined(__GNUC__)
  #  define __WINE_UUID_ATTR __attribute__((visibility("hidden"),weak))
  # endif
---- wine/include/basetsd.h
-+++ libwinevbs/include/basetsd.h
-@@ -37,8 +37,14 @@
-  */
- 
- #if (defined(__x86_64__) || defined(__powerpc64__) || defined(__aarch64__)) && !defined(_WIN64)
-+#define _WIN64
-+#endif
-+
-+#ifdef __LIBWINEVBS__
-+#if defined(__wasm64__) && !defined(_WIN64)
- #define _WIN64
- #endif
-+#endif
- 
- /* Type model independent typedefs */
- /* The __intXX types are native types defined by the MS C compiler.
 --- wine/include/minwindef.h
 +++ libwinevbs/include/minwindef.h
 @@ -41,6 +41,12 @@
@@ -287,14 +285,14 @@
  typedef HINSTANCE HMODULE;
  typedef HANDLE HGLOBAL;
  typedef HANDLE HLOCAL;
-@@ -297,6 +317,7 @@
+@@ -296,6 +316,7 @@
+ typedef INT_PTR (CALLBACK *FARPROC)();
  typedef INT_PTR (CALLBACK *NEARPROC)();
  typedef INT_PTR (CALLBACK *PROC)();
- #endif
 +#endif
+ #endif
  
  /* Macros to split words and longs. */
- 
 --- wine/include/unknwn.h
 +++ libwinevbs/include/unknwn.h
 @@ -71,7 +71,11 @@
@@ -327,7 +325,7 @@
  /*
 --- wine/include/winbase.h
 +++ libwinevbs/include/winbase.h
-@@ -2488,12 +2488,14 @@
+@@ -2661,12 +2661,14 @@
      return strcat( dst, src );
  }
  
@@ -541,7 +539,7 @@
      struct sortkey_state s1;
      struct sortkey_state s2;
      BYTE primary1[32];
-@@ -3966,6 +4010,25 @@
+@@ -3966,6 +4010,24 @@
      free_sortkey_state( &s1 );
      free_sortkey_state( &s2 );
      return ret;
@@ -566,7 +564,7 @@
  }
  
  
-@@ -4408,7 +4470,11 @@
+@@ -4418,7 +4480,11 @@
      if (id == ENUM_ALL_CALENDARS)
      {
          count = locale_strings[locale->scalendartype];
@@ -578,7 +576,7 @@
      }
      else if (id <= CAL_UMALQURA)
      {
-@@ -4486,7 +4552,11 @@
+@@ -4496,7 +4562,11 @@
          return FALSE;
      }
  
@@ -590,7 +588,7 @@
  
      switch (flags & ~LOCALE_USE_CP_ACP)
      {
-@@ -4823,7 +4893,9 @@
+@@ -4833,7 +4903,9 @@
          return 0;
      }
  
@@ -600,7 +598,7 @@
  
      if (!str1 || !str2)
      {
-@@ -5826,6 +5898,7 @@
+@@ -5836,6 +5908,7 @@
  BOOL WINAPI DECLSPEC_HOTPATCH GetFileMUIInfo( DWORD flags, const WCHAR *path,
                                                FILEMUIINFO *info, DWORD *size )
  {
@@ -608,7 +606,7 @@
      DWORD off, mui_size, type = MUI_FILETYPE_NOT_LANGUAGE_NEUTRAL;
      struct mui_resource *mui = NULL;
      HMODULE hmod;
-@@ -5980,6 +6053,9 @@
+@@ -5990,6 +6063,9 @@
  
      FreeLibrary( hmod );
      return TRUE;
@@ -618,7 +616,7 @@
  }
  
  
-@@ -6796,6 +6872,7 @@
+@@ -6812,6 +6888,7 @@
   */
  BOOL WINAPI DECLSPEC_HOTPATCH IsValidLocale( LCID lcid, DWORD flags )
  {
@@ -626,7 +624,7 @@
      switch (lcid)
      {
      case LOCALE_NEUTRAL:
-@@ -6805,6 +6882,9 @@
+@@ -6821,6 +6898,9 @@
      default:
          return !!NlsValidateLocale( &lcid, LOCALE_ALLOW_NEUTRAL_NAMES );
      }
@@ -2955,4 +2953,4 @@
  
  /***********************************************************************
   *		DllRegisterServer (OLEAUT32.@)
-# libwinevbs-only: wine-7298a818b79446bae153b8d5aa27235ab3703bf9.patch
+# libwinevbs-only: wine-9f8c4ae4d35c7ff4153267aba9618c026f5f5583.patch

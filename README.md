@@ -419,6 +419,7 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - vbscript: Reject arguments after a call with empty parentheses. [11.20](https://gitlab.winehq.org/wine/wine/-/merge_requests/12069)
 - vbscript: Match native "Name redefined" handling for parameters, locals, ReDim and class members. [11.19](https://gitlab.winehq.org/wine/wine/-/merge_requests/12070)
 - vbscript: Use IProvideClassInfo for TypeName() of COM objects. [11.20](https://gitlab.winehq.org/wine/wine/-/merge_requests/12301)
+- vbscript: Skip a BOM at the start of the script text. [11.22](https://gitlab.winehq.org/wine/wine/-/merge_requests/12605)
 - scrrun/dictionary: Match native semantics for Empty and Boolean keys. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10960)
 
 ### Enhancements

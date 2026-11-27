@@ -8,10 +8,17 @@
 
 DEFINE_GUID(CLSID_VBScript, 0xb54f3741, 0x5b07, 0x11cf, 0xa4, 0xb0, 0x0, 0xaa, 0x0, 0x4a, 0x55, 0xe8);
 
+#ifdef _WIN64
 #define ASP_QueryInterface IActiveScriptParse64_QueryInterface
 #define ASP_Release IActiveScriptParse64_Release
 #define ASP_InitNew IActiveScriptParse64_InitNew
 #define ASP_ParseScriptText IActiveScriptParse64_ParseScriptText
+#else
+#define ASP_QueryInterface IActiveScriptParse32_QueryInterface
+#define ASP_Release IActiveScriptParse32_Release
+#define ASP_InitNew IActiveScriptParse32_InitNew
+#define ASP_ParseScriptText IActiveScriptParse32_ParseScriptText
+#endif
 
 static void log_callback(libwinevbs_log_level_t level, const char* format, va_list args)
 {

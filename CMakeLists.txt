@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
+include(GNUInstallDirs)
 
 set(PLATFORM "win-mingw" CACHE STRING "Platform")
 set(ARCH "x64" CACHE STRING "Arch")
@@ -232,7 +233,7 @@ if(BUILD_SHARED)
    )
 
    install(TARGETS winevbs_shared
-      LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
    )
    install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs)
    install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atl)
@@ -262,7 +263,7 @@ if(BUILD_STATIC)
    )
 
    install(TARGETS winevbs_static
-      LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
    )
    install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs)
    install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atl)

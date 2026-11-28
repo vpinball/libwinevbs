@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.25)
-include(GNUInstallDirs)
 
 set(PLATFORM "win-mingw" CACHE STRING "Platform")
 set(ARCH "x64" CACHE STRING "Arch")
@@ -39,6 +38,8 @@ string(REGEX MATCH "LIBWINEVBS_VERSION_PATCH[ ]+([0-9]+)" _tmp ${version})
 set(VERSION_PATCH "${CMAKE_MATCH_1}")
 
 project(libwinevbs VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" LANGUAGES C)
+
+include(GNUInstallDirs)
 
 if(PLATFORM STREQUAL "win-mingw")
    if(ARCH STREQUAL "x86")
@@ -232,13 +233,11 @@ if(BUILD_SHARED)
       SOVERSION 0
    )
 
-   install(TARGETS winevbs_shared
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-   )
-   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atl)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atlmfc/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atlmfc)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/wine)
+   install(TARGETS winevbs_shared)
+   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs/atl)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atlmfc/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs/atlmfc)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs/wine)
 
    if(PLATFORM STREQUAL "win-mingw" OR PLATFORM STREQUAL "macos" OR PLATFORM STREQUAL "linux")
       add_executable(winevbs_test src/winevbs_test.c)
@@ -262,11 +261,9 @@ if(BUILD_STATIC)
       OUTPUT_NAME ${LIBWINEVBS_OUTPUT_NAME}
    )
 
-   install(TARGETS winevbs_static
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-   )
-   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atl)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atlmfc/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/atlmfc)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/libwinevbs/wine)
+   install(TARGETS winevbs_static)
+   install(FILES ${CMAKE_SOURCE_DIR}/include/libwinevbs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atl/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs/atl)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/atlmfc/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs/atlmfc)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/wine/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libwinevbs/wine)
 endif()

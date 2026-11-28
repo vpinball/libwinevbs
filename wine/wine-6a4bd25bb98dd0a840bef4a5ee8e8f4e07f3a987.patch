@@ -73,7 +73,7 @@
  
  /* Eliminate Microsoft C/C++ compiler warning 4715 */
  #ifdef _MSC_VER
-@@ -2106,6 +2118,15 @@
+@@ -2172,6 +2184,15 @@
  
  #endif /* __aarch64__ */
  
@@ -89,7 +89,7 @@
  #if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)
  #error You need to define a CONTEXT for your CPU
  #endif
-@@ -2706,6 +2727,7 @@
+@@ -2772,6 +2793,7 @@
  
  struct _TEB;
  
@@ -97,7 +97,7 @@
  #ifdef WINE_UNIX_LIB
  # ifdef __GNUC__
  NTSYSAPI struct _TEB * WINAPI NtCurrentTeb(void) __attribute__((pure));
-@@ -2767,6 +2789,13 @@
+@@ -2833,6 +2855,13 @@
  #elif !defined(RC_INVOKED)
  # error You must define NtCurrentTeb() for your architecture
  #endif
@@ -111,7 +111,7 @@
  
  #ifdef NONAMELESSUNION
  #define GetCurrentFiber()  (((NT_TIB *)NtCurrentTeb())->u.FiberData)
-@@ -8589,6 +8618,7 @@
+@@ -8655,6 +8684,7 @@
  #endif
  }
  
@@ -119,7 +119,7 @@
  static FORCEINLINE DECLSPEC_NORETURN void __fastfail(unsigned int code)
  {
  #if defined(__aarch64__) || defined(__arm64ec__)
-@@ -8601,6 +8631,7 @@
+@@ -8667,6 +8697,7 @@
      for (;;) __asm__ __volatile__( "udf #0xfb" :: "r" (val) : "memory" );
  #endif
  }
@@ -340,6 +340,7 @@
  #endif
  
  #endif /* !defined(__WINESRC__) || defined(WINE_NO_INLINE_STRING) */
+# libwinevbs-only: wine-6a4bd25bb98dd0a840bef4a5ee8e8f4e07f3a987.patch
 --- wine/dlls/atl/atl.c
 +++ libwinevbs/dlls/atl/atl.c
 @@ -968,6 +968,7 @@
@@ -616,7 +617,7 @@
  }
  
  
-@@ -6812,6 +6888,7 @@
+@@ -6897,6 +6973,7 @@
   */
  BOOL WINAPI DECLSPEC_HOTPATCH IsValidLocale( LCID lcid, DWORD flags )
  {
@@ -624,7 +625,7 @@
      switch (lcid)
      {
      case LOCALE_NEUTRAL:
-@@ -6821,6 +6898,9 @@
+@@ -6906,6 +6983,9 @@
      default:
          return !!NlsValidateLocale( &lcid, LOCALE_ALLOW_NEUTRAL_NAMES );
      }
@@ -2349,7 +2350,7 @@
  
 --- wine/dlls/vbscript/interp.c
 +++ libwinevbs/dlls/vbscript/interp.c
-@@ -2053,6 +2053,20 @@
+@@ -2085,6 +2085,20 @@
      }else {
          named_item_t *item;
          disp = NULL;
@@ -2953,4 +2954,3 @@
  
  /***********************************************************************
   *		DllRegisterServer (OLEAUT32.@)
-# libwinevbs-only: wine-9f8c4ae4d35c7ff4153267aba9618c026f5f5583.patch

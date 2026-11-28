@@ -250,7 +250,7 @@ brew install llvm lld bison
 
 git clone https://gitlab.winehq.org/wine/wine.git /path/to/wine
 cd /path/to/wine
-git checkout 7298a818b79446bae153b8d5aa27235ab3703bf9
+git checkout 6a4bd25bb98dd0a840bef4a5ee8e8f4e07f3a987
 export PATH="/opt/homebrew/opt/llvm/bin:/opt/homebrew/opt/bison/bin:$PATH"
 ./configure --without-freetype --enable-win64
 make -j$(nproc)
@@ -419,7 +419,8 @@ Using the Wine VBScript engine source for Visual Pinball has surfaced a large nu
 - vbscript: Reject arguments after a call with empty parentheses. [11.20](https://gitlab.winehq.org/wine/wine/-/merge_requests/12069)
 - vbscript: Match native "Name redefined" handling for parameters, locals, ReDim and class members. [11.19](https://gitlab.winehq.org/wine/wine/-/merge_requests/12070)
 - vbscript: Use IProvideClassInfo for TypeName() of COM objects. [11.20](https://gitlab.winehq.org/wine/wine/-/merge_requests/12301)
-- vbscript: Skip a BOM at the start of the script text. [11.22](https://gitlab.winehq.org/wine/wine/-/merge_requests/12605)
+- vbscript: Skip a BOM at the start of the script text. [11.23](https://gitlab.winehq.org/wine/wine/-/merge_requests/12605)
+- vbscript: Implement IActiveScript::InterruptScriptThread. [11.23](https://gitlab.winehq.org/wine/wine/-/merge_requests/12655)
 - scrrun/dictionary: Match native semantics for Empty and Boolean keys. [11.11](https://gitlab.winehq.org/wine/wine/-/merge_requests/10960)
 
 ### Enhancements

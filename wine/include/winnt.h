@@ -1623,7 +1623,30 @@ typedef struct _XSTATE_CONFIGURATION
     ULONG64 EnabledUserVisibleSupervisorFeatures;
     ULONG64 ExtendedFeatureDisableFeatures;
     ULONG AllNonLargeFeatureSize;
-    ULONG Spare;
+    union
+    {
+        struct
+        {
+            DWORD Amd64Spare1[3];
+        };
+        struct
+        {
+            WORD MaxSveVectorLength;
+            WORD MaxSmeVectorLength;
+            WORD SmeZTRegisterCount;
+            union
+            {
+                WORD Arm64Flags;
+                struct
+                {
+                    WORD SmeFa64 : 1;
+                };
+            };
+            BYTE SupportedSmeVectorLengths;
+            BYTE Arm64Spare[3];
+        };
+    };
+    ULONG64 Spare;
 } XSTATE_CONFIGURATION, *PXSTATE_CONFIGURATION;
 
 typedef struct DECLSPEC_ALIGN(8) _XSAVE_AREA_HEADER
@@ -1633,6 +1656,49 @@ typedef struct DECLSPEC_ALIGN(8) _XSAVE_AREA_HEADER
     DWORD64 Reserved2[6];
 }
 XSAVE_AREA_HEADER, *PXSAVE_AREA_HEADER;
+
+typedef struct _XSAVE_ARM64_SVE_HEADER
+{
+    DWORD VectorLength;
+    DWORD VectorRegisterOffset;
+    DWORD PredicateRegisterOffset;
+    union
+    {
+        DWORD Flags;
+        struct
+        {
+            DWORD Sm : 1;
+            DWORD ReservedFlags : 31;
+        };
+    };
+    DWORD Reserved[4];
+} XSAVE_ARM64_SVE_HEADER, *PXSAVE_ARM64_SVE_HEADER;
+
+typedef struct _XSAVE_ARM64_SME_ZA_HEADER
+{
+    DWORD VectorLength;
+    union
+    {
+        DWORD Flags;
+        struct
+        {
+            DWORD Za : 1;
+            DWORD ReservedFlags : 31;
+        };
+    };
+    DWORD Reserved[6];
+} XSAVE_ARM64_SME_ZA_HEADER, *PXSAVE_ARM64_SME_ZA_HEADER;
+
+typedef struct _XSAVE_ARM64_SME_TPIDR2_HEADER
+{
+    DWORD Reserved[8];
+} XSAVE_ARM64_SME_TPIDR2_HEADER, *PXSAVE_ARM64_SME_TPIDR2_HEADER;
+
+typedef struct _XSAVE_ARM64_SME_ZT_HEADER
+{
+    DWORD RegisterCount;
+    DWORD Reserved[7];
+} XSAVE_ARM64_SME_ZT_HEADER, *PXSAVE_ARM64_SME_ZT_HEADER;
 
 typedef struct DECLSPEC_ALIGN(16) _XSAVE_AREA
 {

@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #ifndef _WIN32
+#include <sched.h>
 #include <fnmatch.h>
 #else
 static int fnmatch(const char *pattern, const char *string, int flags) {
@@ -579,8 +580,36 @@ LONG WINAPI RtlCompareUnicodeStrings(const WCHAR *s1, SIZE_T len1, const WCHAR *
    return len1 < len2 ? -1 : (len1 > len2 ? 1 : 0);
 }
 
+static HANDLE crit_self(void)
+{
+   static __thread char token;
+   return (HANDLE)&token;
+}
+
+static BOOL crit_try_enter(RTL_CRITICAL_SECTION *crit)
+{
+   HANDLE self = crit_self();
+   HANDLE expected = NULL;
+
+   if (__atomic_load_n(&crit->OwningThread, __ATOMIC_RELAXED) == self) {
+      crit->RecursionCount++;
+      return TRUE;
+   }
+   if (!__atomic_compare_exchange_n(&crit->OwningThread, &expected, self, 0, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED))
+      return FALSE;
+   crit->RecursionCount = 1;
+   return TRUE;
+}
+
 NTSTATUS WINAPI RtlEnterCriticalSection(RTL_CRITICAL_SECTION *crit)
 {
+   while (!crit_try_enter(crit)) {
+#ifdef _WIN32
+      Sleep(0);
+#else
+      sched_yield();
+#endif
+   }
    return 0;
 }
 
@@ -673,6 +702,8 @@ NTSTATUS WINAPI RtlLcidToLocaleName(LCID lcid, UNICODE_STRING *name, ULONG flags
 
 NTSTATUS WINAPI RtlLeaveCriticalSection(RTL_CRITICAL_SECTION *crit)
 {
+   if (--crit->RecursionCount == 0)
+      __atomic_store_n(&crit->OwningThread, NULL, __ATOMIC_RELEASE);
    return 0;
 }
 
@@ -1101,14 +1132,18 @@ void WINAPI Sleep(DWORD timeout)
 
 WINBASEAPI void WINAPI InitializeCriticalSection(CRITICAL_SECTION *lpCrit)
 {
+   memset(lpCrit, 0, sizeof(*lpCrit));
+   lpCrit->LockCount = -1;
 }
 
 WINBASEAPI void WINAPI LeaveCriticalSection(CRITICAL_SECTION *lpCrit)
 {
+   RtlLeaveCriticalSection(lpCrit);
 }
 
 WINBASEAPI void WINAPI EnterCriticalSection(CRITICAL_SECTION *lpCrit)
 {
+   RtlEnterCriticalSection(lpCrit);
 }
 
 WINBASEAPI void WINAPI DeleteCriticalSection(CRITICAL_SECTION *lpCrit)
@@ -1117,7 +1152,7 @@ WINBASEAPI void WINAPI DeleteCriticalSection(CRITICAL_SECTION *lpCrit)
 
 WINBASEAPI BOOL WINAPI TryEnterCriticalSection(CRITICAL_SECTION *lpCrit)
 {
-   return TRUE;
+   return crit_try_enter(lpCrit);
 }
 
 HRESULT WINAPI CreateProxyFromTypeInfo(ITypeInfo *typeinfo, IUnknown *outer, REFIID iid, IRpcProxyBuffer **proxy, void **obj)
@@ -1682,7 +1717,7 @@ BOOL WINAPI GetFileVersionInfoW(LPCWSTR filename, DWORD handle, DWORD datasize, 
    return 0;
 }
 
-DWORD WINAPI GetTickCount()
+ULONGLONG WINAPI GetTickCount64()
 {
    struct timespec ts;
    /* Count time spent suspended, as Windows does: on Linux, CLOCK_MONOTONIC
@@ -1691,7 +1726,12 @@ DWORD WINAPI GetTickCount()
    if (clock_gettime(CLOCK_BOOTTIME, &ts) != 0)
 #endif
       clock_gettime(CLOCK_MONOTONIC, &ts);
-   return (DWORD)((ULONGLONG)ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+   return (ULONGLONG)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
+
+DWORD WINAPI GetTickCount()
+{
+   return (DWORD)GetTickCount64();
 }
 
 LCID WINAPI GetThreadLocale(void)
